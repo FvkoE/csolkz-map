@@ -2,7 +2,11 @@ services:
   - type: web
     name: csolflask-app
     env: python
-    buildCommand: pip install -r requirements.txt
+    buildCommand: |
+      curl -sSL https://install.python-poetry.org | python3 -
+      pyenv install 3.11.8
+      pyenv global 3.11.8
+      pip install -r requirements.txt
     startCommand: gunicorn app:app
     envVars:
       - key: SECRET_KEY
@@ -17,8 +21,6 @@ services:
         value: 3307
       - key: DB_NAME
         value: csolkz
-      - key: PYTHON_VERSION
-        value: 3.9.18
       - key: STORAGE_TYPE
         value: imgbb
       - key: IMGBB_API_KEY
