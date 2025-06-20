@@ -25,6 +25,9 @@ class Config:
     # 分页配置
     MAPS_PER_PAGE = 6
 
+    # ImgBB配置
+    IMGBB_API_KEY = os.environ.get('IMGBB_API_KEY', '')
+
 class DevelopmentConfig(Config):
     """开发环境配置"""
     DEBUG = True
