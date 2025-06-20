@@ -1,0 +1,349 @@
+/* 页面整体样式 */
+body { background: #f4f8fb; font-family: 'Microsoft YaHei', Arial, sans-serif; margin: 0; }
+
+/* 顶部导航栏样式 */
+.admin-navbar {
+    width: 100%;
+    background: #124bc6;
+    color: #fff;
+    padding: 0 40px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px #e3e3e3;
+}
+.admin-navbar .site-name {
+    font-size: 1.5em;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+.admin-navbar .welcome {
+    font-size: 1.1em;
+    max-width: 350px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: right;
+    margin-right: 50px;
+}
+
+/* 标签栏样式 */
+.tab-bar {
+    display: flex;
+    background: #fff;
+    border-bottom: 1px solid #e0e0e0;
+    margin-top: 0;
+    position: relative;
+}
+.tab-bar .tab {
+    flex: 1;
+    text-align: center;
+    padding: 18px 0 14px 0;
+    font-size: 1.1em;
+    color: #1976d2;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: border-color 0.2s, background 0.2s;
+}
+.tab-bar .tab.active {
+    border-bottom: 3px solid #1976d2;
+    background: #f4f8fb;
+    font-weight: bold;
+}
+
+/* 主页面内容区域 */
+.admin-main {
+    max-width: 900px;
+    margin: 30px auto 0 auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px #e3e3e3;
+    min-height: 600px;
+    padding: 32px 24px 32px 24px;
+}
+
+/* 搜索栏样式 */
+.admin-search-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    margin-top: 8px;
+}
+.admin-search-input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 15px;
+    background: #fff;
+    transition: border-color 0.2s;
+}
+.admin-search-input:focus {
+    border-color: #1976d2;
+    outline: none;
+}
+.admin-search-btn {
+    padding: 10px 28px;
+    background: #1976d2;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.admin-search-btn:hover {
+    background: #1251a3;
+}
+
+/* 地图卡片图片样式 */
+.map-img-admin {
+    width: 60px;
+    height: 60px;
+    margin-right: 18px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e9eef6;
+    border-radius: 8px;
+    overflow: hidden;
+}
+.map-img-admin img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+/* 地图信息卡片内容宽度与省略号处理 */
+.map-name-ellipsis, .map-author-ellipsis {
+    max-width: 120px;
+    min-width: 60px;
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+}
+.map-info-label {
+    min-width: 48px;
+    color: #1976d2;
+    font-weight: bold;
+    margin-right: 8px;
+    font-size: 1em;
+    text-align: right;
+}
+.map-info-value {
+    margin-right: 24px;
+    color: #333;
+    font-size: 1em;
+    min-width: 60px;
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+}
+
+/* 操作按钮样式 */
+.admin-btn {
+    padding: 7px 18px;
+    margin-left: 10px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.admin-btn-edit {
+    background: #1976d2;
+    color: #fff;
+}
+.admin-btn-edit:hover {
+    background: #1251a3;
+}
+.admin-btn-delete {
+    background: #e53935;
+    color: #fff;
+}
+.admin-btn-delete:hover {
+    background: #b71c1c;
+}
+
+/* 地图信息卡片列表样式 */
+.map-list-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+.map-card-admin {
+    display: flex;
+    align-items: center;
+    background: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    padding: 18px 20px;
+    min-height: 60px;
+    margin-bottom: 0;
+    gap: 0;
+}
+
+/* 分页控件样式 */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin: 30px 0 0 0;
+    gap: 8px;
+}
+.pagination button {
+    background: #1976d2;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 16px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.pagination button.active, .pagination button:hover {
+    background: #1251a3;
+}
+
+/* 主页面内容隐藏与显示 */
+.admin-main .tab-content { display: none; }
+.admin-main .tab-content.active { display: block; }
+
+/* 申请信息表格样式 */
+.apply-table-admin {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px #e3e3e3;
+    overflow: hidden;
+    table-layout: fixed;
+}
+.apply-table-admin th, .apply-table-admin td {
+    font-size: 14px;
+    padding: 6px 8px;
+    border-bottom: 1px solid #f0f0f0;
+    text-align: left;
+    max-width: 140px;
+    min-width: 60px;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    vertical-align: middle;
+}
+.apply-table-admin th {
+    background: #f4f8fb;
+    color: #1976d2;
+    font-weight: bold;
+}
+.apply-table-admin tr:last-child td {
+    border-bottom: none;
+}
+.apply-table-admin td:last-child {
+    min-width: 120px;
+    max-width: 160px;
+    white-space: nowrap;
+}
+.apply-table-admin .admin-btn {
+    display: inline-block;
+    margin: 0 4px 0 0;
+    vertical-align: middle;
+}
+
+/* 申请管理表格图片缩略图样式 */
+.apply-table-admin .apply-thumb {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 6px;
+    background: #f4f4f4;
+    display: block;
+    margin: 0 auto;
+}
+
+/* 表格横向滚动与紧凑布局 */
+.apply-table-wrapper {
+    overflow-x: auto;
+}
+.apply-table-admin th, .apply-table-admin td {
+    font-size: 13px;
+    padding: 4px 6px;
+    min-width: 60px;
+    max-width: 180px;
+}
+.apply-table-admin {
+    table-layout: auto;
+    white-space: nowrap;
+}
+
+/* 地图管理表格样式（与申请管理统一） */
+.map-table-wrapper {
+    overflow-x: auto;
+}
+.map-table-admin {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px #e3e3e3;
+    overflow: hidden;
+    table-layout: auto;
+    white-space: nowrap;
+}
+.map-table-admin th, .map-table-admin td {
+    font-size: 13px;
+    padding: 4px 6px;
+    min-width: 60px;
+    max-width: 180px;
+    border-bottom: 1px solid #f0f0f0;
+    text-align: left;
+    vertical-align: middle;
+}
+.map-table-admin th {
+    background: #f4f8fb;
+    color: #1976d2;
+    font-weight: bold;
+}
+.map-table-admin tr:last-child td {
+    border-bottom: none;
+}
+.map-table-admin td:last-child {
+    min-width: 120px;
+    max-width: 160px;
+    white-space: nowrap;
+}
+.map-table-admin .apply-thumb {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 6px;
+    background: #f4f4f4;
+    display: block;
+    margin: 0 auto;
+}
+
+/* tab刷新按钮样式 */
+.tab-refresh-btn {
+    position: absolute;
+    right: 32px;
+    top: 10px;
+    background: #1976d2;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 18px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background 0.2s;
+    z-index: 2;
+}
+.tab-refresh-btn:hover {
+    background: #1251a3;
+} 
