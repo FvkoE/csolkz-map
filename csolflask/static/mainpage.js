@@ -22,13 +22,15 @@ window.modal = {
             document.getElementById('editMapAuthor').value = author;
             document.getElementById('editMapRegion').value = region;
             document.getElementById('editMapDifficulty').value = difficulty;
-            document.getElementById('currentMapImage').src = image;
         },
         close() {
             document.getElementById('editModal').style.display = 'none';
-            // 清空表单
             document.querySelector('.edit-map-form').reset();
-            document.getElementById('currentMapImage').src = '';
+            // 新增：强制清空图片input和预览区
+            const imgInput = document.getElementById('editMapImage');
+            if(imgInput) imgInput.value = '';
+            const preview = document.getElementById('editMapImagePreview');
+            if(preview) preview.innerHTML = '<p class="current-image-text">当前图片：</p><img class="edit-modal-image-preview" src="" alt="当前地图预览图">';
         }
     },
     // 点击模态框外部关闭处理
@@ -50,13 +52,29 @@ window.imagePreview = {
         // 添加地图的图片预览
         const addImageInput = document.getElementById('mapImage');
         if (addImageInput) {
-            addImageInput.addEventListener('change', (e) => this.handleImageChange(e, '.file-preview'));
+            addImageInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file && !validateImageFile(file)) {
+                    e.target.value = '';
+                    document.querySelector('.add-map-form .file-preview').innerHTML = '';
+                    return;
+                }
+                window.imagePreview.handleImageChange(e, '.file-preview');
+            });
         }
 
         // 修改地图的图片预览
         const editImageInput = document.getElementById('editMapImage');
         if (editImageInput) {
-            editImageInput.addEventListener('change', (e) => this.handleImageChange(e, '.file-preview', true));
+            editImageInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file && !validateImageFile(file)) {
+                    e.target.value = '';
+                    document.querySelector('.edit-map-form .file-preview').innerHTML = '';
+                    return;
+                }
+                window.imagePreview.handleImageChange(e, '.file-preview', true);
+            });
         }
     },
 
@@ -76,9 +94,11 @@ window.imagePreview = {
 
         const reader = new FileReader();
         reader.onload = function(e) {
-            preview.innerHTML = isEdit ?
-                `<p class="current-image-text">新图片预览：</p>\n                 <img src="${e.target.result}" alt="新图片预览">` :
-                `<img src="${e.target.result}" alt="预览图">`;
+            if(isEdit) {
+                preview.innerHTML = `<p class="current-image-text">新图片预览：</p>\n                 <img class="edit-modal-image-preview" src="${e.target.result}" alt="新图片预览">`;
+            } else {
+                preview.innerHTML = `<img src="${e.target.result}" alt="预览图">`;
+            }
         };
         reader.readAsDataURL(file);
     }
@@ -150,10 +170,63 @@ if(addForm){
     }
 }
 
-// 修改地图表单AJAX
+// 记录编辑弹窗原始数据
+let editModalOriginalData = null;
+
+// 修改 openEditModal，记录原始数据
+window.openEditModal = function(mapId, name, author, region, difficulty, image) {
+    window.modal.edit.open(mapId, name, author, region, difficulty, image);
+    editModalOriginalData = {
+        mapId, name, author, region, difficulty, image,
+        imageFile: null
+    };
+    const imgInput = document.getElementById('editMapImage');
+    if(imgInput) imgInput.value = '';
+    let imgSrc = image;
+    if(imgSrc && !/^https?:\/\//.test(imgSrc)) {
+        imgSrc = '/static/' + imgSrc.replace(/^\/*/, '');
+    }
+    const preview = document.getElementById('editMapImagePreview');
+    if(preview) {
+        preview.innerHTML = '<p class="current-image-text">当前图片：</p><img class="edit-modal-image-preview" src="'+imgSrc+'" alt="当前地图预览图">';
+    }
+};
+
+// 监听图片input变化，记录是否有新图
+const editImgInput = document.getElementById('editMapImage');
+if(editImgInput){
+    editImgInput.addEventListener('change', function(e){
+        if(editModalOriginalData) {
+            editModalOriginalData.imageFile = e.target.files[0] || null;
+        }
+    });
+}
+
+// 判断表单是否有变动
+function isEditFormChanged() {
+    if(!editModalOriginalData) return true;
+    const name = document.getElementById('editMapName').value;
+    const author = document.getElementById('editMapAuthor').value;
+    const region = document.getElementById('editMapRegion').value;
+    const difficulty = document.getElementById('editMapDifficulty').value;
+    // 只要有一项不同或有新图片
+    if(name !== editModalOriginalData.name) return true;
+    if(author !== editModalOriginalData.author) return true;
+    if(region !== editModalOriginalData.region) return true;
+    if(difficulty !== editModalOriginalData.difficulty) return true;
+    if(editModalOriginalData.imageFile) return true;
+    return false;
+}
+
+// 拦截编辑表单提交
 const editForm = document.querySelector('.edit-map-form');
 if(editForm){
     editForm.onsubmit = function(e){
+        if(!isEditFormChanged()){
+            showErrorModal('请先修改信息后再提交！');
+            e.preventDefault();
+            return;
+        }
         e.preventDefault();
         const mapId = document.getElementById('editMapId').value;
         const formData = new FormData(this);
@@ -169,7 +242,6 @@ if(editForm){
         .then(data=>{
             if(data.success){
                 this.reset();
-                document.getElementById('currentMapImage').src = '';
                 showSuccessModal('修改申请已提交，等待管理员审核！');
                 window.modal.edit.close();
             }else{
@@ -252,9 +324,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // 全局函数，供HTML直接调用
 window.openAddModal = function() { window.modal.add.open(); }
-window.openEditModal = function(...args) { window.modal.edit.open(...args); }
 window.closeAddModal = function() { window.modal.add.close(); }
-window.closeEditModal = function() { window.modal.edit.close(); }
+window.closeEditModal = function() {
+    window.modal.edit.close();
+    editModalOriginalData = null;
+    // 再次确保彻底清空input和预览（只操作弹窗内）
+    const imgInput = document.getElementById('editMapImage');
+    if(imgInput) imgInput.value = '';
+    const preview = document.getElementById('editMapImagePreview');
+    if(preview) preview.innerHTML = '<p class="current-image-text">当前图片：</p><img class="edit-modal-image-preview" src="" alt="当前地图预览图">';
+}
 
 window.openAdviceBox = function() {
     document.getElementById('adviceModal').style.display = 'flex';
@@ -288,4 +367,19 @@ window.submitAdvice = function(e) {
         }
     })
     .catch(() => alert('网络错误'));
+}
+
+// 图片上传限制检测函数
+function validateImageFile(file) {
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'];
+    const maxSize = 2 * 1024 * 1024; // 2MB
+    if (!allowedTypes.includes(file.type)) {
+        showErrorModal('仅支持PNG、JPG、JPEG、GIF、WEBP格式的图片');
+        return false;
+    }
+    if (file.size > maxSize) {
+        showErrorModal('图片大小不能超过2MB');
+        return false;
+    }
+    return true;
 } 

@@ -94,7 +94,17 @@
                     <tbody>
                         {% for map in maps %}
                         <tr>
-                            <td><img src="{{ url_for('static', filename=map.image if map.image else 'uploads/default_map.jpg') }}" alt="地图图片" class="apply-thumb"></td>
+                            <td>
+                                {% if map.image %}
+                                    {% if map.image.startswith('http') %}
+                                        <img src="{{ map.image }}" alt="地图图片" class="apply-thumb">
+                                    {% else %}
+                                        <img src="{{ url_for('static', filename=map.image) }}" alt="地图图片" class="apply-thumb">
+                                    {% endif %}
+                                {% else %}
+                                    <img src="{{ url_for('static', filename='uploads/default_map.jpg') }}" alt="地图图片" class="apply-thumb">
+                                {% endif %}
+                            </td>
                             <td>{{ map.name }}</td>
                             <td>{{ map.mapper }}</td>
                             <td>{{ map.region }}</td>
@@ -146,9 +156,13 @@
                             <td>{{ '添加' if apply.type=='add' else '修改' }}</td>
                             <td>
                                 {% if apply.image %}
-                                <img src="{{ url_for('static', filename=apply.image if apply.image else 'uploads/default_map.jpg') }}" alt="地图图片" class="apply-thumb">
+                                    {% if apply.image.startswith('http') %}
+                                        <img src="{{ apply.image }}" alt="地图图片" class="apply-thumb">
+                                    {% else %}
+                                        <img src="{{ url_for('static', filename=apply.image) }}" alt="地图图片" class="apply-thumb">
+                                    {% endif %}
                                 {% else %}
-                                <img src="{{ url_for('static', filename='uploads/default_map.jpg') }}" alt="地图图片" class="apply-thumb">
+                                    <img src="{{ url_for('static', filename='uploads/default_map.jpg') }}" alt="地图图片" class="apply-thumb">
                                 {% endif %}
                             </td>
                             <td>{{ apply.name }}</td>

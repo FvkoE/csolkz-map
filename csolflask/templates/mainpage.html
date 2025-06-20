@@ -8,6 +8,11 @@
 
 <!-- 主体 -->
 <body>
+    <!-- 加载动画遮罩 -->
+    <div id="loadingMask" style="display:none;position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;background:rgba(255,255,255,0.7);text-align:center;">
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.5em;">正在上传图片，请稍候...</div>
+    </div>
+
     <!-- #region 页面头部 -->
     <div class="header header-flex">
         <div class="header-block header-left">
@@ -104,7 +109,11 @@
                     <a href="javascript:void(0);" class="card-btn" onclick="openEditModal('{{ map.id }}', '{{ map.name }}', '{{ map.mapper }}', '{{ map.region }}', '{{ map.level }}', '{{ map.image }}')">申请修改</a>
                 </div>
                 {% if map.image %}
-                    <img src="{{ url_for('static', filename=map.image if map.image else 'uploads/default_map.jpg') }}" class="map-card-image">
+                    {% if map.image.startswith('http') %}
+                        <img src="{{ map.image }}" class="map-card-image">
+                    {% else %}
+                        <img src="{{ url_for('static', filename=map.image) }}" class="map-card-image">
+                    {% endif %}
                 {% else %}
                     <img src="{{ url_for('static', filename='uploads/default_map.jpg') }}" class="map-card-image">
                 {% endif %}
@@ -260,7 +269,7 @@
                         </label>
                         <div class="file-preview" id="editMapImagePreview">
                             <p class="current-image-text">当前图片：</p>
-                            <img id="currentMapImage" src="" alt="当前地图预览图">
+                            <img class="edit-modal-image-preview" src="" alt="当前地图预览图">
                         </div>
                     </div>
                 </div>
@@ -321,6 +330,64 @@
         if(form) {
             form.submit();
         }
+    }
+
+    // 显示loading遮罩
+    function showLoading() {
+        document.getElementById('loadingMask').style.display = 'block';
+    }
+    // 隐藏loading遮罩
+    function hideLoading() {
+        document.getElementById('loadingMask').style.display = 'none';
+    }
+    // 表单提交时显示loading
+    var addForm = document.querySelector('.add-map-form');
+    if(addForm){
+        addForm.addEventListener('submit', function(){ showLoading(); });
+    }
+    var editForm = document.querySelector('.edit-map-form');
+    if(editForm){
+        editForm.addEventListener('submit', function(){ showLoading(); });
+    }
+    // 图片压缩函数
+    function compressImage(file, maxW=1024, maxH=1024, quality=0.7, callback) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var img = new Image();
+            img.onload = function() {
+                var w = img.width, h = img.height;
+                if(w > maxW || h > maxH){
+                    if(w/h > maxW/maxH){ h = h * maxW / w; w = maxW; } else { w = w * maxH / h; h = maxH; }
+                }
+                var canvas = document.createElement('canvas');
+                canvas.width = w; canvas.height = h;
+                var ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, w, h);
+                canvas.toBlob(function(blob){ callback(blob); }, 'image/jpeg', quality);
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+    // 替换图片文件为压缩后
+    function handleImageInput(input) {
+        var file = input.files[0];
+        if(!file) return;
+        compressImage(file, 1024, 1024, 0.7, function(blob){
+            var dt = new DataTransfer();
+            var newFile = new File([blob], file.name, {type:'image/jpeg'});
+            dt.items.add(newFile);
+            input.files = dt.files;
+        });
+    }
+    // 绑定图片选择事件
+    var addImgInput = document.querySelector('.add-map-form input[type="file"][name="image"]');
+    if(addImgInput){
+        addImgInput.addEventListener('change', function(){ handleImageInput(this); });
+    }
+    var editImgInput = document.querySelector('.edit-map-form input[type="file"][name="mapImage"]');
+    if(editImgInput){
+        editImgInput.addEventListener('change', function(){ handleImageInput(this); });
     }
     </script>
 </body>

@@ -4,6 +4,7 @@ from config import config
 import os
 import uuid
 from werkzeug.utils import secure_filename
+from imgbb_storage import init_imgbb_storage, upload_to_imgbb
 
 # =====================
 # 配置与常量
@@ -11,6 +12,9 @@ from werkzeug.utils import secure_filename
 # 获取全局配置
 app_config = config['default']
 PER_PAGE = app_config.MAPS_PER_PAGE
+IMGBB_API_KEY = getattr(app_config, 'IMGBB_API_KEY', None)
+if IMGBB_API_KEY:
+    init_imgbb_storage(IMGBB_API_KEY)
 
 # =====================
 # Flask 蓝图注册
@@ -71,7 +75,7 @@ def map_add():
     level = request.form.get('level')
     note = request.form.get('note')
     image_file = request.files.get('image')
-    image_filename = None
+    image_url = None
     session = SessionLocal()
     try:
         exist = session.query(MapList).filter_by(name=name, region=region, mapper=mapper).first()
@@ -81,11 +85,7 @@ def map_add():
             flash('该地图（名称+大区+作者）已存在，不能重复申请！')
             return redirect(url_for('maplist.mainpage'))
         if image_file and image_file.filename:
-            ext = os.path.splitext(image_file.filename)[1]
-            image_filename = f"uploads/map_{uuid.uuid4().hex}{ext}"
-            static_dir = os.path.join(current_app.root_path, 'static')
-            image_path = os.path.join(static_dir, image_filename)
-            image_file.save(image_path)
+            image_url = upload_to_imgbb(image_file)
         new_apply = MapApply(
             type='add',
             map_id=None,
@@ -93,7 +93,7 @@ def map_add():
             region=region,
             mapper=mapper,
             level=level,
-            image=image_filename or "",
+            image=image_url or "",
             note=note,
             status='待审核'
         )
@@ -131,15 +131,11 @@ def map_edit_post(map_id):
     level = request.form.get('mapDifficulty')
     note = request.form.get('mapNote')
     image_file = request.files.get('mapImage')
-    image_filename = None
+    image_url = None
     session = SessionLocal()
     try:
         if image_file and image_file.filename:
-            ext = os.path.splitext(image_file.filename)[1]
-            image_filename = f"uploads/map_{uuid.uuid4().hex}{ext}"
-            static_dir = os.path.join(current_app.root_path, 'static')
-            image_path = os.path.join(static_dir, image_filename)
-            image_file.save(image_path)
+            image_url = upload_to_imgbb(image_file)
         new_apply = MapApply(
             type='edit',
             map_id=map_id,
@@ -147,7 +143,7 @@ def map_edit_post(map_id):
             region=region,
             mapper=mapper,
             level=level,
-            image=image_filename or "",
+            image=image_url or "",
             note=note,
             status='待审核'
         )

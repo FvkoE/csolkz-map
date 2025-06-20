@@ -1,8 +1,17 @@
+__all__ = ['init_imgbb_storage', 'upload_to_imgbb']
+
 import requests
 import base64
 import os
 
-def upload_to_imgbb(file, api_key):
+# 全局变量存储API KEY
+g_imgbb_api_key = None
+
+def init_imgbb_storage(api_key):
+    global g_imgbb_api_key
+    g_imgbb_api_key = api_key
+
+def upload_to_imgbb(file):
     """上传图片到ImgBB，返回图片URL"""
     try:
         # 读取文件数据
@@ -15,7 +24,7 @@ def upload_to_imgbb(file, api_key):
         encoded_image = base64.b64encode(image_data).decode('utf-8')
         # 请求数据
         data = {
-            'key': api_key,
+            'key': g_imgbb_api_key,
             'image': encoded_image
         }
         response = requests.post('https://api.imgbb.com/1/upload', data=data)

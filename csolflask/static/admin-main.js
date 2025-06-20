@@ -202,4 +202,43 @@ window.addEventListener('click', function(e) {
     if (modal && modal.style.display === 'flex' && e.target === modal) {
         window.closeAdviceListModal();
     }
+});
+// 图片上传限制检测函数
+function validateImageFile(file) {
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'];
+    const maxSize = 2 * 1024 * 1024; // 2MB
+    if (!allowedTypes.includes(file.type)) {
+        alert('仅支持PNG、JPG、JPEG、GIF、WEBP格式的图片');
+        return false;
+    }
+    if (file.size > maxSize) {
+        alert('图片大小不能超过2MB');
+        return false;
+    }
+    return true;
+}
+// 添加图片选择检测事件
+window.addEventListener('DOMContentLoaded', function() {
+    // 添加地图
+    var adminAddImgInput = document.getElementById('adminMapImage');
+    if(adminAddImgInput){
+        adminAddImgInput.addEventListener('change', function(e){
+            const file = e.target.files[0];
+            if(file && !validateImageFile(file)){
+                e.target.value = '';
+                document.getElementById('adminAddMapImagePreview').innerHTML = '';
+            }
+        });
+    }
+    // 编辑地图
+    var adminEditImgInput = document.getElementById('editMapImage');
+    if(adminEditImgInput){
+        adminEditImgInput.addEventListener('change', function(e){
+            const file = e.target.files[0];
+            if(file && !validateImageFile(file)){
+                e.target.value = '';
+                document.getElementById('editMapImagePreview').innerHTML = '';
+            }
+        });
+    }
 }); 

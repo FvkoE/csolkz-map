@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from models import SessionLocal, AdminUser, MapList, MapApply, MapHistory, Advice
 import os
 import uuid
+from imgbb_storage import upload_to_imgbb
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -247,14 +248,10 @@ def admin_map_add():
     if exists:
         session_db.close()
         return render_template('admin_home.html', add_map_msg='该地图已存在', **_get_admin_home_context())
-    image_filename = None
+    image_url = None
     if image_file and image_file.filename:
-        ext = os.path.splitext(image_file.filename)[1]
-        image_filename = f"uploads/map_{uuid.uuid4().hex}{ext}"
-        static_dir = os.path.join(os.path.dirname(__file__), 'static')
-        image_path = os.path.join(static_dir, image_filename)
-        image_file.save(image_path)
-    new_map = MapList(name=name, region=region, mapper=mapper, level=level, image=image_filename)
+        image_url = upload_to_imgbb(image_file)
+    new_map = MapList(name=name, region=region, mapper=mapper, level=level, image=image_url)
     session_db.add(new_map)
     session_db.commit()
     # 写入历史表
@@ -286,7 +283,7 @@ def admin_advice_list():
         'list': [
             {
                 'content': a.content,
-                'create_time': a.create_time.strftime('%Y-%m-%d %H:%M:%S') if a.create_time else ''
+                'create_time': a.create_time.strftime('%Y-%m-%d %H:%M:%S') if getattr(a, 'create_time', None) is not None else ''
             } for a in advices
         ]
     })
