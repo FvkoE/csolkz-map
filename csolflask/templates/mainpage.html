@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>csolkz</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<!-- 主体 -->
+<body>
+    <!-- #region 页面头部 -->
+    <div class="header header-flex">
+        <div class="header-block header-left">
+            <div class="header-meta">
+                <div class="site-version">网站版本：内测</div>
+                <div class="site-author">作者:FvkoE</div>
+            </div>
+        </div>
+        <div class="header-block header-center"></div>
+        <div class="header-block header-right">
+            <a href="#" class="advice-link" onclick="openAdviceBox()">网站建议</a>
+        </div>
+    </div>
+    <!-- #endregion -->
+    
+    <!-- #region 导航栏 -->
+    <nav class="nav-bar">
+        <div class="nav-logo">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="" class="logo-img">
+            <span class="logo-text">csolkz地图</span>
+        </div>
+        <div class="nav-links">
+            <a href="#" class="nav-link">暂定</a>
+            <a href="#" class="nav-link">暂定</a>
+            <a href="#" class="nav-link">暂定</a>
+            <a href="#" class="nav-link">暂定</a>
+        </div>
+    </nav>
+
+    <!-- 主内容卡片区域开始 -->
+    <div class="main-content-card">
+        <div class="main-title">地图列表</div>
+        <!-- 筛选地图 -->
+        <form class="filter-section" method="get" action="/">
+            <div class="filter-row">
+                <div class="filter-item">
+                    <span class="filter-label">地图大区：</span>
+                    <div class="filter-options" id="region-btn-group">
+                        <button type="button" class="region-btn{% if not request.args.get('region') %} active{% endif %}" data-value="">全部</button>
+                        <button type="button" class="region-btn{% if request.args.get('region')=='电一' %} active{% endif %}" data-value="电一">电一</button>
+                        <button type="button" class="region-btn{% if request.args.get('region')=='电二' %} active{% endif %}" data-value="电二">电二</button>
+                        <button type="button" class="region-btn{% if request.args.get('region')=='网一' %} active{% endif %}" data-value="网一">网一</button>
+                        <input type="hidden" name="region" id="regionInput" value="{{ request.args.get('region','') }}">
+                    </div>
+                </div>
+            </div>
+            <div class="filter-row">
+                <div class="filter-item">
+                    <span class="filter-label">地图类型：</span>
+                    <div class="filter-options">
+                        <a href="#" class="filter-option">连跳</a>
+                        <a href="#" class="filter-option">攀岩</a>
+                        <a href="#" class="filter-option">连跳/攀岩</a>
+                        <a href="#" class="filter-option">长跳</a>
+                        <a href="#" class="filter-option">滑坡</a>
+                    </div>
+                </div>
+            </div>
+            <div class="filter-row">
+                <div class="filter-item">
+                    <span class="filter-label">地图难度：</span>
+                    <select class="filter-select" name="level" id="levelSelect" onchange="autoSubmitFilter()">
+                        <option value="">全部难度</option>
+                        <option value="入门" {% if request.args.get('level')=='入门' %}selected{% endif %}>入门</option>
+                        <option value="简单" {% if request.args.get('level')=='简单' %}selected{% endif %}>简单</option>
+                        <option value="中级" {% if request.args.get('level')=='中级' %}selected{% endif %}>中级</option>
+                        <option value="高级" {% if request.args.get('level')=='高级' %}selected{% endif %}>高级</option>
+                        <option value="骨灰" {% if request.args.get('level')=='骨灰' %}selected{% endif %}>骨灰</option>
+                        <option value="火星" {% if request.args.get('level')=='火星' %}selected{% endif %}>火星</option>
+                        <option value="极限" {% if request.args.get('level')=='极限' %}selected{% endif %}>极限</option>
+                        <option value="死亡" {% if request.args.get('level')=='死亡' %}selected{% endif %}>死亡</option>
+                        <option value="死亡+" {% if request.args.get('level')=='死亡+' %}selected{% endif %}>死亡+</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-row">
+                <div class="filter-item search-item">
+                    <span class="filter-label">地图名称：</span>
+                    <input type="text" class="search-input" style="width:220px;display:inline-block;vertical-align:middle;"
+                     name="search" value="{{ request.args.get('search','') }}" placeholder="按下回车键搜索">
+                </div>
+            </div>
+        </form>
+
+        <!-- 地图列表 -->
+        <div class="map-list">
+            {% for map in maps %}
+            <div class="map-card map-card-flex">
+                <div class="map-card-content">
+                    <div class="map-title" title="{{ map.name }}">{{ map.name }}</div>
+                    <div class="map-info">作者：{{ map.mapper }}</div>
+                    <div class="map-info">大区：{{ map.region }}</div>
+                    <div class="map-info">难度：{{ map.level }}</div>
+                    <a href="javascript:void(0);" class="card-btn" onclick="openEditModal('{{ map.id }}', '{{ map.name }}', '{{ map.mapper }}', '{{ map.region }}', '{{ map.level }}', '{{ map.image }}')">申请修改</a>
+                </div>
+                {% if map.image %}
+                    <img src="{{ url_for('static', filename=map.image if map.image else 'uploads/default_map.jpg') }}" class="map-card-image">
+                {% else %}
+                    <img src="{{ url_for('static', filename='uploads/default_map.jpg') }}" class="map-card-image">
+                {% endif %}
+            </div>
+            {% else %}
+            <div style="color:#888;font-size:1.1em;margin:40px auto;">暂无地图信息</div>
+            {% endfor %}
+        </div>
+        
+        <a href="javascript:void(0);" class="add-btn" onclick="openAddModal()">申请添加地图</a>
+
+        <!-- 分页控件 -->
+        <div class="pagination-container">
+            <div class="pagination">
+                {% if current_page > 1 %}
+                <a href="{{ url_for('maplist.mainpage', page=current_page-1) }}" class="page-item">&lt;</a>
+                {% else %}
+                <span class="page-item disabled">&lt;</span>
+                {% endif %}
+
+                {% for page in range(1, total_pages + 1) %}
+                <a href="{{ url_for('maplist.mainpage', page=page) }}" class="page-item {% if page == current_page %}active{% endif %}">{{ page }}</a>
+                {% endfor %}
+
+                {% if current_page < total_pages %}
+                <a href="{{ url_for('maplist.mainpage', page=current_page+1) }}" class="page-item">&gt;</a>
+                {% else %}
+                <span class="page-item disabled">&gt;</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <!-- 主内容卡片区域结束 -->
+
+    <!-- 申请添加地图 -->
+    <div class="modal" id="addModal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddModal()">&times;</span>
+            <h2 class="modal-title">申请添加地图</h2>
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <div class="form-error-msg">{{ messages[0] }}</div>
+            {% endif %}
+            {% endwith %}
+            <form class="add-map-form" method="post" action="/map/add" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="mapName">地图名称：</label>
+                    <input type="text" id="mapName" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="mapAuthor">作者：</label>
+                    <input type="text" id="mapAuthor" name="mapper" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="mapRegion">地图大区：</label>
+                    <select id="mapRegion" name="region" required>
+                        <option value="">请选择大区</option>
+                        <option value="电一">电一</option>
+                        <option value="电二">电二</option>
+                        <option value="网一">网一</option>
+                        <option value="网二">网二</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="mapDifficulty">地图难度：</label>
+                    <select id="mapDifficulty" name="level" required>
+                        <option value="">请选择难度</option>
+                        <option value="简单">简单</option>
+                        <option value="中等">中等</option>
+                        <option value="较难">较难</option>
+                        <option value="骨灰">骨灰</option>
+                        <option value="极限">极限</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="mapImage">地图预览图：</label>
+                    <div class="file-upload">
+                        <input type="file" id="mapImage" name="image" accept="image/*" required>
+                        <label for="mapImage" class="file-upload-label">
+                            <span class="upload-icon">+</span>
+                            <span class="upload-text">选择图片</span>
+                        </label>
+                        <div class="file-preview" id="addMapImagePreview"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="mapNote">备注：</label>
+                    <textarea id="mapNote" name="note" class="form-textarea" placeholder="请输入备注信息，例如：地图特点、注意事项等，这些信息将帮助管理员更好地理解您的申请"></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="submit-btn">提交申请</button>
+                    <button type="button" class="cancel-btn" onclick="closeAddModal()">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 修改地图模态框 -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditModal()">&times;</span>
+            <h2 class="modal-title">申请修改地图</h2>
+            <form class="edit-map-form" method="post" enctype="multipart/form-data" id="editMapForm">
+                <input type="hidden" id="editMapId" name="mapId">
+                <div class="form-group">
+                    <label for="editMapName">地图名称：</label>
+                    <input type="text" id="editMapName" name="mapName" required>
+                </div>
+                <div class="form-group">
+                    <label for="editMapAuthor">作者：</label>
+                    <input type="text" id="editMapAuthor" name="mapAuthor" required>
+                </div>
+                <div class="form-group">
+                    <label for="editMapRegion">地图大区：</label>
+                    <select id="editMapRegion" name="mapRegion" required>
+                        <option value="">请选择大区</option>
+                        <option value="电一">电一</option>
+                        <option value="电二">电二</option>
+                        <option value="网一">网一</option>
+                        <option value="网二">网二</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editMapDifficulty">地图难度：</label>
+                    <select id="editMapDifficulty" name="mapDifficulty" required>
+                        <option value="">请选择难度</option>
+                        <option value="简单">简单</option>
+                        <option value="中等">中等</option>
+                        <option value="较难">较难</option>
+                        <option value="骨灰">骨灰</option>
+                        <option value="极限">极限</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editMapImage">地图预览图：</label>
+                    <div class="file-upload">
+                        <input type="file" id="editMapImage" name="mapImage" accept="image/*">
+                        <label for="editMapImage" class="file-upload-label">
+                            <span class="upload-icon">+</span>
+                            <span class="upload-text">选择新图片</span>
+                        </label>
+                        <div class="file-preview" id="editMapImagePreview">
+                            <p class="current-image-text">当前图片：</p>
+                            <img id="currentMapImage" src="" alt="当前地图预览图">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editMapNote">备注：</label>
+                    <textarea id="editMapNote" name="mapNote" class="form-textarea" placeholder="请输入修改原因、具体修改内容等信息，这些信息将帮助管理员更好地理解您的修改申请"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="submit-btn">提交修改</button>
+                    <button type="button" class="cancel-btn" onclick="closeEditModal()">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 网站建议弹窗 -->
+    <div class="modal" id="adviceModal" style="display:none;">
+        <div class="modal-content" style="max-width:420px;">
+            <span class="close" onclick="closeAdviceBox()">&times;</span>
+            <h3 class="modal-title">建议</h3>
+            <form id="adviceForm" onsubmit="submitAdvice(event)">
+                <div class="form-group">
+                    <label for="adviceContent">
+                        网站还处于初期阶段，需要您宝贵的意见，目前网站的主要功能是收录csolkz地图
+                        根据使用人数以及反馈，有可能会更新更多功能，比如刷记录、rank等
+                        有关目前功能的建议，或者未来功能的建议，包括但不限于 使用的体验，地图上传规则，地图收录条件等等
+                        都可以在这里提出，我会认真参考。
+                    </label>
+                    <textarea id="adviceContent" name="content" class="form-textarea" rows="5" placeholder="欢迎留下您对网站的建议或意见"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="submit-btn">提交</button>
+                    <button type="button" class="cancel-btn" onclick="closeAdviceBox()">取消</button>
+                </div>
+            </form>
+            <div id="adviceSuccessMsg" style="display:none;color:#43a047;font-size:1.1em;text-align:center;margin-top:18px;">感谢您的建议！</div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='mainpage.js') }}"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var btns = document.querySelectorAll('#region-btn-group .region-btn');
+        var regionInput = document.getElementById('regionInput');
+        btns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                regionInput.value = btn.getAttribute('data-value');
+                btns.forEach(b=>b.classList.remove('active'));
+                btn.classList.add('active');
+                btn.closest('form').submit();
+            });
+        });
+    });
+
+    function autoSubmitFilter() {
+        // 阻止页面跳到顶部
+        const form = document.querySelector('.filter-section');
+        if(form) {
+            form.submit();
+        }
+    }
+    </script>
+</body>
+</html>

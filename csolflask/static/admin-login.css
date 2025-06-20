@@ -1,0 +1,9 @@
+body { background: #f4f8fb; font-family: 'Microsoft YaHei', Arial, sans-serif; }
+.login-container { max-width: 400px; margin: 100px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 12px #e3e3e3; padding: 40px 32px; }
+.login-title { font-size: 1.6em; color: #1976d2; text-align: center; margin-bottom: 30px; }
+.form-group { margin-bottom: 22px; }
+label { display: block; margin-bottom: 8px; color: #333; }
+input[type="text"], input[type="password"] { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 15px; }
+.login-btn { width: 100%; padding: 12px; background: #1976d2; color: #fff; border: none; border-radius: 6px; font-size: 1.1em; cursor: pointer; margin-top: 10px; }
+.login-btn:hover { background: #1251a3; }
+.error-msg { color: #d32f2f; text-align: center; margin-bottom: 16px; } 

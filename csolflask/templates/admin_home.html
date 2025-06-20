@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>管理员后台</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin-main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='mainpage.js') }}"></script>
+    <script src="{{ url_for('static', filename='admin-main.js') }}"></script>
+</head>
+<body class="admin-bg">
+    <!-- 顶部导航栏 -->
+    <div class="admin-navbar" style="display:flex;align-items:center;justify-content:space-between;gap:18px;">
+        <div class="site-name">csolkz 管理后台</div>
+        <div style="flex:1;"></div>
+        <a href="#" class="advice-list-link" onclick="openAdviceListModal()">查看建议</a>
+        <div class="welcome">欢迎，{{ username }}！</div>
+    </div>
+    <!-- 标签栏 -->
+    <div class="tab-bar">
+        <div class="tab active" onclick="switchTab(0)">管理地图</div>
+        <div class="tab" onclick="switchTab(1)">管理申请信息</div>
+    </div>
+    <!-- 主页面区域 -->
+    <div class="admin-main">
+        <!-- 管理地图主页面 -->
+        <div class="tab-content active">
+            <!-- 搜索栏 -->
+            <form class="admin-search-bar" method="get" action="">
+                <input type="text" class="admin-search-input" name="search" value="{{ search }}" placeholder="请输入地图名称进行搜索">
+                <button class="admin-search-btn" type="submit">搜索</button>
+            </form>
+            <!-- 管理员直接添加地图表单（紧凑，无标题，无备注，无外层卡片） -->
+            <form class="add-map-form" method="post" action="/admin/map/add" enctype="multipart/form-data" style="margin-bottom:18px;display:flex;flex-wrap:wrap;gap:18px 24px;align-items:flex-end;">
+                <div class="form-group" style="flex:1 1 180px;min-width:180px;margin-bottom:0;">
+                    <label for="adminMapName">地图名称：</label>
+                    <input type="text" id="adminMapName" name="name" required>
+                </div>
+                <div class="form-group" style="flex:1 1 120px;min-width:120px;margin-bottom:0;">
+                    <label for="adminMapAuthor">作者：</label>
+                    <input type="text" id="adminMapAuthor" name="mapper" required>
+                </div>
+                <div class="form-group" style="flex:1 1 120px;min-width:120px;margin-bottom:0;">
+                    <label for="adminMapRegion">大区：</label>
+                    <select id="adminMapRegion" name="region" required>
+                        <option value="">请选择大区</option>
+                        <option value="电一">电一</option>
+                        <option value="电二">电二</option>
+                        <option value="网一">网一</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex:1 1 120px;min-width:120px;margin-bottom:0;">
+                    <label for="adminMapDifficulty">难度：</label>
+                    <select id="adminMapDifficulty" name="level" required>
+                        <option value="">请选择难度</option>
+                        <option value="入门">入门</option>
+                        <option value="初级">初级</option>
+                        <option value="中级">中级</option>
+                        <option value="高级">高级</option>
+                        <option value="骨灰">骨灰</option>
+                        <option value="火星">火星</option>
+                        <option value="极限">极限</option>
+                        <option value="死亡">死亡</option>
+                        <option value="死亡+">死亡+</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex:1 1 220px;min-width:220px;margin-bottom:0;">
+                    <label for="adminMapImage">地图预览图：</label>
+                    <div class="file-upload">
+                        <input type="file" id="adminMapImage" name="image" accept="image/*" required>
+                        <label for="adminMapImage" class="file-upload-label">
+                            <span class="upload-icon">+</span>
+                            <span class="upload-text">选择图片</span>
+                        </label>
+                        <div class="file-preview" id="adminAddMapImagePreview"></div>
+                    </div>
+                </div>
+                <div class="form-actions" style="flex:0 0 auto;margin-bottom:0;">
+                    <button type="submit" class="submit-btn">添加</button>
+                </div>
+            </form>
+            <div class="map-table-wrapper">
+                <table class="map-table-admin">
+                    <thead>
+                        <tr>
+                            <th>图片</th>
+                            <th>名称</th>
+                            <th>作者</th>
+                            <th>大区</th>
+                            <th>难度</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for map in maps %}
+                        <tr>
+                            <td><img src="{{ url_for('static', filename=map.image if map.image else 'uploads/default_map.jpg') }}" alt="地图图片" class="apply-thumb"></td>
+                            <td>{{ map.name }}</td>
+                            <td>{{ map.mapper }}</td>
+                            <td>{{ map.region }}</td>
+                            <td>{{ map.level }}</td>
+                            <td style="white-space:nowrap;">
+                                <button class="admin-btn admin-btn-edit" onclick="adminOpenEditModal('{{ map.id }}', '{{ map.name }}', '{{ map.mapper }}', '{{ map.region }}', '{{ map.level }}', '{{ url_for('static', filename=map.image if map.image else 'uploads/default_map.jpg') }}')">修改</button>
+                                <button class="admin-btn admin-btn-delete" onclick="showDeleteModal('{{ map.id }}', this)">删除</button>
+                                <button class="admin-btn" onclick="showHistoryModal({{ map.id }})">历史</button>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="6" style="color:#888;text-align:center;padding:40px 0;">暂无地图信息</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <!-- 分页控件 -->
+            <div class="pagination">
+                {% for p in range(1, total_pages+1) %}
+                    {% if p == current_page %}
+                        <button class="active">{{ p }}</button>
+                    {% else %}
+                        <button onclick="window.location='?page={{ p }}{% if search %}&search={{ search }}{% endif %}'" type="button">{{ p }}</button>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        <!-- 管理申请信息主页面 -->
+        <div class="tab-content">
+            <div class="apply-table-wrapper">
+                <table class="apply-table-admin">
+                    <thead>
+                        <tr>
+                            <th>类型</th>
+                            <th>图片</th>
+                            <th>地图名</th>
+                            <th>作者</th>
+                            <th>大区</th>
+                            <th>难度</th>
+                            <th>备注</th>
+                            <th>状态</th>
+                            <th>时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for apply in applies %}
+                        <tr data-apply-id="{{ apply.id }}">
+                            <td>{{ '添加' if apply.type=='add' else '修改' }}</td>
+                            <td>
+                                {% if apply.image %}
+                                <img src="{{ url_for('static', filename=apply.image if apply.image else 'uploads/default_map.jpg') }}" alt="地图图片" class="apply-thumb">
+                                {% else %}
+                                <img src="{{ url_for('static', filename='uploads/default_map.jpg') }}" alt="地图图片" class="apply-thumb">
+                                {% endif %}
+                            </td>
+                            <td>{{ apply.name }}</td>
+                            <td>{{ apply.mapper }}</td>
+                            <td>{{ apply.region }}</td>
+                            <td>{{ apply.level }}</td>
+                            <td>{{ apply.note }}</td>
+                            <td>{{ apply.status }}</td>
+                            <td>{{ apply.create_time.strftime('%Y-%m-%d %H:%M') if apply.create_time else '' }}</td>
+                            <td style="white-space:nowrap;">
+                                {% if apply.status == '待审核' %}
+                                <button class="admin-btn admin-btn-edit" onclick="reviewApply({{ apply.id }}, '通过', this)">同意</button>
+                                <button class="admin-btn admin-btn-delete" onclick="reviewApply({{ apply.id }}, '拒绝', this)">拒绝</button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="10" style="color:#888;text-align:center;padding:40px 0;">暂无申请信息</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination">
+                {% for p in range(1, total_apply_pages+1) %}
+                    {% if p == apply_page %}
+                        <button class="active">{{ p }}</button>
+                    {% else %}
+                        <button onclick="window.location='?apply_page={{ p }}'" type="button">{{ p }}</button>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <!-- 删除确认弹窗 -->
+    <div class="modal" id="deleteModal" style="display:none;">
+        <div class="modal-content" style="max-width:340px;text-align:center;">
+            <input type="hidden" id="deleteMapId">
+            <div style="font-size:1.2em;margin:30px 0 24px 0;">确定要删除此地图吗？</div>
+            <div style="display:flex;justify-content:center;gap:18px;">
+                <button class="submit-btn" onclick="confirmDeleteMap()">确定</button>
+                <button class="cancel-btn" onclick="closeDeleteModal()">取消</button>
+            </div>
+        </div>
+    </div>
+    <!-- 用户端地图编辑模态框（复用mainpage.html结构） -->
+    <div class="modal" id="editModal" style="display:none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditModal()">&times;</span>
+            <h2 class="modal-title">修改地图信息</h2>
+            <form class="edit-map-form" method="post" enctype="multipart/form-data" id="editMapForm">
+                <input type="hidden" id="editMapId" name="mapId">
+                <div class="form-group">
+                    <label for="editMapName">地图名称：</label>
+                    <input type="text" id="editMapName" name="mapName" required>
+                </div>
+                <div class="form-group">
+                    <label for="editMapAuthor">作者：</label>
+                    <input type="text" id="editMapAuthor" name="mapAuthor" required>
+                </div>
+                <div class="form-group">
+                    <label for="editMapRegion">地图大区：</label>
+                    <select id="editMapRegion" name="mapRegion" required>
+                        <option value="">请选择大区</option>
+                        <option value="电一">电一</option>
+                        <option value="电二">电二</option>
+                        <option value="网一">网一</option>
+                        <option value="网二">网二</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editMapDifficulty">地图难度：</label>
+                    <select id="editMapDifficulty" name="mapDifficulty" required>
+                        <option value="">请选择难度</option>
+                        <option value="简单">简单</option>
+                        <option value="中等">中等</option>
+                        <option value="较难">较难</option>
+                        <option value="骨灰">骨灰</option>
+                        <option value="极限">极限</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editMapImage">地图预览图：</label>
+                    <div class="file-upload">
+                        <input type="file" id="editMapImage" name="mapImage" accept="image/*">
+                        <label for="editMapImage" class="file-upload-label">
+                            <span class="upload-icon">+</span>
+                            <span class="upload-text">选择新图片</span>
+                        </label>
+                        <div class="file-preview" id="editMapImagePreview">
+                            <p class="current-image-text">当前图片：</p>
+                            <img id="currentMapImage" src="" alt="当前地图预览图">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editMapNote">备注：</label>
+                    <textarea id="editMapNote" name="mapNote" class="form-textarea" placeholder="请输入修改原因、具体修改内容等信息，这些信息将帮助管理员更好地理解您的修改申请"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="submit-btn">提交修改</button>
+                    <button type="button" class="cancel-btn" onclick="closeEditModal()">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+    let pendingReject = null;
+    function reviewApply(applyId, action, btn) {
+        if(action === '通过') {
+            // 同意直接执行
+            fetch(`/admin/apply/review/${applyId}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({action: action})
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    btn.closest('tr').remove();
+                } else {
+                    alert('操作失败：' + (data.msg || '未知错误'));
+                }
+            })
+            .catch(() => alert('请求失败'));
+        } else if(action === '拒绝') {
+            // 弹窗确认
+            pendingReject = {applyId, btn};
+            document.getElementById('rejectModal').style.display = 'flex';
+        }
+    }
+    function confirmReject() {
+        if(!pendingReject) return;
+        const {applyId, btn} = pendingReject;
+        fetch(`/admin/apply/review/${applyId}`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({action: '拒绝'})
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success) {
+                btn.closest('tr').remove();
+            } else {
+                alert('操作失败：' + (data.msg || '未知错误'));
+            }
+            closeRejectModal();
+        })
+        .catch(() => { alert('请求失败'); closeRejectModal(); });
+    }
+    function closeRejectModal() {
+        document.getElementById('rejectModal').style.display = 'none';
+        pendingReject = null;
+    }
+    </script>
+    <!-- 拒绝确认弹窗 -->
+    <div class="modal" id="rejectModal" style="display:none;">
+        <div class="modal-content" style="max-width:340px;text-align:center;">
+            <div style="font-size:1.2em;margin:30px 0 24px 0;">确定要拒绝该申请吗？</div>
+            <div style="display:flex;justify-content:center;gap:18px;">
+                <button class="submit-btn" onclick="confirmReject()">确定</button>
+                <button class="cancel-btn" onclick="closeRejectModal()">取消</button>
+            </div>
+        </div>
+    </div>
+    <!-- 新增：历史记录弹窗 -->
+    <div class="modal" id="historyModal" style="display:none;">
+        <div class="modal-content" style="max-width:700px;min-width:400px;">
+            <span class="close" onclick="closeHistoryModal()">&times;</span>
+            <h2 class="modal-title">地图历史记录</h2>
+            <div id="historyContent" style="max-height:60vh;overflow-y:auto;"></div>
+        </div>
+    </div>
+    <!-- 建议列表弹窗 -->
+    <div class="modal" id="adviceListModal" style="display:none;">
+        <div class="modal-content" style="max-width:600px;min-width:320px;">
+            <span class="close" onclick="closeAdviceListModal()">&times;</span>
+            <h2 class="modal-title">网站建议列表</h2>
+            <div id="adviceListBox" style="min-height:120px;padding:10px 0 0 0;"></div>
+        </div>
+    </div>
+</body>
+</html> 

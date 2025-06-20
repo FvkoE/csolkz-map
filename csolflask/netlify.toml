@@ -1,0 +1,11 @@
+[build]
+  publish = "static"
+  command = "echo 'Static site build complete'"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200 
