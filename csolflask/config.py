@@ -7,12 +7,12 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'your_secret_key_123456'
     DEBUG = True
     
-    # 数据库配置 - 支持环境变量
-    DB_USER = os.environ.get('DB_USER', 'fvckyopue')
-    DB_PASSWORD = os.environ.get('DB_PASSWORD', 'd5kQa7pzXbrHUg8A')
-    DB_HOST = os.environ.get('DB_HOST', 'mysql2.sqlpub.com')
-    DB_PORT = os.environ.get('DB_PORT', '3307')
-    DB_NAME = os.environ.get('DB_NAME', 'csolkz')
+    # 数据库配置
+    DB_USER = 'fvckyopue'
+    DB_PASSWORD = 'd5kQa7pzXbrHUg8A'
+    DB_HOST = 'mysql2.sqlpub.com'
+    DB_PORT = '3307'
+    DB_NAME = 'csolkz'
     
     # 数据库URL
     DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"

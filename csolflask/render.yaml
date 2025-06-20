@@ -18,4 +18,8 @@ services:
       - key: DB_NAME
         value: csolkz
       - key: PYTHON_VERSION
-        value: 3.9.18 
+        value: 3.9.18
+      - key: STORAGE_TYPE
+        value: imgbb
+      - key: IMGBB_API_KEY
+        sync: false  # 需要在Render控制台手动设置 
