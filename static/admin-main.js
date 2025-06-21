@@ -202,7 +202,7 @@ window.addEventListener('click', function(e) {
     if (modal && modal.style.display === 'flex' && e.target === modal) {
         window.closeAdviceListModal();
     }
-});
+}); 
 // 图片上传限制检测函数
 function validateImageFile(file) {
     const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'];

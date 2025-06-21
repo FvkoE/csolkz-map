@@ -1,0 +1,33 @@
+[Unit]
+Description=CSOL Flask Application
+After=network.target
+Wants=network.target
+
+[Service]
+Type=notify
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/csolflask
+Environment="PATH=/var/www/csolflask/venv/bin"
+Environment="DEPLOYMENT_ENV=aliyun"
+ExecStart=/var/www/csolflask/venv/bin/gunicorn --config gunicorn.conf.py app:app
+ExecReload=/bin/kill -s HUP $MAINPID
+KillMode=mixed
+TimeoutStopSec=5
+PrivateTmp=true
+Restart=always
+RestartSec=10
+
+# 日志配置
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=csolflask
+
+# 安全配置
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/www/csolflask /var/log/csolflask
+
+[Install]
+WantedBy=multi-user.target 
