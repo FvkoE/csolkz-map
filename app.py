@@ -1,4 +1,10 @@
 from flask import Flask, request, jsonify
+from dotenv import load_dotenv
+import os
+
+# 加载环境变量
+load_dotenv()
+
 from config import config
 from models import SessionLocal, Advice
 

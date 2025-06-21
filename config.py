@@ -9,12 +9,20 @@ class Config:
     # Flask配置
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'your_secret_key_123456'
     
-    # 数据库配置
-    DB_USER = os.environ.get('DB_USER', 'fvckyopue')
-    DB_PASSWORD = os.environ.get('DB_PASSWORD', 'd5kQa7pzXbrHUg8A')
-    DB_HOST = os.environ.get('DB_HOST', 'mysql2.sqlpub.com')
-    DB_PORT = os.environ.get('DB_PORT', '3307')
-    DB_NAME = os.environ.get('DB_NAME', 'csolkz')
+    # 数据库配置 - 使用环境变量，如果未设置则抛出错误
+    DB_USER = os.environ.get('DB_USER')
+    DB_PASSWORD = os.environ.get('DB_PASSWORD')
+    DB_HOST = os.environ.get('DB_HOST')
+    DB_PORT = os.environ.get('DB_PORT', '3306')
+    DB_NAME = os.environ.get('DB_NAME')
+    
+    # 检查必要的数据库配置
+    if not all([DB_USER, DB_PASSWORD, DB_HOST, DB_NAME]):
+        raise ValueError(
+            "数据库配置不完整！请设置以下环境变量：\n"
+            "DB_USER, DB_PASSWORD, DB_HOST, DB_NAME\n"
+            "或者创建 .env 文件包含这些配置。"
+        )
     
     # 数据库URL
     DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
@@ -28,7 +36,7 @@ class Config:
     MAPS_PER_PAGE = 6
 
     # ImgBB配置
-    IMGBB_API_KEY = os.environ.get('IMGBB_API_KEY', 'cbcb80fb8d641b6cc945f5797a7fab95')
+    IMGBB_API_KEY = os.environ.get('IMGBB_API_KEY')
 
 class DevelopmentConfig(Config):
     """开发环境配置"""
