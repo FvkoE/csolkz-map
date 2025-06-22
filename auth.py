@@ -24,6 +24,11 @@ def admin_required(f):
         
         # 检查普通用户会话中的角色
         if session.get('user_logged_in') and session.get('user_role') == 'admin':
+            # 如果普通用户是管理员，自动设置管理员会话，避免重复登录
+            session['admin_logged_in'] = True
+            session['admin_username'] = session.get('username')
+            session['admin_user_id'] = session.get('user_id')
+            session['admin_user_role'] = session.get('user_role')
             return f(*args, **kwargs)
         
         # 如果都没有，重定向到管理员登录页面

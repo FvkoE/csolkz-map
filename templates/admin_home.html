@@ -15,7 +15,7 @@
         <div style="flex:1;"></div>
         <a href="#" class="advice-list-link" onclick="openAdviceListModal()">查看建议</a>
         <div class="welcome">欢迎，{{ username }}！</div>
-        <a href="{{ url_for('admin.admin_logout') }}" class="nav-link" style="color:#fff;text-decoration:none;padding:8px 16px;border-radius:4px;transition:all 0.2s;margin-left:10px;">退出</a>
+        <a href="{{ url_for('maplist.mainpage') }}" class="nav-link" style="color:#fff;text-decoration:none;padding:8px 16px;border-radius:4px;transition:all 0.2s;margin-left:10px;background-color:rgba(255,255,255,0.1);">返回用户端</a>
     </div>
     <!-- 标签栏 -->
     <div class="tab-bar">
@@ -55,7 +55,7 @@
                     <select id="adminMapDifficulty" name="level" required>
                         <option value="">请选择难度</option>
                         <option value="入门">入门</option>
-                        <option value="初级">初级</option>
+                        <option value="简单">简单</option>
                         <option value="中级">中级</option>
                         <option value="高级">高级</option>
                         <option value="骨灰">骨灰</option>
@@ -265,11 +265,15 @@
                     <label for="editMapDifficulty">地图难度：</label>
                     <select id="editMapDifficulty" name="mapDifficulty" required>
                         <option value="">请选择难度</option>
+                        <option value="入门">入门</option>
                         <option value="简单">简单</option>
-                        <option value="中等">中等</option>
-                        <option value="较难">较难</option>
+                        <option value="中级">中级</option>
+                        <option value="高级">高级</option>
                         <option value="骨灰">骨灰</option>
+                        <option value="火星">火星</option>
                         <option value="极限">极限</option>
+                        <option value="死亡">死亡</option>
+                        <option value="死亡+">死亡+</option>
                     </select>
                 </div>
                 <div class="form-group">

@@ -36,11 +36,16 @@ class Config:
     
     # 文件上传配置 - 现在使用ImgBB云存储，不再需要本地存储
     # UPLOAD_FOLDER = 'static/uploads'
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB
+    MAX_CONTENT_LENGTH = 2 * 1024 * 1024  # 2MB
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
     
     # 分页配置
     MAPS_PER_PAGE = 6
+
+    # local: 仅本地存储
+    # imgbb: 仅ImgBB云存储
+    # fallback: 优先ImgBB，失败时自动降级到本地
+    STORAGE_METHOD = os.environ.get('STORAGE_METHOD', 'imgbb')
 
     # ImgBB配置
     IMGBB_API_KEY = os.environ.get('IMGBB_API_KEY')

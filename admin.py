@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from models import SessionLocal, User, MapList, MapApply, MapHistory, Advice
 from auth import admin_required
-from imgbb_storage import upload_to_imgbb
+from storage import upload_image
 from sqlalchemy import or_
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -69,11 +69,6 @@ def admin_logout():
 @admin_bp.route('/')
 @admin_required
 def admin_home():
-    # 强制检查管理员会话 - 防止后退按钮绕过
-    if not session.get('admin_logged_in') and not (session.get('user_logged_in') and session.get('user_role') == 'admin'):
-        # 立即重定向，不显示任何内容
-        return redirect(url_for('admin.admin_login'))
-    
     # 获取用户名，优先使用管理员会话中的用户名
     username = session.get('admin_username') or session.get('username', '管理员')
     
@@ -153,7 +148,7 @@ def admin_map_edit(map_id):
         setattr(map_obj, 'type', map_type)
         # 保存新图片（如有）
         if image_file and image_file.filename:
-            image_url = upload_to_imgbb(image_file)
+            image_url = upload_image(image_file)
             if image_url:
                 setattr(map_obj, 'image', image_url)
         session_db.commit()
@@ -306,7 +301,7 @@ def admin_map_add():
         return render_template('admin_home.html', add_map_msg='该地图已存在', **_get_admin_home_context())
     image_url = None
     if image_file and image_file.filename:
-        image_url = upload_to_imgbb(image_file)
+        image_url = upload_image(image_file)
     new_map = MapList(name=name, region=region, mapper=mapper, level=level, type=map_type, image=image_url)
     session_db.add(new_map)
     session_db.commit()

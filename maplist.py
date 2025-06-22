@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from models import SessionLocal, MapList, MapApply
 from config import config
 from auth import login_required
-from imgbb_storage import init_imgbb_storage, upload_to_imgbb
+from storage import init_storage, upload_image, get_storage_method
 from sqlalchemy import or_
 
 # =====================
@@ -12,8 +12,13 @@ from sqlalchemy import or_
 app_config = config['default']
 PER_PAGE = app_config.MAPS_PER_PAGE
 IMGBB_API_KEY = getattr(app_config, 'IMGBB_API_KEY', None)
+
+# 初始化存储系统
 if IMGBB_API_KEY:
-    init_imgbb_storage(IMGBB_API_KEY)
+    init_storage(IMGBB_API_KEY)
+else:
+    init_storage()
+    print("警告: IMGBB_API_KEY未配置，将使用本地存储")
 
 # 地图类型常量
 MAP_TYPES = ['连跳', '攀岩', '连跳/攀岩', '长跳', '滑坡', '其它']
@@ -104,7 +109,8 @@ def map_add():
     map_type = request.form.get('type', '连跳')
     note = request.form.get('note')
     image_file = request.files.get('image')
-    image_url = None
+    image_url = ""
+    
     session = SessionLocal()
     try:
         exist = session.query(MapList).filter_by(name=name, region=region, mapper=mapper).first()
@@ -113,8 +119,18 @@ def map_add():
                 return jsonify({'success': False, 'msg': '该地图（名称+大区+作者）已存在，不能重复申请！'})
             flash('该地图（名称+大区+作者）已存在，不能重复申请！')
             return redirect(url_for('maplist.mainpage'))
+        
+        # 处理图片上传
         if image_file and image_file.filename:
-            image_url = upload_to_imgbb(image_file)
+            try:
+                image_url = upload_image(image_file)
+                if not image_url:
+                    # 图片上传失败，但不阻止申请提交
+                    print("图片上传失败，但继续处理申请")
+            except Exception as e:
+                print(f"图片上传异常: {e}")
+                # 图片上传异常，但不阻止申请提交
+        
         new_apply = MapApply(
             type='add',
             map_id=None,
@@ -123,7 +139,7 @@ def map_add():
             mapper=mapper,
             level=level,
             maptype=map_type,
-            image=image_url or "",
+            image=image_url,
             note=note,
             status='待审核'
         )
@@ -134,6 +150,7 @@ def map_add():
         flash('申请已提交，等待管理员审核！')
     except Exception as e:
         session.rollback()
+        print(f"申请提交失败: {e}")
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return jsonify({'success': False, 'msg': '申请提交失败：' + str(e)})
         flash('申请提交失败：' + str(e))
@@ -165,3 +182,51 @@ def add_advice():
 def map_apply():
     """申请添加地图页面（暂未实现）"""
     return "这里是申请添加地图的页面，后续可完善"
+
+# =====================
+# 路由：测试ImgBB连接
+# =====================
+@maplist_bp.route('/test/imgbb')
+@login_required
+def test_imgbb():
+    """测试ImgBB API连接"""
+    import requests
+    
+    if not IMGBB_API_KEY:
+        return jsonify({
+            'success': False, 
+            'msg': 'ImgBB API密钥未配置',
+            'api_key_configured': False
+        })
+    
+    try:
+        # 测试连接
+        response = requests.get('https://api.imgbb.com/1/upload', timeout=10)
+        return jsonify({
+            'success': True,
+            'msg': 'ImgBB API连接正常',
+            'api_key_configured': True,
+            'connection_test': 'success',
+            'response_status': response.status_code
+        })
+    except requests.exceptions.ConnectionError:
+        return jsonify({
+            'success': False,
+            'msg': '无法连接到ImgBB API，请检查网络连接',
+            'api_key_configured': True,
+            'connection_test': 'connection_error'
+        })
+    except requests.exceptions.Timeout:
+        return jsonify({
+            'success': False,
+            'msg': 'ImgBB API连接超时',
+            'api_key_configured': True,
+            'connection_test': 'timeout'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'msg': f'ImgBB API测试失败: {str(e)}',
+            'api_key_configured': True,
+            'connection_test': 'unknown_error'
+        })

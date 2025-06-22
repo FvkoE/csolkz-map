@@ -43,7 +43,7 @@
         <div class="nav-actions">
              <span class="username">欢迎, {{ session.username }}</span>
              {% if session.user_role == 'admin' %}
-             <a href="{{ url_for('admin.admin_home') }}" class="nav-link">管理后台</a>
+             <a href="{{ url_for('admin.admin_home') }}" class="nav-link" target="_blank">管理后台</a>
              {% endif %}
              <a href="{{ url_for('auth.logout') }}" class="nav-link">退出</a>
         </div>
@@ -144,7 +144,7 @@
                     <select id="mapDifficulty" name="level" required>
                         <option value="">请选择难度</option>
                         <option value="入门">入门</option>
-                        <option value="初级">初级</option>
+                        <option value="简单">简单</option>
                         <option value="中级">中级</option>
                         <option value="高级">高级</option>
                         <option value="骨灰">骨灰</option>
@@ -219,7 +219,7 @@
                     <select id="editMapDifficulty" name="mapDifficulty" required>
                         <option value="">请选择难度</option>
                         <option value="入门">入门</option>
-                        <option value="初级">初级</option>
+                        <option value="简单">简单</option>
                         <option value="中级">中级</option>
                         <option value="高级">高级</option>
                         <option value="骨灰">骨灰</option>

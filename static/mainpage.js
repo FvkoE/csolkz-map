@@ -7,30 +7,9 @@ window.modal = {
         },
         close() {
             document.getElementById('addModal').style.display = 'none';
-            // 清空表单
-            document.querySelector('.add-map-form').reset();
-            document.querySelector('.file-preview').innerHTML = '';
-        }
-    },
-    // 修改地图相关操作
-    edit: {
-        open(mapId, name, author, region, difficulty, image) {
-            document.getElementById('editModal').style.display = 'flex';
-            // 填充表单数据
-            document.getElementById('editMapId').value = mapId;
-            document.getElementById('editMapName').value = name;
-            document.getElementById('editMapAuthor').value = author;
-            document.getElementById('editMapRegion').value = region;
-            document.getElementById('editMapDifficulty').value = difficulty;
-        },
-        close() {
-            document.getElementById('editModal').style.display = 'none';
-            document.querySelector('.edit-map-form').reset();
-            // 新增：强制清空图片input和预览区
-            const imgInput = document.getElementById('editMapImage');
-            if(imgInput) imgInput.value = '';
-            const preview = document.getElementById('editMapImagePreview');
-            if(preview) preview.innerHTML = '<p class="current-image-text">当前图片：</p><img class="edit-modal-image-preview" src="" alt="当前地图预览图">';
+            // 不再清空表单，以便保留用户输入
+            // document.querySelector('.add-map-form').reset();
+            // document.querySelector('.file-preview').innerHTML = '';
         }
     },
     // 点击模态框外部关闭处理
@@ -38,8 +17,6 @@ window.modal = {
         if (event.target.classList.contains('modal')) {
             if (event.target.id === 'addModal') {
                 window.modal.add.close();
-            } else if (event.target.id === 'editModal') {
-                window.modal.edit.close();
             }
         }
     }
@@ -104,6 +81,54 @@ window.imagePreview = {
     }
 };
 
+// =====================
+// 表单草稿功能 (Session Storage)
+// =====================
+const DRAFT_KEY_PREFIX = 'add_map_draft_';
+
+// 保存草稿
+function saveDraft(formElement) {
+    if (!formElement) return;
+    const formData = new FormData(formElement);
+    for (let [key, value] of formData.entries()) {
+        // 不保存文件和空字段
+        if (key !== 'image' && value) {
+            sessionStorage.setItem(DRAFT_KEY_PREFIX + key, value);
+        }
+    }
+}
+
+// 加载草稿
+function loadDraft(formElement) {
+    if (!formElement) return;
+    for (let i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i);
+        if (key.startsWith(DRAFT_KEY_PREFIX)) {
+            const formKey = key.replace(DRAFT_KEY_PREFIX, '');
+            const element = formElement.elements[formKey];
+            if (element) {
+                element.value = sessionStorage.getItem(key);
+            }
+        }
+    }
+}
+
+// 清除草稿
+function clearDraft(formElement) {
+    if (!formElement) return;
+    const keysToRemove = [];
+    for (let i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i);
+        if (key.startsWith(DRAFT_KEY_PREFIX)) {
+            keysToRemove.push(key);
+        }
+    }
+    keysToRemove.forEach(key => sessionStorage.removeItem(key));
+    // 同时重置表单
+    formElement.reset();
+    document.querySelector('.file-preview').innerHTML = '';
+}
+
 // 新增：表单AJAX提交与错误弹窗
 function showErrorModal(msg) {
     let modal = document.getElementById('errorModal');
@@ -144,132 +169,54 @@ function showSuccessModal(msg) {
     modal.style.display = 'flex';
 }
 
-// 添加地图表单AJAX
-const addForm = document.querySelector('.add-map-form');
-if(addForm){
-    const loadingMask = document.getElementById('loadingMask');
-    const showLoading = () => { if(loadingMask) loadingMask.style.display = 'flex'; };
-    const hideLoading = () => { if(loadingMask) loadingMask.style.display = 'none'; };
-
-    addForm.onsubmit = function(e){
-        e.preventDefault();
-        showLoading(); // 显示加载动画
-        const formData = new FormData(this);
-        fetch('/map/add', {
-            method: 'POST',
-            body: formData,
-            headers: {'X-Requested-With': 'XMLHttpRequest'}
-        })
-        .then(res=>res.json())
-        .then(data=>{
-            hideLoading(); // 隐藏加载动画
-            if(data.success){
-                // 清理特定字段，而不是重置整个表单
-                document.getElementById('mapName').value = '';
-                document.getElementById('mapAuthor').value = '';
-                document.getElementById('mapImage').value = '';
-                document.querySelector('#addModal .file-preview').innerHTML = '';
-
-                // 提示成功，但不关闭窗口，方便继续添加
-                showSuccessModal('申请成功！您可以继续添加。');
-            }else{
-                showErrorModal(data.msg||'申请失败');
-            }
-        })
-        .catch(()=>{
-            hideLoading(); // 隐藏加载动画
-            showErrorModal('网络错误');
-        });
-    }
-}
-
-// 记录编辑弹窗原始数据
-let editModalOriginalData = null;
-
-// 修改 openEditModal，记录原始数据
-window.openEditModal = function(mapId, name, author, region, difficulty, image) {
-    window.modal.edit.open(mapId, name, author, region, difficulty, image);
-    editModalOriginalData = {
-        mapId, name, author, region, difficulty, image,
-        imageFile: null
-    };
-    const imgInput = document.getElementById('editMapImage');
-    if(imgInput) imgInput.value = '';
-    let imgSrc = image;
-    if(imgSrc && !/^https?:\/\//.test(imgSrc)) {
-        imgSrc = '/static/' + imgSrc.replace(/^\/*/, '');
-    }
-    const preview = document.getElementById('editMapImagePreview');
-    if(preview) {
-        preview.innerHTML = '<p class="current-image-text">当前图片：</p><img class="edit-modal-image-preview" src="'+imgSrc+'" alt="当前地图预览图">';
-    }
-};
-
-// 监听图片input变化，记录是否有新图
-const editImgInput = document.getElementById('editMapImage');
-if(editImgInput){
-    editImgInput.addEventListener('change', function(e){
-        if(editModalOriginalData) {
-            editModalOriginalData.imageFile = e.target.files[0] || null;
-        }
-    });
-}
-
-// 判断表单是否有变动
-function isEditFormChanged() {
-    if(!editModalOriginalData) return true;
-    const name = document.getElementById('editMapName').value;
-    const author = document.getElementById('editMapAuthor').value;
-    const region = document.getElementById('editMapRegion').value;
-    const difficulty = document.getElementById('editMapDifficulty').value;
-    // 只要有一项不同或有新图片
-    if(name !== editModalOriginalData.name) return true;
-    if(author !== editModalOriginalData.author) return true;
-    if(region !== editModalOriginalData.region) return true;
-    if(difficulty !== editModalOriginalData.difficulty) return true;
-    if(editModalOriginalData.imageFile) return true;
-    return false;
-}
-
-// 拦截编辑表单提交
-const editForm = document.querySelector('.edit-map-form');
-if(editForm){
-    editForm.onsubmit = function(e){
-        if(!isEditFormChanged()){
-            showErrorModal('请先修改信息后再提交！');
-            e.preventDefault();
-            return;
-        }
-        e.preventDefault();
-        const mapId = document.getElementById('editMapId').value;
-        const formData = new FormData(this);
-        fetch(`/map/edit/${mapId}`, {
-            method: 'POST',
-            body: formData,
-            headers: {'X-Requested-With': 'XMLHttpRequest'}
-        })
-        .then(res => {
-            // 尝试解析JSON，失败也视为成功（兼容后端重定向）
-            return res.json().catch(()=>({success:true, force:true}));
-        })
-        .then(data=>{
-            if(data.success){
-                this.reset();
-                showSuccessModal('修改申请已提交，等待管理员审核！');
-                window.modal.edit.close();
-            }else{
-                showErrorModal(data.msg||'修改申请失败');
-            }
-        })
-        .catch(()=>{
-            // 如果请求本身没报错，也直接刷新页面（防止误判）
-            window.location.reload();
-        });
-    }
-}
-
-
 document.addEventListener('DOMContentLoaded', function() {
+    // ===================================
+    //  初始化：表单草稿和AJAX提交
+    // ===================================
+    const addMapForm = document.querySelector('.add-map-form');
+    
+    if (addMapForm) {
+        // 页面加载后，立即加载草稿
+        loadDraft(addMapForm);
+        
+        // 监听表单输入，实时保存草稿
+        addMapForm.addEventListener('input', () => saveDraft(addMapForm));
+        
+        // AJAX提交
+        const loadingMask = document.getElementById('loadingMask');
+        const showLoading = () => { if(loadingMask) loadingMask.style.display = 'flex'; };
+        const hideLoading = () => { if(loadingMask) loadingMask.style.display = 'none'; };
+
+        addMapForm.onsubmit = function(e){
+            e.preventDefault();
+            showLoading(); // 显示加载动画
+            const formData = new FormData(this);
+            fetch('/map/add', {
+                method: 'POST',
+                body: formData,
+                headers: {'X-Requested-With': 'XMLHttpRequest'}
+            })
+            .then(res => res.json())
+            .then(data => {
+                hideLoading(); // 隐藏加载动画
+                if (data.success) {
+                    // 申请成功后，清除草稿和表单
+                    clearDraft(addMapForm);
+                    showSuccessModal('申请成功！您可以关闭窗口或继续添加。');
+                } else {
+                    showErrorModal(data.msg || '申请失败');
+                }
+            })
+            .catch(() => {
+                hideLoading(); // 隐藏加载动画
+                showErrorModal('网络错误');
+            });
+        }
+    }
+
+    // ===================================
+    //  初始化：筛选功能
+    // ===================================
     const filterResultsContainer = document.getElementById('filter-results-container');
     const mapListContainer = document.getElementById('map-list-container');
     const filterForm = document.querySelector('.filter-section');
@@ -356,7 +303,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // 页面加载完成后统一初始化
-    if (addForm) {
+    if (addMapForm) {
         // 这部分逻辑已经被合并，不再需要
     }
 
