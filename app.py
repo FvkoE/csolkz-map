@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, redirect, url_for
 from dotenv import load_dotenv
 import os
 
@@ -18,8 +18,15 @@ def create_app(config_name='default'):
     # 注册蓝图
     from maplist import maplist_bp
     from admin import admin_bp
+    from auth import auth_bp
     app.register_blueprint(maplist_bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(auth_bp)
+    
+    @app.route('/')
+    def index():
+        """根路由重定向到登录页面"""
+        return redirect(url_for('auth.login'))
     
     @app.route('/health')
     def health_check():

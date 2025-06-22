@@ -72,6 +72,19 @@ body.admin-bg {
     display: flex;
     gap: 2rem;
     align-items: center;
+    margin-left: auto; /* 将链接推向右侧 */
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-left: 2rem;
+}
+
+.nav-actions .username {
+    color: #333;
+    font-weight: 500;
 }
 
 .nav-link {
@@ -822,4 +835,55 @@ body.admin-bg {
 .advice-link:hover {
     color: #1251a3;
     text-decoration: underline;
+}
+
+/* 用户信息和登出按钮样式 */
+.user-info {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 0.9em;
+}
+
+.username {
+    color: #333;
+    font-weight: 500;
+}
+
+.logout-btn {
+    color: #dc3545;
+    text-decoration: none;
+    padding: 5px 12px;
+    border: 1px solid #dc3545;
+    border-radius: 15px;
+    background: rgba(220, 53, 69, 0.1);
+    transition: all 0.3s ease;
+    font-size: 0.8em;
+}
+
+.logout-btn:hover {
+    background: #dc3545;
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+    .user-info {
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-end;
+    }
+    
+    .username {
+        font-size: 0.8em;
+    }
+    
+    .logout-btn {
+        font-size: 0.7em;
+        padding: 4px 8px;
+    }
 }

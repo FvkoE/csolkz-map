@@ -27,6 +27,13 @@ class AdminUser(Base):
     username = Column(String(50))
     password = Column(String(50))
 
+# 临时用户表 - 内测期间使用，公测后删除
+class TempUser(Base):
+    __tablename__ = 'temp_users'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(50), unique=True, nullable=False)
+    password = Column(String(100), nullable=False)
+
 class MapApply(Base):
     __tablename__ = 'map_apply'
     id = Column(Integer, primary_key=True, autoincrement=True)

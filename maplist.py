@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, jsonify
 from models import SessionLocal, MapList, MapApply
 from config import config
+from auth import login_required
 import os
 import uuid
 from werkzeug.utils import secure_filename
@@ -37,7 +38,8 @@ def get_paginated_maps(page, per_page=PER_PAGE):
 # =====================
 # 路由：主页面（带分页）
 # =====================
-@maplist_bp.route('/', methods=['GET'])
+@maplist_bp.route('/mainpage', methods=['GET'])
+@login_required
 def mainpage():
     """主页面，展示地图列表，支持分页和筛选"""
     page = request.args.get('page', 1, type=int)
@@ -67,6 +69,7 @@ def mainpage():
 # 路由：添加地图（POST）
 # =====================
 @maplist_bp.route('/map/add', methods=['POST'])
+@login_required
 def map_add():
     """处理添加地图表单，写入 map_apply 申请表"""
     name = request.form.get('name')
@@ -115,6 +118,7 @@ def map_add():
 # 路由：申请添加地图页面（预留）
 # =====================
 @maplist_bp.route('/map/apply')
+@login_required
 def map_apply():
     """申请添加地图页面（暂未实现）"""
     return "这里是申请添加地图的页面，后续可完善"
@@ -123,6 +127,7 @@ def map_apply():
 # 路由：修改地图（POST）
 # =====================
 @maplist_bp.route('/map/edit/<int:map_id>', methods=['POST'])
+@login_required
 def map_edit_post(map_id):
     """处理修改地图表单，写入 map_apply 申请表"""
     name = request.form.get('mapName')
