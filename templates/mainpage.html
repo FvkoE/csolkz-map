@@ -84,14 +84,21 @@
                     <select class="filter-select" name="level" id="levelSelect">
                         <option value="">全部难度</option>
                         <option value="入门" {% if request.args.get('level')=='入门' %}selected{% endif %}>入门</option>
-                        <option value="简单" {% if request.args.get('level')=='简单' %}selected{% endif %}>简单</option>
+                        <option value="初级" {% if request.args.get('level')=='初级' %}selected{% endif %}>初级</option>
                         <option value="中级" {% if request.args.get('level')=='中级' %}selected{% endif %}>中级</option>
+                        <option value="中级+" {% if request.args.get('level')=='中级+' %}selected{% endif %}>中级+</option>
                         <option value="高级" {% if request.args.get('level')=='高级' %}selected{% endif %}>高级</option>
+                        <option value="高级+" {% if request.args.get('level')=='高级+' %}selected{% endif %}>高级+</option>
                         <option value="骨灰" {% if request.args.get('level')=='骨灰' %}selected{% endif %}>骨灰</option>
+                        <option value="骨灰+" {% if request.args.get('level')=='骨灰+' %}selected{% endif %}>骨灰+</option>
                         <option value="火星" {% if request.args.get('level')=='火星' %}selected{% endif %}>火星</option>
-                        <option value="极限" {% if request.args.get('level')=='极限' %}selected{% endif %}>极限</option>
-                        <option value="死亡" {% if request.args.get('level')=='死亡' %}selected{% endif %}>死亡</option>
-                        <option value="死亡+" {% if request.args.get('level')=='死亡+' %}selected{% endif %}>死亡+</option>
+                        <option value="极限(1)" {% if request.args.get('level')=='极限(1)' %}selected{% endif %}>极限(1)</option>
+                        <option value="极限(2)" {% if request.args.get('level')=='极限(2)' %}selected{% endif %}>极限(2)</option>
+                        <option value="极限(3)" {% if request.args.get('level')=='极限(3)' %}selected{% endif %}>极限(3)</option>
+                        <option value="极限(4)" {% if request.args.get('level')=='极限(4)' %}selected{% endif %}>极限(4)</option>
+                        <option value="死亡(1)" {% if request.args.get('level')=='死亡(1)' %}selected{% endif %}>死亡(1)</option>
+                        <option value="死亡(2)" {% if request.args.get('level')=='死亡(2)' %}selected{% endif %}>死亡(2)</option>
+                        <option value="死亡(3)" {% if request.args.get('level')=='死亡(3)' %}selected{% endif %}>死亡(3)</option>
                     </select>
                 </div>
             </div>
@@ -144,14 +151,21 @@
                     <select id="mapDifficulty" name="level" required>
                         <option value="">请选择难度</option>
                         <option value="入门">入门</option>
-                        <option value="简单">简单</option>
+                        <option value="初级">初级</option>
                         <option value="中级">中级</option>
+                        <option value="中级+">中级+</option>
                         <option value="高级">高级</option>
+                        <option value="高级+">高级+</option>
                         <option value="骨灰">骨灰</option>
+                        <option value="骨灰+">骨灰+</option>
                         <option value="火星">火星</option>
-                        <option value="极限">极限</option>
-                        <option value="死亡">死亡</option>
-                        <option value="死亡+">死亡+</option>
+                        <option value="极限(1)">极限(1)</option>
+                        <option value="极限(2)">极限(2)</option>
+                        <option value="极限(3)">极限(3)</option>
+                        <option value="极限(4)">极限(4)</option>
+                        <option value="死亡(1)">死亡(1)</option>
+                        <option value="死亡(2)">死亡(2)</option>
+                        <option value="死亡(3)">死亡(3)</option>
                     </select>
                 </div>
                 
@@ -219,14 +233,21 @@
                     <select id="editMapDifficulty" name="mapDifficulty" required>
                         <option value="">请选择难度</option>
                         <option value="入门">入门</option>
-                        <option value="简单">简单</option>
+                        <option value="初级">初级</option>
                         <option value="中级">中级</option>
+                        <option value="中级+">中级+</option>
                         <option value="高级">高级</option>
+                        <option value="高级+">高级+</option>
                         <option value="骨灰">骨灰</option>
+                        <option value="骨灰+">骨灰+</option>
                         <option value="火星">火星</option>
-                        <option value="极限">极限</option>
-                        <option value="死亡">死亡</option>
-                        <option value="死亡+">死亡+</option>
+                        <option value="极限(1)">极限(1)</option>
+                        <option value="极限(2)">极限(2)</option>
+                        <option value="极限(3)">极限(3)</option>
+                        <option value="极限(4)">极限(4)</option>
+                        <option value="死亡(1)">死亡(1)</option>
+                        <option value="死亡(2)">死亡(2)</option>
+                        <option value="死亡(3)">死亡(3)</option>
                     </select>
                 </div>
                 <div class="form-group">
