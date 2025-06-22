@@ -94,7 +94,10 @@ def admin_home():
     apply_status = request.args.get('apply_status', '待审核')
     apply_query = session_db.query(MapApply)
     if apply_status:
-        apply_query = apply_query.filter(MapApply.status == apply_status)
+        if apply_status == '同意':
+            apply_query = apply_query.filter(MapApply.status == '通过')
+        else:
+            apply_query = apply_query.filter(MapApply.status == apply_status)
     total_apply = apply_query.count()
     apply_per_page = 20
     applies = apply_query.order_by(MapApply.create_time.desc()).offset((apply_page-1)*apply_per_page).limit(apply_per_page).all()
@@ -102,7 +105,7 @@ def admin_home():
     session_db.close()
     return render_template('admin_home.html', username=username, maps=maps, current_page=page, total_pages=total_pages, search=search,
                            applies=applies, apply_page=apply_page, total_apply_pages=total_apply_pages, apply_status=apply_status,
-                           all_apply_statuses=['待审核', '已处理', '拒绝'])
+                           all_apply_statuses=['待审核', '同意', '拒绝'])
 
 @admin_bp.route('/map/delete/<int:map_id>', methods=['POST'])
 @admin_required
@@ -262,8 +265,6 @@ def admin_apply_review(apply_id):
         else:
             return jsonify({'success': False, 'msg': '无效操作'})
         
-        # 标记申请为已处理，而不是直接删除
-        setattr(apply, 'status', '已处理')
         session_db.commit()
 
         return jsonify({'success': True})
@@ -429,7 +430,10 @@ def _get_admin_home_context():
     apply_status = request.args.get('apply_status', '待审核')
     apply_query = session_db.query(MapApply)
     if apply_status:
-        apply_query = apply_query.filter(MapApply.status == apply_status)
+        if apply_status == '同意':
+            apply_query = apply_query.filter(MapApply.status == '通过')
+        else:
+            apply_query = apply_query.filter(MapApply.status == apply_status)
     total_apply = apply_query.count()
     apply_per_page = 20
     applies = apply_query.order_by(MapApply.create_time.desc()).offset((apply_page-1)*apply_per_page).limit(apply_per_page).all()

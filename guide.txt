@@ -9,3 +9,6 @@
      ssh root@60.205.144.139
      cd /var/www/csolflask/
      sudo ./update_aliyun.sh
+
+     ##删除申请表数据
+     python delete_apply.py show <ID>
