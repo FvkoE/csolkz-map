@@ -208,9 +208,13 @@ def upload_to_imgbb(file):
 
 def upload_image(file):
     """统一的上传接口"""
-    if STORAGE_METHOD == 'local':
+    # 动态获取最新的存储方法配置
+    current_config = config.get(os.environ.get('DEPLOYMENT_ENV', 'default'), config['default'])
+    storage_method = getattr(current_config, 'STORAGE_METHOD', 'fallback')
+    
+    if storage_method == 'local':
         return upload_to_local(file)
-    elif STORAGE_METHOD == 'imgbb':
+    elif storage_method == 'imgbb':
         # 尝试ImgBB上传
         result = upload_to_imgbb(file)
         if result:
@@ -219,7 +223,7 @@ def upload_image(file):
             # ImgBB上传失败，降级到本地存储
             print("ImgBB上传失败，降级到本地存储")
             return upload_to_local(file)
-    elif STORAGE_METHOD == 'fallback':
+    elif storage_method == 'fallback':
         # 优先尝试ImgBB，失败时降级到本地
         if g_imgbb_api_key:
             result = upload_to_imgbb(file)
@@ -229,7 +233,7 @@ def upload_image(file):
         print("使用本地存储")
         return upload_to_local(file)
     else:
-        print(f"未知的存储方式: {STORAGE_METHOD}，使用本地存储作为后备")
+        print(f"未知的存储方式: {storage_method}，使用本地存储作为后备")
         return upload_to_local(file)
 
 def delete_image(image_url):

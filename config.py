@@ -34,8 +34,8 @@ class Config:
     # 数据库URL
     DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
     
-    # 文件上传配置 - 现在使用ImgBB云存储，不再需要本地存储
-    # UPLOAD_FOLDER = 'static/uploads'
+    # 文件上传配置
+    UPLOAD_FOLDER = 'static/uploads'
     MAX_CONTENT_LENGTH = 2 * 1024 * 1024  # 2MB
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
     
@@ -45,7 +45,7 @@ class Config:
     # local: 仅本地存储
     # imgbb: 仅ImgBB云存储
     # fallback: 优先ImgBB，失败时自动降级到本地
-    STORAGE_METHOD = os.environ.get('STORAGE_METHOD', 'imgbb')
+    STORAGE_METHOD = os.environ.get('STORAGE_METHOD', 'local')
 
     # ImgBB配置
     IMGBB_API_KEY = os.environ.get('IMGBB_API_KEY')
