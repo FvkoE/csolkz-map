@@ -1,4 +1,80 @@
 // 管理员后台主页面JS
+// ===================================
+//  管理员添加地图表单大区按钮逻辑
+// ===================================
+function initAdminAddMapRegionButtons() {
+    const adminAddMapRegionButtons = document.querySelectorAll('#admin-add-map-region-btn-group .region-btn');
+    const adminAddMapRegionInput = document.getElementById('adminMapRegionInput');
+    
+    if (adminAddMapRegionButtons.length > 0) {
+        adminAddMapRegionButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // 切换选中状态
+                button.classList.toggle('active');
+                
+                // 获取所有选中的大区
+                const selectedRegions = Array.from(adminAddMapRegionButtons)
+                    .filter(btn => btn.classList.contains('active'))
+                    .map(btn => btn.dataset.value);
+                
+                // 根据选中数量决定值
+                let regionValue = '';
+                if (selectedRegions.length === 0) {
+                    // 没有选中任何大区
+                    regionValue = '';
+                } else if (selectedRegions.length === 3) {
+                    // 选中3个大区，显示"全区"
+                    regionValue = '全区';
+                } else {
+                    // 选中1-2个大区，用'/'分隔
+                    regionValue = selectedRegions.join('/');
+                }
+                
+                // 更新隐藏输入框的值
+                adminAddMapRegionInput.value = regionValue;
+            });
+        });
+    }
+}
+
+// ===================================
+//  管理员编辑地图表单大区按钮逻辑
+// ===================================
+function initAdminEditMapRegionButtons() {
+    const adminEditMapRegionButtons = document.querySelectorAll('#admin-edit-map-region-btn-group .region-btn');
+    const adminEditMapRegionInput = document.getElementById('editMapRegionInput');
+    
+    if (adminEditMapRegionButtons.length > 0) {
+        adminEditMapRegionButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // 切换选中状态
+                button.classList.toggle('active');
+                
+                // 获取所有选中的大区
+                const selectedRegions = Array.from(adminEditMapRegionButtons)
+                    .filter(btn => btn.classList.contains('active'))
+                    .map(btn => btn.dataset.value);
+                
+                // 根据选中数量决定值
+                let regionValue = '';
+                if (selectedRegions.length === 0) {
+                    // 没有选中任何大区
+                    regionValue = '';
+                } else if (selectedRegions.length === 3) {
+                    // 选中3个大区，显示"全区"
+                    regionValue = '全区';
+                } else {
+                    // 选中1-2个大区，用'/'分隔
+                    regionValue = selectedRegions.join('/');
+                }
+                
+                // 更新隐藏输入框的值
+                adminEditMapRegionInput.value = regionValue;
+            });
+        });
+    }
+}
+
 // 标签栏切换逻辑
 function switchTab(tabIndex) {
     // 记录当前tab
@@ -28,6 +104,10 @@ window.onload = function() {
         adminSearchInput.value = '';
         adminSearchInput.value = val;
     }
+    
+    // 初始化大区按钮
+    initAdminAddMapRegionButtons();
+    initAdminEditMapRegionButtons();
 };
 function refreshTab(tabIndex) {
     // 保持tabIndex，刷新页面
@@ -68,7 +148,45 @@ function adminOpenEditModal(mapId, name, author, region, level, type, image) {
     document.getElementById('editMapId').value = mapId;
     document.getElementById('editMapName').value = name;
     document.getElementById('editMapAuthor').value = author;
-    document.getElementById('editMapRegion').value = region;
+    
+    // 设置大区按钮选中状态
+    const adminEditMapRegionButtons = document.querySelectorAll('#admin-edit-map-region-btn-group .region-btn');
+    const adminEditMapRegionInput = document.getElementById('editMapRegionInput');
+    
+    // 清除所有按钮的选中状态
+    adminEditMapRegionButtons.forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // 根据region参数设置选中状态
+    if (region === '全区') {
+        // 如果region是"全区"，激活所有按钮
+        adminEditMapRegionButtons.forEach(btn => {
+            btn.classList.add('active');
+        });
+        adminEditMapRegionInput.value = '全区';
+    } else if (region && region.includes('/')) {
+        // 多选大区，激活对应的按钮
+        const selectedRegions = region.split('/').map(r => r.trim());
+        adminEditMapRegionButtons.forEach(btn => {
+            if (selectedRegions.includes(btn.dataset.value)) {
+                btn.classList.add('active');
+            }
+        });
+        adminEditMapRegionInput.value = region;
+    } else if (region) {
+        // 单选大区，激活对应的按钮
+        adminEditMapRegionButtons.forEach(btn => {
+            if (btn.dataset.value === region) {
+                btn.classList.add('active');
+            }
+        });
+        adminEditMapRegionInput.value = region;
+    } else {
+        // 没有大区信息
+        adminEditMapRegionInput.value = '';
+    }
+    
     document.getElementById('editMapDifficulty').value = level;
     document.getElementById('editMapType').value = type;
     document.getElementById('currentMapImage').src = image;
@@ -88,6 +206,18 @@ function closeEditModal() {
     document.getElementById('editModal').style.display = 'none';
     document.querySelector('.edit-map-form').reset();
     document.getElementById('currentMapImage').src = '';
+    
+    // 清除大区按钮选中状态
+    const adminEditMapRegionButtons = document.querySelectorAll('#admin-edit-map-region-btn-group .region-btn');
+    adminEditMapRegionButtons.forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // 清除大区隐藏输入框
+    const adminEditMapRegionInput = document.getElementById('editMapRegionInput');
+    if (adminEditMapRegionInput) {
+        adminEditMapRegionInput.value = '';
+    }
 }
 // 申请审核逻辑
 let pendingReject = null;

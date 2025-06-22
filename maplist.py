@@ -3,7 +3,7 @@ from models import SessionLocal, MapList, MapApply
 from config import config
 from auth import login_required
 from storage import init_storage, upload_image, get_storage_method
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 
 # =====================
 # 配置与常量
@@ -58,7 +58,41 @@ def mainpage():
     try:
         query = session.query(MapList)
         if region:
-            query = query.filter(MapList.region == region)
+            if region == '全区':
+                # 筛选"全区"：显示所有地图
+                pass  # 不添加任何筛选条件，显示所有地图
+            elif '/' in region:
+                # 多选大区筛选
+                regions = [r.strip() for r in region.split('/')]
+                if regions:
+                    # 条件1：匹配任意一个单选大区
+                    single_region_conditions = [MapList.region == r for r in regions]
+                    
+                    # 条件2：匹配包含任意一个选中大区的多选大区地图
+                    multi_region_conditions = []
+                    for r in regions:
+                        multi_region_conditions.append(MapList.region.like(f'%{r}%'))
+                    
+                    # 条件3：匹配"全区"地图（因为"全区"地图在所有大区都存在）
+                    all_region_condition = MapList.region == '全区'
+                    
+                    # 组合条件：单选大区 OR 包含任意一个选中大区的多选大区 OR 全区地图
+                    query = query.filter(
+                        or_(
+                            *single_region_conditions,  # 匹配任意一个单选大区
+                            *multi_region_conditions,  # 匹配包含任意一个选中大区的多选大区
+                            all_region_condition       # 匹配"全区"地图
+                        )
+                    )
+            else:
+                # 单选大区：显示该大区的地图 + 包含该大区的多选大区地图 + 全区地图
+                query = query.filter(
+                    or_(
+                        MapList.region == region,  # 匹配单选大区
+                        MapList.region.like(f'%{region}%'),  # 匹配包含该大区的多选大区
+                        MapList.region == '全区'  # 匹配"全区"地图
+                    )
+                )
         if level:
             query = query.filter(MapList.level == level)
         if map_type:

@@ -59,9 +59,9 @@
                     <span class="filter-label">地图大区：</span>
                     <div class="filter-options" id="region-btn-group">
                         <button type="button" class="region-btn{% if not request.args.get('region') %} active{% endif %}" data-value="">全部</button>
-                        <button type="button" class="region-btn{% if request.args.get('region')=='电一' %} active{% endif %}" data-value="电一">电一</button>
-                        <button type="button" class="region-btn{% if request.args.get('region')=='电二' %} active{% endif %}" data-value="电二">电二</button>
-                        <button type="button" class="region-btn{% if request.args.get('region')=='网一' %} active{% endif %}" data-value="网一">网一</button>
+                        <button type="button" class="region-btn" data-value="电一">电一</button>
+                        <button type="button" class="region-btn" data-value="电二">电二</button>
+                        <button type="button" class="region-btn" data-value="网一">网一</button>
                         <input type="hidden" name="region" id="regionInput" value="{{ request.args.get('region','') }}">
                     </div>
                 </div>
@@ -138,12 +138,12 @@
                 
                 <div class="form-group">
                     <label for="mapRegion">地图大区：</label>
-                    <select id="mapRegion" name="region" required>
-                        <option value="">请选择大区</option>
-                        <option value="电一">电一</option>
-                        <option value="电二">电二</option>
-                        <option value="网一">网一</option>
-                    </select>
+                    <div class="filter-options" id="add-map-region-btn-group">
+                        <button type="button" class="region-btn" data-value="电一">电一</button>
+                        <button type="button" class="region-btn" data-value="电二">电二</button>
+                        <button type="button" class="region-btn" data-value="网一">网一</button>
+                        <input type="hidden" name="region" id="addMapRegionInput" value="" required>
+                    </div>
                 </div>
                 
                 <div class="form-group">
@@ -221,12 +221,12 @@
                 </div>
                 <div class="form-group">
                     <label for="editMapRegion">地图大区：</label>
-                    <select id="editMapRegion" name="mapRegion" required>
-                        <option value="">请选择大区</option>
-                        <option value="电一">电一</option>
-                        <option value="电二">电二</option>
-                        <option value="网一">网一</option>
-                    </select>
+                    <div class="filter-options" id="edit-map-region-btn-group">
+                        <button type="button" class="region-btn" data-value="电一">电一</button>
+                        <button type="button" class="region-btn" data-value="电二">电二</button>
+                        <button type="button" class="region-btn" data-value="网一">网一</button>
+                        <input type="hidden" name="mapRegion" id="editMapRegionInput" value="" required>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="editMapDifficulty">地图难度：</label>

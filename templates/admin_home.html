@@ -43,13 +43,12 @@
                 </div>
                 <div class="form-group" style="flex:1 1 120px;min-width:120px;margin-bottom:0;">
                     <label for="adminMapRegion">大区：</label>
-                    <select id="adminMapRegion" name="region" required>
-                        <option value="">请选择大区</option>
-                        <option value="电一">电一</option>
-                        <option value="电二">电二</option>
-                        <option value="网一">网一</option>
-                        <option value="网二">网二</option>
-                    </select>
+                    <div class="filter-options" id="admin-add-map-region-btn-group">
+                        <button type="button" class="region-btn" data-value="电一">电一</button>
+                        <button type="button" class="region-btn" data-value="电二">电二</button>
+                        <button type="button" class="region-btn" data-value="网一">网一</button>
+                        <input type="hidden" name="region" id="adminMapRegionInput" value="" required>
+                    </div>
                 </div>
                 <div class="form-group" style="flex:1 1 120px;min-width:120px;margin-bottom:0;">
                     <label for="adminMapDifficulty">难度：</label>
@@ -265,13 +264,12 @@
                 </div>
                 <div class="form-group">
                     <label for="editMapRegion">地图大区：</label>
-                    <select id="editMapRegion" name="mapRegion" required>
-                        <option value="">请选择大区</option>
-                        <option value="电一">电一</option>
-                        <option value="电二">电二</option>
-                        <option value="网一">网一</option>
-                        <option value="网二">网二</option>
-                    </select>
+                    <div class="filter-options" id="admin-edit-map-region-btn-group">
+                        <button type="button" class="region-btn" data-value="电一">电一</button>
+                        <button type="button" class="region-btn" data-value="电二">电二</button>
+                        <button type="button" class="region-btn" data-value="网一">网一</button>
+                        <input type="hidden" name="mapRegion" id="editMapRegionInput" value="" required>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="editMapDifficulty">地图难度：</label>
