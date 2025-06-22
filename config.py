@@ -9,6 +9,13 @@ class Config:
     # Flask配置
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'your_secret_key_123456'
     
+    # 会话配置
+    PERMANENT_SESSION_LIFETIME = 100 * 365 * 24 * 3600  # 会话过期时间：永久（100年）
+    SESSION_COOKIE_SECURE = False  # 开发环境设为False，生产环境应设为True
+    SESSION_COOKIE_HTTPONLY = True  # 防止XSS攻击
+    SESSION_COOKIE_SAMESITE = 'Lax'  # CSRF防护
+    SESSION_COOKIE_MAX_AGE = 100 * 365 * 24 * 3600  # Cookie最大年龄：永久（100年）
+    
     # 数据库配置 - 使用环境变量，如果未设置则抛出错误
     DB_USER = os.environ.get('DB_USER')
     DB_PASSWORD = os.environ.get('DB_PASSWORD')

@@ -448,8 +448,60 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.target === editModal) window.modal.edit.close();
         if (e.target === adviceModal) closeAdviceBox();
     });
+
+    // 检查页面是否包含敏感信息（用户已登录）
+    const isAuthenticated = document.querySelector('.username') !== null;
+    
+    if (isAuthenticated) {
+        // 监听页面可见性变化 - 只在页面重新可见时检查
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                // 页面重新可见时，检查登录状态
+                checkLoginStatus();
+            }
+        });
+        
+        // 监听页面焦点变化 - 减少检查频率
+        let focusCheckTimeout;
+        window.addEventListener('focus', function() {
+            // 防抖处理，避免频繁检查
+            clearTimeout(focusCheckTimeout);
+            focusCheckTimeout = setTimeout(checkLoginStatus, 1000);
+        });
+    }
 });
 
+// 检查登录状态的函数
+function checkLoginStatus() {
+    fetch('/check_login')
+        .then(response => response.json())
+        .then(data => {
+            if (!data.logged_in) {
+                // 用户未登录，重定向到登录页面
+                window.location.replace('/login');
+            }
+        })
+        .catch(error => {
+            console.error('检查登录状态失败:', error);
+        });
+}
+
+// 页面卸载时清除敏感数据
+window.addEventListener('beforeunload', function() {
+    // 可以在这里添加额外的清理逻辑
+    sessionStorage.clear();
+});
+
+// 防止页面被缓存
+if (window.history && window.history.pushState) {
+    window.addEventListener('popstate', function() {
+        // 用户点击后退按钮时，检查登录状态
+        const isAuthenticated = document.querySelector('.username') !== null;
+        if (isAuthenticated) {
+            checkLoginStatus();
+        }
+    });
+}
 
 function openAddModal() {
     const modal = document.getElementById('addModal');

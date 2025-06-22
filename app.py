@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, redirect, url_for
+from flask import Flask, request, jsonify, redirect, url_for, session
 from dotenv import load_dotenv
 import os
 
@@ -50,6 +50,53 @@ def create_app(config_name='default'):
             return jsonify({'success': False, 'msg': str(e)})
         finally:
             session.close()
+    
+    # 全局中间件：会话验证
+    @app.before_request
+    def validate_session():
+        """验证会话有效性"""
+        # 检查管理员会话
+        if session.get('admin_logged_in'):
+            # 验证管理员会话是否有效
+            if not session.get('admin_username') or not session.get('admin_user_role'):
+                # 会话数据不完整，清除管理员会话
+                session.pop('admin_logged_in', None)
+                session.pop('admin_username', None)
+                session.pop('admin_user_id', None)
+                session.pop('admin_user_role', None)
+        
+        # 检查普通用户会话
+        if session.get('user_logged_in'):
+            # 验证用户会话是否有效
+            if not session.get('username') or not session.get('user_id'):
+                # 会话数据不完整，清除用户会话
+                session.clear()
+    
+    # 全局中间件：为认证页面设置缓存控制
+    @app.after_request
+    def add_cache_control_headers(response):
+        """为认证页面添加缓存控制头，防止敏感信息被缓存"""
+        # 检查是否是认证相关的页面
+        if (request.endpoint and 
+            ('admin' in request.endpoint or 
+             'auth' in request.endpoint or
+             'maplist' in request.endpoint)):
+            
+            # 对于登录页面，允许缓存但设置较短时间
+            if 'login' in request.endpoint:
+                response.headers['Cache-Control'] = 'public, max-age=3600'  # 1小时缓存
+            else:
+                # 对于敏感页面（已登录的页面），设置严格的缓存控制
+                response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+                response.headers['Pragma'] = 'no-cache'
+                response.headers['Expires'] = '0'
+                
+                # 对于敏感页面，添加额外的安全头
+                if 'admin' in request.endpoint:
+                    response.headers['X-Frame-Options'] = 'DENY'
+                    response.headers['X-Content-Type-Options'] = 'nosniff'
+        
+        return response
     
     return app
 

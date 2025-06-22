@@ -243,3 +243,81 @@ window.addEventListener('DOMContentLoaded', function() {
         });
     }
 }); 
+
+// 防止退出后通过后退按钮访问管理员页面
+document.addEventListener('DOMContentLoaded', function() {
+    // 检查是否是管理员页面
+    const isAdminPage = document.querySelector('.admin-navbar') !== null;
+    
+    if (isAdminPage) {
+        // 立即检查登录状态
+        checkAdminLoginStatus();
+        
+        // 监听页面可见性变化
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                // 页面重新可见时，立即检查管理员登录状态
+                checkAdminLoginStatus();
+            }
+        });
+        
+        // 监听页面焦点变化 - 减少检查频率
+        let focusCheckTimeout;
+        window.addEventListener('focus', function() {
+            // 防抖处理，避免频繁检查
+            clearTimeout(focusCheckTimeout);
+            focusCheckTimeout = setTimeout(checkAdminLoginStatus, 1000);
+        });
+        
+        // 监听页面加载完成
+        window.addEventListener('load', function() {
+            checkAdminLoginStatus();
+        });
+    }
+});
+
+// 检查管理员登录状态的函数
+function checkAdminLoginStatus() {
+    // 检查是否有管理员会话
+    fetch('/admin/check_admin_login')
+        .then(response => response.json())
+        .then(data => {
+            if (!data.admin_logged_in) {
+                // 管理员未登录，立即重定向到管理员登录页面
+                window.location.replace('/admin/login');
+            }
+        })
+        .catch(error => {
+            console.error('检查管理员登录状态失败:', error);
+            // 如果检查失败，立即重定向到管理员登录页面
+            window.location.replace('/admin/login');
+        });
+}
+
+// 页面卸载时清除敏感数据
+window.addEventListener('beforeunload', function() {
+    sessionStorage.clear();
+    localStorage.removeItem('admin_session');
+});
+
+// 防止页面被缓存 - 更强制的方式
+if (window.history && window.history.pushState) {
+    // 监听后退按钮
+    window.addEventListener('popstate', function() {
+        // 立即检查管理员登录状态
+        checkAdminLoginStatus();
+    });
+    
+    // 监听前进按钮
+    window.addEventListener('pushstate', function() {
+        checkAdminLoginStatus();
+    });
+}
+
+// 定期检查登录状态（每5分钟）- 减少检查频率
+setInterval(function() {
+    const isAdminPage = document.querySelector('.admin-navbar') !== null;
+    if (isAdminPage) {
+        checkAdminLoginStatus();
+    }
+}, 300000); // 5分钟 

@@ -52,6 +52,12 @@ def login():
 
             if user and user.check_password(password):
                 # 登录成功
+                remember_me = request.form.get('remember_me') == 'on'
+                if remember_me:
+                    session.permanent = True  # 启用持久化会话
+                else:
+                    session.permanent = False  # 使用临时会话（浏览器关闭后失效）
+                
                 session['user_logged_in'] = True
                 session['username'] = user.username
                 session['user_id'] = user.id
@@ -71,9 +77,17 @@ def login():
 @auth_bp.route('/logout')
 def logout():
     """用户登出"""
+    # 清除所有会话数据
     session.clear()
+    
+    # 设置响应头，防止浏览器缓存
+    response = redirect(url_for('auth.login'))
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    
     flash('已退出登录', 'info')
-    return redirect(url_for('auth.login'))
+    return response
 
 @auth_bp.route('/check_login')
 def check_login():

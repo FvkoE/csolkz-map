@@ -29,6 +29,12 @@ def admin_login():
             
             if user and user.check_password(password):
                 # 管理员登录成功，设置管理员专用会话
+                remember_me = request.form.get('remember_me') == 'on'
+                if remember_me:
+                    session.permanent = True  # 启用持久化会话
+                else:
+                    session.permanent = False  # 使用临时会话（浏览器关闭后失效）
+                
                 session['admin_logged_in'] = True
                 session['admin_username'] = user.username
                 session['admin_user_id'] = user.id
@@ -51,12 +57,24 @@ def admin_logout():
     session.pop('admin_username', None)
     session.pop('admin_user_id', None)
     session.pop('admin_user_role', None)
+    
+    # 设置响应头，防止浏览器缓存
+    response = redirect(url_for('admin.admin_login'))
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    
     flash('已退出管理员登录', 'info')
-    return redirect(url_for('admin.admin_login'))
+    return response
 
 @admin_bp.route('/')
 @admin_required
 def admin_home():
+    # 强制检查管理员会话 - 防止后退按钮绕过
+    if not session.get('admin_logged_in') and not (session.get('user_logged_in') and session.get('user_role') == 'admin'):
+        # 立即重定向，不显示任何内容
+        return redirect(url_for('admin.admin_login'))
+    
     # 获取用户名，优先使用管理员会话中的用户名
     username = session.get('admin_username') or session.get('username', '管理员')
     
@@ -324,6 +342,18 @@ def admin_advice_list():
             } for a in advices
         ]
     })
+
+@admin_bp.route('/check_admin_login')
+def check_admin_login():
+    """检查管理员登录状态（AJAX接口）"""
+    if session.get('admin_logged_in'):
+        return jsonify({
+            'admin_logged_in': True, 
+            'admin_username': session.get('admin_username'),
+            'admin_role': session.get('admin_user_role')
+        })
+    else:
+        return jsonify({'admin_logged_in': False})
 
 def _get_admin_home_context():
     # 复用admin_home的上下文参数
