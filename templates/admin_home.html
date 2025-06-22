@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>管理员后台</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='admin-main.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="{{ url_for('static', filename='mainpage.js') }}"></script>
-    <script src="{{ url_for('static', filename='admin-main.js') }}"></script>
+    <link rel="stylesheet" href="{{ static_url(filename='admin-main.css') }}">
+    <link rel="stylesheet" href="{{ static_url(filename='style.css') }}">
+    <script src="{{ static_url(filename='mainpage.js') }}"></script>
+    <script src="{{ static_url(filename='admin-main.js') }}"></script>
 </head>
 <body class="admin-bg">
     <!-- 顶部导航栏 -->

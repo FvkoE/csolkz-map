@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>csolkz</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ static_url(filename='style.css') }}">
 </head>
 
 <!-- 主体 -->
@@ -279,6 +279,6 @@
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='mainpage.js') }}"></script>
+    <script src="{{ static_url(filename='mainpage.js') }}"></script>
 </body>
 </html>

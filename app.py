@@ -23,6 +23,26 @@ def create_app(config_name='default'):
     app.register_blueprint(admin_bp)
     app.register_blueprint(auth_bp)
     
+    @app.context_processor
+    def inject_static_url_version():
+        """
+        自动为静态文件URL添加版本号，解决浏览器缓存问题。
+        版本号使用文件的最后修改时间。
+        """
+        def static_url(filename):
+            try:
+                # 获取文件在服务器上的物理路径
+                filepath = os.path.join(app.static_folder, filename)
+                if os.path.exists(filepath):
+                    # 获取文件修改时间作为版本号
+                    version = int(os.path.getmtime(filepath))
+                    return f"{url_for('static', filename=filename)}?v={version}"
+            except Exception as e:
+                # 如果出现错误，则返回不带版本号的URL
+                print(f"无法为 {filename} 生成版本号: {e}")
+            return url_for('static', filename=filename)
+        return dict(static_url=static_url)
+    
     @app.route('/')
     def index():
         """根路由重定向到登录页面"""
