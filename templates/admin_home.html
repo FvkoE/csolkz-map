@@ -15,6 +15,7 @@
         <div style="flex:1;"></div>
         <a href="#" class="advice-list-link" onclick="openAdviceListModal()">查看建议</a>
         <div class="welcome">欢迎，{{ username }}！</div>
+        <a href="{{ url_for('admin.admin_logout') }}" class="nav-link" style="color:#fff;text-decoration:none;padding:8px 16px;border-radius:4px;transition:all 0.2s;margin-left:10px;">退出</a>
     </div>
     <!-- 标签栏 -->
     <div class="tab-bar">

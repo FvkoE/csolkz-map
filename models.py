@@ -1,6 +1,7 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, Enum
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, Enum, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, relationship
+from werkzeug.security import generate_password_hash, check_password_hash
 from config import config
 from datetime import datetime
 
@@ -27,16 +28,24 @@ class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(50), unique=True, nullable=False)
-    password = Column(String(100), nullable=False)
+    password_hash = Column(String(255), nullable=False)
     role = Column(String(20), nullable=False, default='user')  # 'user', 'admin', 'temp_user'
     create_time = Column(DateTime, default=datetime.now)
     is_active = Column(Boolean, default=True)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        if not isinstance(self.password_hash, str):
+            return False
+        return check_password_hash(self.password_hash, password)
 
 class MapApply(Base):
     __tablename__ = 'map_apply'
     id = Column(Integer, primary_key=True, autoincrement=True)
     type = Column(String(10))  # add 或 edit
-    map_id = Column(Integer)   # 申请修改时关联原地图id
+    map_id = Column(Integer, ForeignKey('maplist.id'))   # 申请修改时关联原地图id
     name = Column(String(50))
     region = Column(String(50))
     mapper = Column(String(50))
@@ -51,7 +60,7 @@ class MapApply(Base):
 class MapHistory(Base):
     __tablename__ = 'map_history'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    map_id = Column(Integer, nullable=False)  # 关联的地图ID
+    map_id = Column(Integer, ForeignKey('maplist.id'), nullable=False)  # 关联的地图ID
     name = Column(String(50), nullable=False)
     region = Column(String(50), nullable=False)
     mapper = Column(String(50))
@@ -62,7 +71,7 @@ class MapHistory(Base):
     action = Column(String(20), nullable=False)  # 操作类型（add/edit/delete/rollback）
     operator = Column(String(50), nullable=False)  # 操作人
     operate_time = Column(DateTime, default=datetime.now)
-    origin_apply_id = Column(Integer)  # 来源申请ID（如有）
+    origin_apply_id = Column(Integer, ForeignKey('map_apply.id'))  # 来源申请ID（如有）
 
 class Advice(Base):
     __tablename__ = 'advice'

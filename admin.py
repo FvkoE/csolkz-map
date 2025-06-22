@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from models import SessionLocal, User, MapList, MapApply, MapHistory, Advice
+from auth import admin_required
 import os
 import uuid
 from imgbb_storage import upload_to_imgbb
@@ -7,31 +8,58 @@ from imgbb_storage import upload_to_imgbb
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
 @admin_bp.route('/login', methods=['GET', 'POST'])
-def login():
+def admin_login():
+    """管理员专用登录页面"""
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
+        
+        if not username or not password:
+            flash('用户名和密码不能为空', 'error')
+            return render_template('admin_login.html')
+        
         session_db = SessionLocal()
-        # 使用新的User模型，只查询管理员角色
-        user = session_db.query(User).filter_by(
-            username=username, 
-            password=password,
-            role='admin',
-            is_active=True
-        ).first()
-        session_db.close()
-        if user:
-            session['admin_logged_in'] = True
-            session['admin_username'] = username
-            return redirect(url_for('admin.admin_home'))
-        else:
-            flash('用户名或密码错误', 'error')
+        try:
+            # 只查询管理员角色的用户
+            user = session_db.query(User).filter_by(
+                username=username,
+                role='admin',
+                is_active=True
+            ).first()
+            
+            if user and user.check_password(password):
+                # 管理员登录成功，设置管理员专用会话
+                session['admin_logged_in'] = True
+                session['admin_username'] = user.username
+                session['admin_user_id'] = user.id
+                session['admin_user_role'] = user.role
+                
+                flash('管理员登录成功！', 'success')
+                return redirect(url_for('admin.admin_home'))
+            else:
+                flash('用户名或密码错误，或该用户不是管理员', 'error')
+        finally:
+            session_db.close()
+    
     return render_template('admin_login.html')
 
+@admin_bp.route('/logout')
+def admin_logout():
+    """管理员登出"""
+    # 只清除管理员相关的会话信息，保留普通用户会话
+    session.pop('admin_logged_in', None)
+    session.pop('admin_username', None)
+    session.pop('admin_user_id', None)
+    session.pop('admin_user_role', None)
+    flash('已退出管理员登录', 'info')
+    return redirect(url_for('admin.admin_login'))
+
 @admin_bp.route('/')
+@admin_required
 def admin_home():
-    if not session.get('admin_logged_in'):
-        return redirect(url_for('admin.login'))
+    # 获取用户名，优先使用管理员会话中的用户名
+    username = session.get('admin_username') or session.get('username', '管理员')
+    
     # 分页与搜索（地图）
     page = request.args.get('page', 1, type=int)
     search = request.args.get('search', '', type=str)
@@ -54,13 +82,12 @@ def admin_home():
     applies = apply_query.order_by(MapApply.create_time.desc()).offset((apply_page-1)*apply_per_page).limit(apply_per_page).all()
     total_apply_pages = (total_apply + apply_per_page - 1) // apply_per_page
     session_db.close()
-    return render_template('admin_home.html', username=session.get('admin_username'), maps=maps, current_page=page, total_pages=total_pages, search=search,
+    return render_template('admin_home.html', username=username, maps=maps, current_page=page, total_pages=total_pages, search=search,
                            applies=applies, apply_page=apply_page, total_apply_pages=total_apply_pages, apply_status=apply_status)
 
 @admin_bp.route('/map/delete/<int:map_id>', methods=['POST'])
+@admin_required
 def admin_map_delete(map_id):
-    if not session.get('admin_logged_in'):
-        return jsonify({'success': False, 'msg': '未登录'}), 401
     session_db = SessionLocal()
     try:
         map_obj = session_db.query(MapList).filter(MapList.id == map_id).first()
@@ -85,9 +112,8 @@ def admin_map_delete(map_id):
         session_db.close()
 
 @admin_bp.route('/map/edit/<int:map_id>', methods=['POST'])
+@admin_required
 def admin_map_edit(map_id):
-    if not session.get('admin_logged_in'):
-        return jsonify({'success': False, 'msg': '未登录'}), 401
     session_db = SessionLocal()
     try:
         map_obj = session_db.query(MapList).filter(MapList.id == map_id).first()
@@ -124,7 +150,7 @@ def admin_map_edit(map_id):
             image=map_obj.image,
             note='管理员直接修改',
             action='edit',
-            operator=session.get('admin_username', '管理员')
+            operator=session.get('admin_username') or session.get('username', '管理员')
         )
         session_db.add(history)
         session_db.commit()
@@ -136,9 +162,8 @@ def admin_map_edit(map_id):
         session_db.close()
 
 @admin_bp.route('/apply/review/<int:apply_id>', methods=['POST'])
+@admin_required
 def admin_apply_review(apply_id):
-    if not session.get('admin_logged_in'):
-        return jsonify({'success': False, 'msg': '未登录'}), 401
     data = request.get_json()
     action = data.get('action')
     session_db = SessionLocal()
@@ -174,7 +199,7 @@ def admin_apply_review(apply_id):
                     image=new_map.image,
                     note=apply.note,
                     action='add',
-                    operator=session.get('admin_username', '管理员'),
+                    operator=session.get('admin_username') or session.get('username', '管理员'),
                     origin_apply_id=apply.id
                 )
                 session_db.add(history)
@@ -200,7 +225,7 @@ def admin_apply_review(apply_id):
                         image=apply_image,
                         note=apply.note,
                         action='edit',
-                        operator=session.get('admin_username', '管理员'),
+                        operator=session.get('admin_username') or session.get('username', '管理员'),
                         origin_apply_id=apply.id
                     )
                     session_db.add(history)
@@ -221,9 +246,8 @@ def admin_apply_review(apply_id):
         session_db.close()
 
 @admin_bp.route('/map/history/<int:map_id>')
+@admin_required
 def admin_map_history(map_id):
-    if not session.get('admin_logged_in'):
-        return jsonify({'success': False, 'msg': '未登录'}), 401
     session_db = SessionLocal()
     try:
         history = session_db.query(MapHistory).filter(MapHistory.map_id == map_id).order_by(MapHistory.operate_time.desc()).all()
@@ -246,9 +270,8 @@ def admin_map_history(map_id):
         session_db.close()
 
 @admin_bp.route('/map/add', methods=['POST'])
+@admin_required
 def admin_map_add():
-    if not session.get('admin_logged_in'):
-        return redirect(url_for('admin.login'))
     name = request.form.get('name')
     region = request.form.get('region')
     mapper = request.form.get('mapper')
@@ -279,7 +302,7 @@ def admin_map_add():
         image=new_map.image,
         note=note,
         action='add',
-        operator=session.get('admin_username', '管理员')
+        operator=session.get('admin_username') or session.get('username', '管理员')
     )
     session_db.add(history)
     session_db.commit()
@@ -287,9 +310,8 @@ def admin_map_add():
     return redirect(url_for('admin.admin_home'))
 
 @admin_bp.route('/advice/list')
+@admin_required
 def admin_advice_list():
-    if not session.get('admin_logged_in'):
-        return jsonify({'success': False, 'msg': '未登录'})
     session_db = SessionLocal()
     advices = session_db.query(Advice).order_by(Advice.id.desc()).all()
     session_db.close()
@@ -326,5 +348,5 @@ def _get_admin_home_context():
     applies = apply_query.order_by(MapApply.create_time.desc()).offset((apply_page-1)*apply_per_page).limit(apply_per_page).all()
     total_apply_pages = (total_apply + apply_per_page - 1) // apply_per_page
     session_db.close()
-    return dict(username=session.get('admin_username'), maps=maps, current_page=page, total_pages=total_pages, search=search,
+    return dict(username=session.get('admin_username') or session.get('username', '管理员'), maps=maps, current_page=page, total_pages=total_pages, search=search,
                 applies=applies, apply_page=apply_page, total_apply_pages=total_apply_pages, apply_status=apply_status) 

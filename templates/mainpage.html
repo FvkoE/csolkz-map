@@ -42,6 +42,9 @@
         </div>
         <div class="nav-actions">
              <span class="username">欢迎, {{ session.username }}</span>
+             {% if session.user_role == 'admin' %}
+             <a href="{{ url_for('admin.admin_home') }}" class="nav-link">管理后台</a>
+             {% endif %}
              <a href="{{ url_for('auth.logout') }}" class="nav-link">退出</a>
         </div>
     </nav>
