@@ -81,10 +81,10 @@ window.imagePreview = {
     // 处理图片变化
     handleImageChange(event, previewSelector, isEdit = false) {
         const file = event.target.files[0];
-        const preview = isEdit ? 
-            event.target.closest('.file-upload').querySelector(previewSelector) :
-            document.querySelector(previewSelector);
-        
+        const preview = event.target.closest('.file-upload').querySelector(previewSelector);
+
+        if (!preview) return; // 安全检查
+
         if (!file) {
             if (!isEdit) {
                 preview.innerHTML = '';
@@ -147,8 +147,13 @@ function showSuccessModal(msg) {
 // 添加地图表单AJAX
 const addForm = document.querySelector('.add-map-form');
 if(addForm){
+    const loadingMask = document.getElementById('loadingMask');
+    const showLoading = () => { if(loadingMask) loadingMask.style.display = 'flex'; };
+    const hideLoading = () => { if(loadingMask) loadingMask.style.display = 'none'; };
+
     addForm.onsubmit = function(e){
         e.preventDefault();
+        showLoading(); // 显示加载动画
         const formData = new FormData(this);
         fetch('/map/add', {
             method: 'POST',
@@ -157,16 +162,24 @@ if(addForm){
         })
         .then(res=>res.json())
         .then(data=>{
+            hideLoading(); // 隐藏加载动画
             if(data.success){
-                this.reset();
+                // 清理特定字段，而不是重置整个表单
+                document.getElementById('mapName').value = '';
+                document.getElementById('mapAuthor').value = '';
+                document.getElementById('mapImage').value = '';
                 document.querySelector('#addModal .file-preview').innerHTML = '';
-                showSuccessModal('添加成功，等待管理员审核！');
-                window.modal.add.close();
+
+                // 提示成功，但不关闭窗口，方便继续添加
+                showSuccessModal('申请成功！您可以继续添加。');
             }else{
                 showErrorModal(data.msg||'申请失败');
             }
         })
-        .catch(()=>showErrorModal('网络错误'));
+        .catch(()=>{
+            hideLoading(); // 隐藏加载动画
+            showErrorModal('网络错误');
+        });
     }
 }
 
@@ -342,44 +355,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    const addForm = document.querySelector('.add-map-form');
+    // 页面加载完成后统一初始化
     if (addForm) {
-        const loadingMask = document.getElementById('loadingMask');
-        const showLoading = () => { if(loadingMask) loadingMask.style.display = 'block'; };
-        const hideLoading = () => { if(loadingMask) loadingMask.style.display = 'none'; };
+        // 这部分逻辑已经被合并，不再需要
+    }
 
-        addForm.addEventListener('submit', async function(event){
-            event.preventDefault();
-            showLoading();
-            const formData = new FormData(addForm);
-            try {
-                const response = await fetch(addForm.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {'X-Requested-With': 'XMLHttpRequest'}
-                });
-                const data = await response.json();
-                if(data.success){
-                    alert('申请成功，等待管理员审核！');
-                    closeAddModal();
-                    applyFilters(window.location.href.split('#')[0]);
-                } else {
-                    alert('申请失败: ' + (data.msg || '未知错误'));
-                }
-            } catch (error) {
-                console.error('Submit failed:', error);
-                alert('网络错误，提交失败！');
-            } finally {
-                hideLoading();
-            }
-        });
-        
-        const addImgInput = addForm.querySelector('input[type="file"][name="image"]');
-        if(addImgInput){
-            addImgInput.addEventListener('change', function(){
-                handleImageInput(this, '#addMapImagePreview'); 
-            });
-        }
+    if (filterForm) {
+        // ...
     }
 
     window.addEventListener('click', (event) => {

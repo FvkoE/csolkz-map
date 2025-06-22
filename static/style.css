@@ -239,17 +239,48 @@ body.admin-bg {
 
 /* 右侧图片，固定1:1比例，150px正方形 */
 .map-card-image {
-    width: 150px;
-    height: 150px;
+    width: 120px;
+    height: 120px;
     object-fit: cover;
-    border-radius: 0;
-    flex-shrink: 0;
-    flex-grow: 0;
-    box-shadow: none;
-    align-self: center;
-    background: #f4f8fb;
-    position: relative;
-    z-index: 1;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+}
+
+.map-card-image-placeholder {
+    width: 120px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f5f5;
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    color: #999;
+    font-size: 12px;
+    text-align: center;
+}
+
+.apply-thumb {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.apply-thumb-placeholder {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f5f5;
+    border: 1px dashed #ddd;
+    border-radius: 4px;
+    color: #999;
+    font-size: 10px;
+    text-align: center;
 }
 
 /* 卡片内按钮样式 */
@@ -398,45 +429,63 @@ body.admin-bg {
 /* 文件上传样式 */
 .file-upload {
     position: relative;
-    margin-top: 8px;
+    width: 120px; /* 给容器一个固定尺寸 */
+    height: 90px;
 }
+
 .file-upload input[type="file"] {
     position: absolute;
     width: 0;
     height: 0;
     opacity: 0;
 }
+
 .file-upload-label {
     display: flex;
     align-items: center;
+    justify-content: center; /* 居中加号和文字 */
     gap: 8px;
     padding: 12px;
     border: 2px dashed #ddd;
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s;
+    width: 100%; /* 占满容器 */
+    height: 100%; /* 占满容器 */
+    box-sizing: border-box;
 }
+
 .file-upload-label:hover {
     border-color: #1976d2;
     background: #f5f9ff;
 }
+
 .upload-icon {
     font-size: 24px;
     color: #666;
 }
+
 .upload-text {
     color: #666;
     font-size: 14px;
 }
+
 .file-preview {
-    margin-top: 12px;
-    text-align: center;
-}
-.file-preview img {
-    max-width: 100%;
-    max-height: 200px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     border-radius: 6px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    /* 让点击事件穿透到下方的label，以便重新选择图片 */
+    pointer-events: none; 
+}
+
+.file-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 用cover来填充，效果更好 */
 }
 
 /* 表单按钮样式 */
@@ -796,8 +845,8 @@ body.admin-bg {
 }
 .add-map-form .file-upload {
     min-width: 180px;
-    min-height: 48px;
-    height: 48px;
+    /* 移除固定的高度，允许容器自适应内容 */
+    /* height: 48px; */
     display: flex;
     align-items: center;
 }
@@ -901,9 +950,9 @@ body.admin-bg {
 }
 
 .logout-btn:hover {
-    background: #dc3545;
+    background: #e53935;
     color: white;
-    transform: translateY(-1px);
+    text-decoration: none;
 }
 
 /* 响应式适配 */
@@ -921,5 +970,61 @@ body.admin-bg {
     .logout-btn {
         font-size: 0.7em;
         padding: 4px 8px;
+    }
+}
+
+/* Flash消息样式 */
+.flash-messages {
+    position: fixed;
+    top: 70px; /* 导航栏高度 + 间距 */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1050;
+    width: auto;
+    max-width: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.flash-message {
+    padding: 12px 24px;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    animation: fadeInOut 5s forwards;
+    opacity: 0;
+}
+
+.flash-success {
+    background-color: #4caf50; /* 绿色 */
+}
+
+.flash-error {
+    background-color: #f44336; /* 红色 */
+}
+
+.flash-info {
+    background-color: #2196f3; /* 蓝色 */
+}
+
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    10% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    90% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-20px);
     }
 }

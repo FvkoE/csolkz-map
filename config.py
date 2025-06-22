@@ -34,8 +34,8 @@ class Config:
     # 数据库URL
     DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
     
-    # 文件上传配置
-    UPLOAD_FOLDER = 'static/uploads'
+    # 文件上传配置 - 现在使用ImgBB云存储，不再需要本地存储
+    # UPLOAD_FOLDER = 'static/uploads'
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
     

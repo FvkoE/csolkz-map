@@ -1,9 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from models import SessionLocal, User, MapList, MapApply, MapHistory, Advice
 from auth import admin_required
-import os
-import uuid
 from imgbb_storage import upload_to_imgbb
+from sqlalchemy import or_
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -84,14 +83,20 @@ def admin_home():
     session_db = SessionLocal()
     query = session_db.query(MapList)
     if search:
-        query = query.filter(MapList.name.like(f"%{search}%"))
+        search_term = f"%{search}%"
+        query = query.filter(
+            or_(
+                MapList.name.like(search_term),
+                MapList.mapper.like(search_term)
+            )
+        )
     total_maps = query.count()
     per_page = 20
     maps = query.offset((page-1)*per_page).limit(per_page).all()
     total_pages = (total_maps + per_page - 1) // per_page
     # 申请信息分页与筛选
     apply_page = request.args.get('apply_page', 1, type=int)
-    apply_status = request.args.get('apply_status', '', type=str)
+    apply_status = request.args.get('apply_status', '待审核')
     apply_query = session_db.query(MapApply)
     if apply_status:
         apply_query = apply_query.filter(MapApply.status == apply_status)
@@ -101,25 +106,23 @@ def admin_home():
     total_apply_pages = (total_apply + apply_per_page - 1) // apply_per_page
     session_db.close()
     return render_template('admin_home.html', username=username, maps=maps, current_page=page, total_pages=total_pages, search=search,
-                           applies=applies, apply_page=apply_page, total_apply_pages=total_apply_pages, apply_status=apply_status)
+                           applies=applies, apply_page=apply_page, total_apply_pages=total_apply_pages, apply_status=apply_status,
+                           all_apply_statuses=['待审核', '已处理', '拒绝'])
 
 @admin_bp.route('/map/delete/<int:map_id>', methods=['POST'])
 @admin_required
 def admin_map_delete(map_id):
     session_db = SessionLocal()
     try:
+        # 首先，删除与该地图关联的所有历史记录
+        session_db.query(MapHistory).filter(MapHistory.map_id == map_id).delete()
+
         map_obj = session_db.query(MapList).filter(MapList.id == map_id).first()
         if not map_obj:
+            # 如果没有地图，但历史记录可能已被删除，也算部分成功，回滚以撤销删除
+            session_db.rollback() 
             return jsonify({'success': False, 'msg': '地图不存在'})
-        # 删除图片文件（如有）
-        image_path_val = getattr(map_obj, 'image', None)
-        if image_path_val:
-            img_path = os.path.join(os.path.dirname(__file__), 'static', image_path_val) if not os.path.isabs(image_path_val) else image_path_val
-            if os.path.exists(img_path):
-                try:
-                    os.remove(img_path)
-                except Exception:
-                    pass
+        
         session_db.delete(map_obj)
         session_db.commit()
         return jsonify({'success': True})
@@ -150,12 +153,9 @@ def admin_map_edit(map_id):
         setattr(map_obj, 'type', map_type)
         # 保存新图片（如有）
         if image_file and image_file.filename:
-            ext = os.path.splitext(image_file.filename)[1]
-            image_filename = f"uploads/map_{uuid.uuid4().hex}{ext}"
-            static_dir = os.path.join(os.path.dirname(__file__), 'static')
-            image_path = os.path.join(static_dir, image_filename)
-            image_file.save(image_path)
-            setattr(map_obj, 'image', image_filename)
+            image_url = upload_to_imgbb(image_file)
+            if image_url:
+                setattr(map_obj, 'image', image_url)
         session_db.commit()
         # 写入历史表
         history = MapHistory(
@@ -252,10 +252,11 @@ def admin_apply_review(apply_id):
             setattr(apply, 'status', '拒绝')
         else:
             return jsonify({'success': False, 'msg': '无效操作'})
+        
+        # 标记申请为已处理，而不是直接删除
+        apply.status = '已处理'
         session_db.commit()
-        # 审核后直接删除申请记录
-        session_db.delete(apply)
-        session_db.commit()
+
         return jsonify({'success': True})
     except Exception as e:
         session_db.rollback()
@@ -362,14 +363,20 @@ def _get_admin_home_context():
     session_db = SessionLocal()
     query = session_db.query(MapList)
     if search:
-        query = query.filter(MapList.name.like(f"%{search}%"))
+        search_term = f"%{search}%"
+        query = query.filter(
+            or_(
+                MapList.name.like(search_term),
+                MapList.mapper.like(search_term)
+            )
+        )
     total_maps = query.count()
     per_page = 20
     maps = query.offset((page-1)*per_page).limit(per_page).all()
     total_pages = (total_maps + per_page - 1) // per_page
     # 申请信息分页与筛选
     apply_page = request.args.get('apply_page', 1, type=int)
-    apply_status = request.args.get('apply_status', '', type=str)
+    apply_status = request.args.get('apply_status', '待审核')
     apply_query = session_db.query(MapApply)
     if apply_status:
         apply_query = apply_query.filter(MapApply.status == apply_status)

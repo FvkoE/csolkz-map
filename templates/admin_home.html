@@ -116,7 +116,7 @@
                                         <img src="{{ url_for('static', filename=map.image) }}" alt="地图图片" class="apply-thumb">
                                     {% endif %}
                                 {% else %}
-                                    <img src="{{ url_for('static', filename='uploads/default_map.jpg') }}" alt="地图图片" class="apply-thumb">
+                                    <div class="apply-thumb-placeholder">暂无图片</div>
                                 {% endif %}
                             </td>
                             <td>{{ map.name }}</td>
@@ -125,7 +125,7 @@
                             <td>{{ map.level }}</td>
                             <td>{{ map.type }}</td>
                             <td style="white-space:nowrap;">
-                                <button class="admin-btn admin-btn-edit" onclick="adminOpenEditModal('{{ map.id }}', '{{ map.name }}', '{{ map.mapper }}', '{{ map.region }}', '{{ map.level }}', '{{ map.type }}', '{{ url_for('static', filename=map.image if map.image else 'uploads/default_map.jpg') }}')">修改</button>
+                                <button class="admin-btn admin-btn-edit" onclick="adminOpenEditModal('{{ map.id }}', '{{ map.name }}', '{{ map.mapper }}', '{{ map.region }}', '{{ map.level }}', '{{ map.type }}', '{{ map.image if map.image else "" }}')">修改</button>
                                 <button class="admin-btn admin-btn-delete" onclick="showDeleteModal('{{ map.id }}', this)">删除</button>
                                 <button class="admin-btn" onclick="showHistoryModal({{ map.id }})">历史</button>
                             </td>
@@ -149,6 +149,18 @@
         </div>
         <!-- 管理申请信息主页面 -->
         <div class="tab-content">
+            <div class="admin-toolbar">
+                <form method="GET" action="{{ url_for('admin.admin_home') }}">
+                    <input type="hidden" name="tab" value="applies"> <!-- 假设用参数控制tab -->
+                    <label for="apply_status_filter">筛选状态:</label>
+                    <select name="apply_status" id="apply_status_filter" onchange="this.form.submit()">
+                        <option value="">全部</option>
+                        {% for status in all_apply_statuses %}
+                        <option value="{{ status }}" {% if status == apply_status %}selected{% endif %}>{{ status }}</option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
             <div class="apply-table-wrapper">
                 <table class="apply-table-admin">
                     <thead>
@@ -178,7 +190,7 @@
                                         <img src="{{ url_for('static', filename=apply.image) }}" alt="地图图片" class="apply-thumb">
                                     {% endif %}
                                 {% else %}
-                                    <img src="{{ url_for('static', filename='uploads/default_map.jpg') }}" alt="地图图片" class="apply-thumb">
+                                    <div class="apply-thumb-placeholder">暂无图片</div>
                                 {% endif %}
                             </td>
                             <td>{{ apply.name }}</td>
@@ -207,7 +219,7 @@
                     {% if p == apply_page %}
                         <button class="active">{{ p }}</button>
                     {% else %}
-                        <button onclick="window.location='?apply_page={{ p }}'" type="button">{{ p }}</button>
+                        <button onclick="window.location='?apply_page={{ p }}&apply_status={{ apply_status }}'" type="button">{{ p }}</button>
                     {% endif %}
                 {% endfor %}
             </div>

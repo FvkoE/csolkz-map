@@ -16,7 +16,7 @@
                 <img src="{{ url_for('static', filename=map.image) }}" class="map-card-image">
             {% endif %}
         {% else %}
-            <img src="{{ url_for('static', filename='uploads/default_map.jpg') }}" class="map-card-image">
+            <div class="map-card-image-placeholder">暂无图片</div>
         {% endif %}
     </div>
     {% else %}

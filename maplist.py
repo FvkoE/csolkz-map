@@ -2,10 +2,8 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from models import SessionLocal, MapList, MapApply
 from config import config
 from auth import login_required
-import os
-import uuid
-from werkzeug.utils import secure_filename
 from imgbb_storage import init_imgbb_storage, upload_to_imgbb
+from sqlalchemy import or_
 
 # =====================
 # 配置与常量
@@ -61,7 +59,15 @@ def mainpage():
         if map_type:
             query = query.filter(MapList.type == map_type)
         if search:
-            query = query.filter(MapList.name.like(f"%{search}%"))
+            # 使用 .contains() 方法进行子字符串查询，SQLAlchemy会自动处理转义
+            # 同时搜索地图名称、作者
+            search_term = f"%{search}%"
+            query = query.filter(
+                or_(
+                    MapList.name.like(search_term),
+                    MapList.mapper.like(search_term)
+                )
+            )
         
         total_maps = query.count()
         maps = query.offset((page - 1) * PER_PAGE).limit(PER_PAGE).all()

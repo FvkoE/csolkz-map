@@ -118,11 +118,6 @@
         <div class="modal-content">
             <span class="close" onclick="closeAddModal()">&times;</span>
             <h2 class="modal-title">申请添加地图</h2>
-            {% with messages = get_flashed_messages() %}
-            {% if messages %}
-            <div class="form-error-msg">{{ messages[0] }}</div>
-            {% endif %}
-            {% endwith %}
             <form class="add-map-form" method="post" action="{{ url_for('maplist.map_add') }}" enctype="multipart/form-data">
                 <div class="form-group">
                     <label for="mapName">地图名称：</label>
