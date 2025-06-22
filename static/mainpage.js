@@ -3,6 +3,12 @@ window.modal = {
     // 添加地图相关操作
     add: {
         open() {
+            // 每次打开时，都从sessionStorage加载草稿，确保数据恢复
+            const addMapForm = document.querySelector('.add-map-form');
+            if (addMapForm) {
+                console.log('[草稿] 模态框已打开，执行加载操作...');
+                loadDraft(addMapForm);
+            }
             document.getElementById('addModal').style.display = 'flex';
         },
         close() {
@@ -89,10 +95,12 @@ const DRAFT_KEY_PREFIX = 'add_map_draft_';
 // 保存草稿
 function saveDraft(formElement) {
     if (!formElement) return;
+    console.log('[草稿] 正在保存...');
     const formData = new FormData(formElement);
     for (let [key, value] of formData.entries()) {
         // 不保存文件和空字段
         if (key !== 'image' && value) {
+            console.log(`  - 保存字段: ${key}, 值: ${value}`);
             sessionStorage.setItem(DRAFT_KEY_PREFIX + key, value);
         }
     }
@@ -101,13 +109,16 @@ function saveDraft(formElement) {
 // 加载草稿
 function loadDraft(formElement) {
     if (!formElement) return;
+    console.log('[草稿] 正在加载...');
     for (let i = 0; i < sessionStorage.length; i++) {
         const key = sessionStorage.key(i);
         if (key.startsWith(DRAFT_KEY_PREFIX)) {
             const formKey = key.replace(DRAFT_KEY_PREFIX, '');
             const element = formElement.elements[formKey];
-            if (element) {
-                element.value = sessionStorage.getItem(key);
+            const value = sessionStorage.getItem(key);
+            if (element && value) {
+                console.log(`  - 加载字段: ${formKey}, 值: ${value}`);
+                element.value = value;
             }
         }
     }
@@ -116,6 +127,7 @@ function loadDraft(formElement) {
 // 清除草稿
 function clearDraft(formElement) {
     if (!formElement) return;
+    console.log('[草稿] 正在清除...');
     const keysToRemove = [];
     for (let i = 0; i < sessionStorage.length; i++) {
         const key = sessionStorage.key(i);
@@ -398,6 +410,14 @@ document.addEventListener('DOMContentLoaded', function() {
             focusCheckTimeout = setTimeout(checkLoginStatus, 1000);
         });
     }
+
+    // ===================================
+    //  全局函数绑定
+    // ===================================
+    // 将模态框操作函数绑定到全局，以便HTML中的onclick可以调用
+    window.openAddModal = window.modal.add.open;
+    window.closeAddModal = window.modal.add.close;
+    // ... 其他全局函数绑定 ...
 });
 
 // 检查登录状态的函数
@@ -430,20 +450,6 @@ if (window.history && window.history.pushState) {
             checkLoginStatus();
         }
     });
-}
-
-function openAddModal() {
-    const modal = document.getElementById('addModal');
-    if(modal) modal.style.display = 'flex';
-}
-function closeAddModal() {
-    const modal = document.getElementById('addModal');
-    if(!modal) return;
-    modal.style.display = 'none';
-    const form = modal.querySelector('.add-map-form');
-    if (form) form.reset();
-    const preview = modal.querySelector('#addMapImagePreview');
-    if (preview) preview.innerHTML = '';
 }
 
 function openAdviceBox() {
