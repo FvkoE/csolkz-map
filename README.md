@@ -112,7 +112,7 @@ IMGBB_API_KEY=cbcb80fb8d641b6cc945f5797a7fab95
 python app.py
 ```
 
-访问 http://127.0.0.1:5000 即可使用
+访问 https://www.csolkz.com 即可使用
 
 ## 数据库结构
 

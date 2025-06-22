@@ -71,6 +71,9 @@ def login():
                 flash('用户名或密码错误', 'error')
         finally:
             session_db.close()
+    else:
+        # GET请求时，清除之前的Flash消息，避免显示旧的"登录成功"消息
+        session.pop('_flashes', None)
     
     return render_template('login.html')
 
@@ -85,6 +88,9 @@ def logout():
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '0'
+    
+    # 清除Flash消息
+    session.pop('_flashes', None)
     
     flash('已退出登录', 'info')
     return response

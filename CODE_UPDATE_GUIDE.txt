@@ -106,4 +106,4 @@
 5.  **服务器**: `cd /var/www/csolflask/aliyun_deployment/`
 6.  **服务器**: `sudo ./update_aliyun.sh`
 7.  **浏览器**: 访问网站验证。 
-123123
+http://60.205.144.139

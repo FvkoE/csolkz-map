@@ -197,6 +197,19 @@
     </div>
 
     <script>
+        // 页面加载时清除旧的Flash消息
+        window.addEventListener('load', function() {
+            // 如果是从其他页面跳转过来的，清除可能存在的Flash消息
+            if (window.performance && window.performance.navigation.type === window.performance.navigation.TYPE_BACK_FORWARD) {
+                const flashMessages = document.querySelectorAll('.flash-message');
+                flashMessages.forEach(function(msg) {
+                    if (msg.textContent.includes('登录成功')) {
+                        msg.remove();
+                    }
+                });
+            }
+        });
+        
         // 自动聚焦到用户名输入框
         document.getElementById('username').focus();
         
