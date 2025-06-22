@@ -201,9 +201,9 @@ window.closeAdviceListModal = function() {
 window.addEventListener('click', function(e) {
     const modal = document.getElementById('adviceListModal');
     if (modal && modal.style.display === 'flex' && e.target === modal) {
-        window.closeAdviceListModal();
+        closeAdviceListModal();
     }
-}); 
+});
 // 图片上传限制检测函数
 function validateImageFile(file) {
     const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'];
@@ -242,8 +242,135 @@ window.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-}); 
-
+});
+// 管理员添加地图表单验证
+function validateAdminAddForm() {
+    const name = document.getElementById('adminMapName').value.trim();
+    const author = document.getElementById('adminMapAuthor').value.trim();
+    const region = document.getElementById('adminMapRegion').value;
+    const level = document.getElementById('adminMapDifficulty').value;
+    const type = document.getElementById('adminMapType').value;
+    const imageFile = document.getElementById('adminMapImage').files[0];
+    
+    // 验证必填字段
+    if (!name) {
+        alert('请输入地图名称');
+        document.getElementById('adminMapName').focus();
+        return false;
+    }
+    
+    if (!author) {
+        alert('请输入作者');
+        document.getElementById('adminMapAuthor').focus();
+        return false;
+    }
+    
+    if (!region) {
+        alert('请选择大区');
+        document.getElementById('adminMapRegion').focus();
+        return false;
+    }
+    
+    if (!level) {
+        alert('请选择难度');
+        document.getElementById('adminMapDifficulty').focus();
+        return false;
+    }
+    
+    if (!type) {
+        alert('请选择类型');
+        document.getElementById('adminMapType').focus();
+        return false;
+    }
+    
+    // 验证图片文件（如果选择了的话）
+    if (imageFile) {
+        if (!imageFile.type.startsWith('image/')) {
+            alert('请选择有效的图片文件');
+            document.getElementById('adminMapImage').focus();
+            return false;
+        }
+        
+        if (imageFile.size > 2 * 1024 * 1024) {
+            alert('图片文件大小不能超过2MB');
+            document.getElementById('adminMapImage').focus();
+            return false;
+        }
+    }
+    
+    return true;
+}
+// 管理员添加地图图片预览功能
+function previewAdminAddImage(input) {
+    const preview = document.getElementById('adminAddMapImagePreview');
+    const file = input.files[0];
+    
+    if (file) {
+        // 验证文件类型
+        if (!file.type.startsWith('image/')) {
+            alert('请选择图片文件');
+            input.value = '';
+            preview.innerHTML = '';
+            return;
+        }
+        
+        // 验证文件大小（2MB）
+        if (file.size > 2 * 1024 * 1024) {
+            alert('图片文件大小不能超过2MB');
+            input.value = '';
+            preview.innerHTML = '';
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = `
+                <img src="${e.target.result}" alt="预览图片" style="max-width:100%;max-height:120px;border-radius:4px;margin-top:8px;">
+                <div style="font-size:12px;color:#666;margin-top:4px;">${file.name}</div>
+            `;
+        };
+        reader.readAsDataURL(file);
+    } else {
+        preview.innerHTML = '';
+    }
+}
+// 管理员编辑地图图片预览功能
+function previewAdminEditImage(input) {
+    const preview = document.getElementById('editMapImagePreview');
+    const file = input.files[0];
+    
+    if (file) {
+        // 验证文件类型
+        if (!file.type.startsWith('image/')) {
+            alert('请选择图片文件');
+            input.value = '';
+            return;
+        }
+        
+        // 验证文件大小（2MB）
+        if (file.size > 2 * 1024 * 1024) {
+            alert('图片文件大小不能超过2MB');
+            input.value = '';
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            // 更新预览图片
+            const currentImage = document.getElementById('currentMapImage');
+            if (currentImage) {
+                currentImage.src = e.target.result;
+            }
+            
+            // 显示新图片信息
+            const currentImageText = preview.querySelector('.current-image-text');
+            if (currentImageText) {
+                currentImageText.textContent = '新选择的图片：';
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+}
 // 防止退出后通过后退按钮访问管理员页面
 document.addEventListener('DOMContentLoaded', function() {
     // 检查是否是管理员页面
@@ -275,7 +402,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-
 // 检查管理员登录状态的函数
 function checkAdminLoginStatus() {
     // 检查是否有管理员会话
@@ -293,13 +419,11 @@ function checkAdminLoginStatus() {
             window.location.replace('/admin/login');
         });
 }
-
 // 页面卸载时清除敏感数据
 window.addEventListener('beforeunload', function() {
     sessionStorage.clear();
     localStorage.removeItem('admin_session');
 });
-
 // 防止页面被缓存 - 更强制的方式
 if (window.history && window.history.pushState) {
     // 监听后退按钮
@@ -313,7 +437,6 @@ if (window.history && window.history.pushState) {
         checkAdminLoginStatus();
     });
 }
-
 // 定期检查登录状态（每5分钟）- 减少检查频率
 setInterval(function() {
     const isAdminPage = document.querySelector('.admin-navbar') !== null;

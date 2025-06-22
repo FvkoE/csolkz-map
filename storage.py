@@ -28,13 +28,20 @@ def init_storage(api_key=None):
     if api_key:
         g_imgbb_api_key = api_key
         print(f"ImgBB API密钥已设置: {api_key[:10]}...")
+    elif IMGBB_API_KEY:
+        g_imgbb_api_key = IMGBB_API_KEY
+        print(f"从配置加载ImgBB API密钥: {IMGBB_API_KEY[:10]}...")
+    else:
+        print("警告: ImgBB API密钥未配置")
     
     # 确保本地存储目录存在
-    if STORAGE_METHOD == 'local':
+    if STORAGE_METHOD in ['local', 'fallback']:
         os.makedirs(UPLOAD_FOLDER, exist_ok=True)
         print(f"本地存储目录已创建: {UPLOAD_FOLDER}")
     
     print(f"存储方式: {STORAGE_METHOD}")
+    if STORAGE_METHOD == 'imgbb' and not g_imgbb_api_key:
+        print("警告: 使用ImgBB存储但API密钥未配置，将自动降级到本地存储")
 
 def get_storage_method():
     """获取当前存储方式"""
@@ -204,10 +211,26 @@ def upload_image(file):
     if STORAGE_METHOD == 'local':
         return upload_to_local(file)
     elif STORAGE_METHOD == 'imgbb':
-        return upload_to_imgbb(file)
+        # 尝试ImgBB上传
+        result = upload_to_imgbb(file)
+        if result:
+            return result
+        else:
+            # ImgBB上传失败，降级到本地存储
+            print("ImgBB上传失败，降级到本地存储")
+            return upload_to_local(file)
+    elif STORAGE_METHOD == 'fallback':
+        # 优先尝试ImgBB，失败时降级到本地
+        if g_imgbb_api_key:
+            result = upload_to_imgbb(file)
+            if result:
+                return result
+        # 降级到本地存储
+        print("使用本地存储")
+        return upload_to_local(file)
     else:
-        print(f"未知的存储方式: {STORAGE_METHOD}")
-        return None
+        print(f"未知的存储方式: {STORAGE_METHOD}，使用本地存储作为后备")
+        return upload_to_local(file)
 
 def delete_image(image_url):
     """删除图片文件（仅对本地存储有效）"""

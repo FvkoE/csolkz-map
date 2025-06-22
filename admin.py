@@ -110,16 +110,23 @@ def admin_map_delete(map_id):
     session_db = SessionLocal()
     try:
         # 首先，删除与该地图关联的所有历史记录
-        session_db.query(MapHistory).filter(MapHistory.map_id == map_id).delete()
+        session_db.query(MapHistory).filter(MapHistory.map_id == map_id).delete(synchronize_session=False)
 
+        # 其次，删除与该地图关联的所有申请记录
+        session_db.query(MapApply).filter(MapApply.map_id == map_id).delete(synchronize_session=False)
+
+        # 然后，查找要删除的地图对象
         map_obj = session_db.query(MapList).filter(MapList.id == map_id).first()
+        
         if not map_obj:
             # 如果没有地图，但历史记录可能已被删除，也算部分成功，回滚以撤销删除
             session_db.rollback() 
             return jsonify({'success': False, 'msg': '地图不存在'})
         
+        # 最后，删除地图对象
         session_db.delete(map_obj)
         session_db.commit()
+        
         return jsonify({'success': True})
     except Exception as e:
         session_db.rollback()
@@ -148,9 +155,16 @@ def admin_map_edit(map_id):
         setattr(map_obj, 'type', map_type)
         # 保存新图片（如有）
         if image_file and image_file.filename:
-            image_url = upload_image(image_file)
-            if image_url:
-                setattr(map_obj, 'image', image_url)
+            try:
+                print(f"管理员开始编辑图片: {image_file.filename}")
+                image_url = upload_image(image_file)
+                if image_url:
+                    setattr(map_obj, 'image', image_url)
+                    print(f"管理员图片编辑成功: {image_url}")
+                else:
+                    print("管理员图片编辑失败")
+            except Exception as e:
+                print(f"管理员图片编辑异常: {e}")
         session_db.commit()
         # 写入历史表
         history = MapHistory(
@@ -220,13 +234,13 @@ def admin_apply_review(apply_id):
             elif apply_type == 'edit' and apply_map_id:
                 map_obj = session_db.query(MapList).filter(MapList.id == apply_map_id).first()
                 if map_obj:
-                    map_obj.name = apply.name
-                    map_obj.region = apply.region
-                    map_obj.mapper = apply.mapper
-                    map_obj.level = apply.level
-                    map_obj.type = getattr(apply, 'maptype', '连跳')
+                    setattr(map_obj, 'name', apply.name)
+                    setattr(map_obj, 'region', apply.region)
+                    setattr(map_obj, 'mapper', apply.mapper)
+                    setattr(map_obj, 'level', apply.level)
+                    setattr(map_obj, 'type', getattr(apply, 'maptype', '连跳'))
                     if apply_image:
-                        map_obj.image = apply_image
+                        setattr(map_obj, 'image', apply_image)
                     # 写入历史表
                     history = MapHistory(
                         map_id=map_obj.id,
@@ -249,7 +263,7 @@ def admin_apply_review(apply_id):
             return jsonify({'success': False, 'msg': '无效操作'})
         
         # 标记申请为已处理，而不是直接删除
-        apply.status = '已处理'
+        setattr(apply, 'status', '已处理')
         session_db.commit()
 
         return jsonify({'success': True})
@@ -301,26 +315,67 @@ def admin_map_add():
         return render_template('admin_home.html', add_map_msg='该地图已存在', **_get_admin_home_context())
     image_url = None
     if image_file and image_file.filename:
-        image_url = upload_image(image_file)
-    new_map = MapList(name=name, region=region, mapper=mapper, level=level, type=map_type, image=image_url)
-    session_db.add(new_map)
-    session_db.commit()
-    # 写入历史表
-    history = MapHistory(
-        map_id=new_map.id,
-        name=new_map.name,
-        region=new_map.region,
-        mapper=new_map.mapper,
-        level=new_map.level,
-        type=new_map.type,
-        image=new_map.image,
-        note=note,
-        action='add',
-        operator=session.get('admin_username') or session.get('username', '管理员')
-    )
-    session_db.add(history)
-    session_db.commit()
-    session_db.close()
+        try:
+            print(f"管理员开始上传图片: {image_file.filename}")
+            image_url = upload_image(image_file)
+            if not image_url:
+                print("管理员图片上传失败")
+                image_url = None
+            else:
+                print(f"管理员图片上传成功: {image_url}")
+        except Exception as e:
+            print(f"管理员图片上传异常: {e}")
+            image_url = None
+    
+    try:
+        # 1. 直接添加到maplist表（无需审核）
+        new_map = MapList(name=name, region=region, mapper=mapper, level=level, type=map_type, image=image_url)
+        session_db.add(new_map)
+        session_db.commit()
+        
+        # 2. 在map_apply表中创建一条已处理的记录用于历史追踪
+        admin_apply = MapApply(
+            type='add',
+            map_id=new_map.id,
+            name=name,
+            region=region,
+            mapper=mapper,
+            level=level,
+            maptype=map_type,
+            image=image_url,
+            note=note or '管理员直接添加',
+            status='已处理'  # 直接设为已处理，不会出现在申请列表中
+        )
+        session_db.add(admin_apply)
+        session_db.commit()
+        
+        # 3. 写入历史表
+        history = MapHistory(
+            map_id=new_map.id,
+            name=new_map.name,
+            region=new_map.region,
+            mapper=new_map.mapper,
+            level=new_map.level,
+            type=new_map.type,
+            image=new_map.image,
+            note=note or '管理员直接添加',
+            action='add',
+            operator=session.get('admin_username') or session.get('username', '管理员'),
+            origin_apply_id=admin_apply.id  # 关联到刚创建的申请记录
+        )
+        session_db.add(history)
+        session_db.commit()
+        
+        print(f"管理员成功添加地图: {name} (ID: {new_map.id})")
+        
+    except Exception as e:
+        session_db.rollback()
+        print(f"管理员添加地图失败: {e}")
+        session_db.close()
+        return render_template('admin_home.html', add_map_msg=f'添加失败：{str(e)}', **_get_admin_home_context())
+    finally:
+        session_db.close()
+    
     return redirect(url_for('admin.admin_home'))
 
 @admin_bp.route('/advice/list')

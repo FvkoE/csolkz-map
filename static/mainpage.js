@@ -4,7 +4,7 @@ window.modal = {
     add: {
         open() {
             // 每次打开时，都从sessionStorage加载草稿，确保数据恢复
-            const addMapForm = document.querySelector('.add-map-form');
+            const addMapForm = document.querySelector('.add-map-form:not(.admin-add-map-form)');
             if (addMapForm) {
                 console.log('[草稿] 模态框已打开，执行加载操作...');
                 loadDraft(addMapForm);
@@ -39,7 +39,10 @@ window.imagePreview = {
                 const file = e.target.files[0];
                 if (file && !validateImageFile(file)) {
                     e.target.value = '';
-                    document.querySelector('.add-map-form .file-preview').innerHTML = '';
+                    const userForm = document.querySelector('.add-map-form:not(.admin-add-map-form)');
+                    if (userForm) {
+                        userForm.querySelector('.file-preview').innerHTML = '';
+                    }
                     return;
                 }
                 window.imagePreview.handleImageChange(e, '.file-preview');
@@ -189,7 +192,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const openAddModalBtn = document.getElementById('openAddModalBtn');
     const addModalCloseBtn = document.getElementById('addModalCloseBtn');
     const addModalCancelBtn = document.getElementById('addModalCancelBtn');
-    const addMapForm = document.querySelector('.add-map-form');
+    const addMapForm = document.querySelector('.add-map-form:not(.admin-add-map-form)');
     const loadingMask = document.getElementById('loadingMask');
     
     // ===================================
@@ -199,9 +202,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function saveDraft() {
         if (!addMapForm) return;
+        console.log('[草稿] 正在保存...');
         const formData = new FormData(addMapForm);
         for (let [key, value] of formData.entries()) {
+            // 不保存文件和空字段
             if (key !== 'image' && value) {
+                console.log(`  - 保存字段: ${key}, 值: ${value}`);
                 sessionStorage.setItem(DRAFT_KEY_PREFIX + key, value);
             }
         }
@@ -209,6 +215,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function loadDraft() {
         if (!addMapForm) return;
+        console.log('[草稿] 正在加载...');
         for (let i = 0; i < sessionStorage.length; i++) {
             const key = sessionStorage.key(i);
             if (key.startsWith(DRAFT_KEY_PREFIX)) {
@@ -216,6 +223,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const element = addMapForm.elements[formKey];
                 const value = sessionStorage.getItem(key);
                 if (element && value) {
+                    console.log(`  - 加载字段: ${formKey}, 值: ${value}`);
                     element.value = value;
                 }
             }
@@ -224,6 +232,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function clearDraft() {
         if (!addMapForm) return;
+        console.log('[草稿] 正在清除...');
         const keysToRemove = [];
         for (let i = 0; i < sessionStorage.length; i++) {
             const key = sessionStorage.key(i);
@@ -232,9 +241,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         keysToRemove.forEach(key => sessionStorage.removeItem(key));
+        // 同时重置表单
         addMapForm.reset();
-        const preview = addMapForm.querySelector('.file-preview');
-        if (preview) preview.innerHTML = '';
+        document.querySelector('.file-preview').innerHTML = '';
     }
 
     // ===================================
@@ -266,9 +275,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ===================================
-    //  表单处理
+    //  表单事件处理 (只针对用户端表单，排除管理员端)
     // ===================================
-    if (addMapForm) {
+    if (addMapForm && !addMapForm.classList.contains('admin-add-map-form')) {
         // 实时保存草稿
         addMapForm.addEventListener('input', saveDraft);
         

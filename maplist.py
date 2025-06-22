@@ -123,12 +123,16 @@ def map_add():
         # 处理图片上传
         if image_file and image_file.filename:
             try:
+                print(f"开始上传图片: {image_file.filename}")
                 image_url = upload_image(image_file)
                 if not image_url:
-                    # 图片上传失败，但不阻止申请提交
                     print("图片上传失败，但继续处理申请")
+                    image_url = ""  # 确保为空字符串而不是None
+                else:
+                    print(f"图片上传成功: {image_url}")
             except Exception as e:
                 print(f"图片上传异常: {e}")
+                image_url = ""  # 确保为空字符串而不是None
                 # 图片上传异常，但不阻止申请提交
         
         new_apply = MapApply(

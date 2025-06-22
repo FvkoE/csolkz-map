@@ -1,3 +1,0 @@
-     python manage_users.py create FvkoE jichengxin2009 --role admin
-     cd /var/www/csolflask/
-     sudo ./update_aliyun.sh
