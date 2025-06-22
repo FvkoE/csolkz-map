@@ -1,3 +1,7 @@
+html {
+    font-size: 14px; /* 设置一个较小的基础字号来缩小整个页面的比例 */
+}
+
 /* 页面整体背景和字体设置 */
 body {
     font-family: "Microsoft YaHei", Arial, sans-serif;
@@ -552,13 +556,44 @@ body.admin-bg {
 }
 
 .search-input::placeholder {
-    color: #999;
+    color: #aaa;
+}
+
+/* New styles for the search filter item */
+.search-filter-item {
+    display: flex;
+    align-items: center;
+}
+
+.search-filter-item .filter-label {
+    white-space: nowrap;
+    flex-shrink: 0; /* 防止label被压缩 */
+}
+
+.search-filter-item .search-input {
+    width: 200px;
+    flex-grow: 0; /* 不要占据多余空间 */
+    margin-right: 8px; /* 和按钮之间加点间距 */
+}
+
+.search-btn {
+    padding: 6px 12px;
+    background: #1976d2;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    flex-shrink: 0; /* 防止按钮被压缩 */
+}
+.search-btn:hover {
+    background: #1565c0;
 }
 
 /* 分页控制样式 */
 .pagination-container {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
     gap: 16px;
     margin: 30px 0;
@@ -713,7 +748,7 @@ body.admin-bg {
 }
 
 /* 地图类型和大区筛选按钮统一极简风格 */
-.region-btn, .filter-option {
+.region-btn, .type-btn, .filter-option {
     display: inline-block;
     background: transparent;
     color: #222;
@@ -729,13 +764,14 @@ body.admin-bg {
     font-weight: 400;
 }
 .region-btn.active, .region-btn:hover,
+.type-btn.active, .type-btn:hover,
 .filter-option.active, .filter-option:hover {
     background: #f2f2f2;
     color: #222;
     font-weight: 600;
     text-decoration: none;
 }
-.region-btn:last-child, .filter-option:last-child { margin-right: 0; }
+.region-btn:last-child, .type-btn:last-child, .filter-option:last-child { margin-right: 0; }
 
 /* 管理员端添加地图表单紧凑排版优化 */
 .add-map-form {

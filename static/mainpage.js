@@ -255,121 +255,314 @@ if(editForm){
     }
 }
 
-// 页面加载完成后初始化
-document.addEventListener('DOMContentLoaded', () => {
-    // 初始化图片预览功能
-    window.imagePreview.init();
 
-    // 初始化模态框外部点击关闭
-    window.addEventListener('click', window.modal.handleOutsideClick);
+document.addEventListener('DOMContentLoaded', function() {
+    const filterResultsContainer = document.getElementById('filter-results-container');
+    const mapListContainer = document.getElementById('map-list-container');
+    const filterForm = document.querySelector('.filter-section');
 
-    // 恢复滚动位置
-    const scrollY = sessionStorage.getItem('mainpage_scrollY');
-    if(scrollY) {
-        window.scrollTo(0, parseInt(scrollY));
-        sessionStorage.removeItem('mainpage_scrollY');
+    async function applyFilters(url) {
+        if (!mapListContainer || !filterResultsContainer) return;
+
+        try {
+            const response = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            if (!response.ok) throw new Error('网络响应失败');
+            const data = await response.json();
+            if (data.results_html) filterResultsContainer.innerHTML = data.results_html;
+            if (data.maps_html) mapListContainer.innerHTML = data.maps_html;
+            history.pushState({}, '', url);
+
+            // 更新按钮的激活状态
+            const params = new URL(url).searchParams;
+            const region = params.get('region') || '';
+            const type = params.get('type') || '';
+
+            document.querySelectorAll('.region-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.value === region);
+            });
+    
+            document.querySelectorAll('.type-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.value === type);
+            });
+
+        } catch (error) {
+            console.error('筛选请求失败:', error);
+            mapListContainer.innerHTML = '<p style="color:red;text-align:center;">内容加载失败，请刷新页面重试。</p>';
+        }
     }
 
-    // 搜索框自动聚焦并光标移到末尾（无论有无内容）
+    // 筛选表单
+    if (filterForm) {
+        filterForm.addEventListener('submit', e => {
+            e.preventDefault();
+            const formData = new FormData(filterForm);
+            const params = new URLSearchParams(formData);
+            // 修复：在添加查询参数前，移除 action URL 中的锚点
+            const action = filterForm.action.split('#')[0];
+            const url = `${action}?${params.toString()}`;
+            applyFilters(url);
+        });
+
+        filterForm.querySelectorAll('.region-btn, .type-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const inputId = button.classList.contains('region-btn') ? 'regionInput' : 'typeInput';
+                document.getElementById(inputId).value = button.dataset.value;
+                filterForm.dispatchEvent(new Event('submit', { cancelable: true }));
+            });
+        });
+        
+        filterForm.querySelector('#levelSelect')?.addEventListener('change', () => {
+            filterForm.dispatchEvent(new Event('submit', { cancelable: true }));
+        });
+    }
+
+    if (mapListContainer) {
+        mapListContainer.addEventListener('click', event => {
+            const target = event.target.closest('a');
+            if (target && (target.matches('.page-item'))) {
+                event.preventDefault();
+                applyFilters(target.href);
+            }
+        });
+    }
+
+    if (filterResultsContainer) {
+        filterResultsContainer.addEventListener('click', event => {
+             if (event.target.matches('.clear-filter-btn')) {
+                event.preventDefault();
+                applyFilters(event.target.href);
+                
+                // Bug修复：手动重置表单项
+                const levelSelect = document.getElementById('levelSelect');
+                if (levelSelect) levelSelect.selectedIndex = 0;
+                
+                const searchInput = document.querySelector('.search-input[name="search"]');
+                if (searchInput) searchInput.value = '';
+            }
+        });
+    }
+
+    const addForm = document.querySelector('.add-map-form');
+    if (addForm) {
+        const loadingMask = document.getElementById('loadingMask');
+        const showLoading = () => { if(loadingMask) loadingMask.style.display = 'block'; };
+        const hideLoading = () => { if(loadingMask) loadingMask.style.display = 'none'; };
+
+        addForm.addEventListener('submit', async function(event){
+            event.preventDefault();
+            showLoading();
+            const formData = new FormData(addForm);
+            try {
+                const response = await fetch(addForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {'X-Requested-With': 'XMLHttpRequest'}
+                });
+                const data = await response.json();
+                if(data.success){
+                    alert('申请成功，等待管理员审核！');
+                    closeAddModal();
+                    applyFilters(window.location.href.split('#')[0]);
+                } else {
+                    alert('申请失败: ' + (data.msg || '未知错误'));
+                }
+            } catch (error) {
+                console.error('Submit failed:', error);
+                alert('网络错误，提交失败！');
+            } finally {
+                hideLoading();
+            }
+        });
+        
+        const addImgInput = addForm.querySelector('input[type="file"][name="image"]');
+        if(addImgInput){
+            addImgInput.addEventListener('change', function(){
+                handleImageInput(this, '#addMapImagePreview'); 
+            });
+        }
+    }
+
+    window.addEventListener('click', (event) => {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = 'none';
+        }
+    });
+
+    window.imagePreview.init();
+
     let searchInput = document.querySelector('.search-input');
     if(searchInput) {
         searchInput.focus();
-        // 将光标移到末尾
         const val = searchInput.value;
         searchInput.value = '';
         searchInput.value = val;
     }
 
-    // 搜索输入仅回车提交，彻底避免输入法被打断
-    if(searchInput) {
-        searchInput.addEventListener('keydown', function(e) {
-            if(e.key === 'Enter') {
-                e.preventDefault();
-                recordScrollAndSubmit(document.querySelector('.filter-section'));
-            }
-        });
-    }
+    // 将所有委托到 body 的点击事件统一处理
+    document.body.addEventListener('click', e => {
+        // 分页链接
+        const pageLink = e.target.closest('a.page-item');
+        if (pageLink && mapListContainer && mapListContainer.contains(e.target)) {
+            e.preventDefault();
+            applyFilters(pageLink.href);
+            return; // 处理完后退出
+        }
+        
+        // 清除筛选按钮
+        if (e.target.matches('.clear-filter-btn') && filterResultsContainer && filterResultsContainer.contains(e.target)) {
+            e.preventDefault();
+            applyFilters(e.target.href);
+            
+            // Bug修复：手动重置表单项
+            const levelSelect = document.getElementById('levelSelect');
+            if (levelSelect) levelSelect.selectedIndex = 0;
+            
+            const searchInput = document.querySelector('.search-input[name="search"]');
+            if (searchInput) searchInput.value = '';
+            return; // 处理完后退出
+        }
 
-    // 封装筛选前记录滚动位置的函数
-    function recordScrollAndSubmit(form) {
-        sessionStorage.setItem('mainpage_scrollY', window.scrollY);
-        form.submit();
-    }
-    // 地图大区按钮自动提交
-    document.querySelectorAll('.region-btn').forEach(btn => {
-        btn.addEventListener('click', function(e) {
+        // 打开模态框
+        if (e.target.matches('.add-btn')) openAddModal();
+        if (e.target.matches('#adviceLink')) {
             e.preventDefault();
-            document.getElementById('regionInput').value = this.getAttribute('data-value');
-            recordScrollAndSubmit(document.querySelector('.filter-section'));
-        });
-    });
-    // 地图类型按钮自动提交
-    document.querySelectorAll('.filter-option').forEach(btn => {
-        btn.addEventListener('click', function(e) {
+            openAdviceBox();
+        }
+        const editButton = e.target.closest('.edit-btn');
+        if (editButton) {
             e.preventDefault();
-            if(document.getElementById('typeInput')){
-                document.getElementById('typeInput').value = this.textContent.trim();
-            }
-            recordScrollAndSubmit(document.querySelector('.filter-section'));
-        });
+            openEditModal(editButton.dataset.mapId, editButton.dataset.mapName, editButton.dataset.mapAuthor, editButton.dataset.mapRegion, editButton.dataset.mapDifficulty, editButton.dataset.mapImage);
+        }
+        
+        // 关闭模态框
+        const addModal = document.getElementById('addModal');
+        const editModal = document.getElementById('editModal');
+        const adviceModal = document.getElementById('adviceModal');
+
+        if (e.target.matches('#closeAddModalBtn, #cancelAddModalBtn')) closeAddModal();
+        if (e.target.matches('#closeEditModalBtn, #cancelEditModalBtn')) window.modal.edit.close();
+        if (e.target.matches('#closeAdviceBoxBtn, #cancelAdviceBoxBtn')) closeAdviceBox();
+        
+        // 点击模态框背景关闭
+        if (e.target === addModal) closeAddModal();
+        if (e.target === editModal) window.modal.edit.close();
+        if (e.target === adviceModal) closeAdviceBox();
     });
-    // 难度下拉和搜索输入自动提交也加上滚动记录
-    const levelSelect = document.getElementById('levelSelect');
-    if(levelSelect){
-        levelSelect.addEventListener('change', function(){
-            recordScrollAndSubmit(document.querySelector('.filter-section'));
-        });
-    }
 });
 
-// 全局函数，供HTML直接调用
-window.openAddModal = function() { window.modal.add.open(); }
-window.closeAddModal = function() { window.modal.add.close(); }
-window.closeEditModal = function() {
-    window.modal.edit.close();
-    editModalOriginalData = null;
-    // 再次确保彻底清空input和预览（只操作弹窗内）
-    const imgInput = document.getElementById('editMapImage');
-    if(imgInput) imgInput.value = '';
-    const preview = document.getElementById('editMapImagePreview');
-    if(preview) preview.innerHTML = '<p class="current-image-text">当前图片：</p><img class="edit-modal-image-preview" src="" alt="当前地图预览图">';
+
+function openAddModal() {
+    const modal = document.getElementById('addModal');
+    if(modal) modal.style.display = 'flex';
+}
+function closeAddModal() {
+    const modal = document.getElementById('addModal');
+    if(!modal) return;
+    modal.style.display = 'none';
+    const form = modal.querySelector('.add-map-form');
+    if (form) form.reset();
+    const preview = modal.querySelector('#addMapImagePreview');
+    if (preview) preview.innerHTML = '';
 }
 
-window.openAdviceBox = function() {
-    document.getElementById('adviceModal').style.display = 'flex';
-    document.getElementById('adviceForm').style.display = '';
-    document.getElementById('adviceSuccessMsg').style.display = 'none';
-    document.getElementById('adviceContent').value = '';
-    document.getElementById('adviceContent').focus();
+function openAdviceBox() {
+    const modal = document.getElementById('adviceModal');
+    if(modal) modal.style.display = 'flex';
 }
-window.closeAdviceBox = function() {
-    document.getElementById('adviceModal').style.display = 'none';
+function closeAdviceBox() {
+    const modal = document.getElementById('adviceModal');
+    if(modal) modal.style.display = 'none';
 }
-window.submitAdvice = function(e) {
-    e.preventDefault();
-    var content = document.getElementById('adviceContent').value.trim();
+
+async function submitAdvice(event) {
+    event.preventDefault();
+    const contentEl = document.getElementById('adviceContent');
+    const content = contentEl.value.trim();
     if (!content) {
         alert('请填写建议内容');
         return;
     }
-    fetch('/advice/add', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            document.getElementById('adviceForm').style.display = 'none';
-            document.getElementById('adviceSuccessMsg').style.display = '';
+    try {
+        const response = await fetch('/advice/add', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ content: content })
+        });
+        const data = await response.json();
+        if(data.success){
+            contentEl.value = ''; // 清空文本域
+            const successMsg = document.getElementById('adviceSuccessMsg');
+            if(successMsg) successMsg.style.display = 'block';
+            setTimeout(() => { 
+                closeAdviceBox();
+                if(successMsg) successMsg.style.display = 'none';
+            }, 2000);
         } else {
-            alert(data.msg || '提交失败');
+            alert('提交失败: ' + (data.msg || '未知错误'));
         }
-    })
-    .catch(() => alert('网络错误'));
+    } catch(error) {
+        console.error("Submit advice failed:", error);
+        alert("网络错误，提交失败！");
+    }
 }
 
-// 图片上传限制检测函数
+function handleImageInput(inputElement, previewSelector) {
+    const file = inputElement.files[0];
+    const preview = document.querySelector(previewSelector);
+    if (!file || !preview) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        preview.innerHTML = `<img src="${e.target.result}" alt="预览图" style="max-width:100%;max-height:100%;object-fit:contain;">`;
+    };
+    reader.readAsDataURL(file);
+    
+    compressImage(file, 1024, 1024, 0.7, (compressedBlob) => {
+        if(!compressedBlob) return;
+        const dataTransfer = new DataTransfer();
+        const compressedFile = new File([compressedBlob], file.name, {
+            type: 'image/jpeg',
+            lastModified: Date.now()
+        });
+        dataTransfer.items.add(compressedFile);
+        inputElement.files = dataTransfer.files;
+    });
+}
+
+function compressImage(file, maxWidth, maxHeight, quality, callback) {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (e) => {
+        const img = new Image();
+        img.src = e.target.result;
+        img.onerror = () => callback(null);
+        img.onload = () => {
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+                if (width > maxWidth) {
+                    height *= maxWidth / width;
+                    width = maxWidth;
+                }
+            } else {
+                if (height > maxHeight) {
+                    width *= maxHeight / height;
+                    height = maxHeight;
+                }
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            canvas.toBlob(callback, 'image/jpeg', quality);
+        };
+    };
+    reader.onerror = () => callback(null);
+}
+
 function validateImageFile(file) {
     const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'];
     const maxSize = 2 * 1024 * 1024; // 2MB
@@ -382,4 +575,5 @@ function validateImageFile(file) {
         return false;
     }
     return true;
-} 
+}
+

@@ -1,0 +1,48 @@
+<!-- 地图列表 -->
+<div class="map-list">
+    {% for map in maps %}
+    <div class="map-card map-card-flex">
+        <div class="map-card-content">
+            <div class="map-title" title="{{ map.name }}">{{ map.name }}</div>
+            <div class="map-info">作者：{{ map.mapper }}</div>
+            <div class="map-info">大区：{{ map.region }}</div>
+            <div class="map-info">难度：{{ map.level }}</div>
+            <div class="map-info">类型：{{ map.type }}</div>
+        </div>
+        {% if map.image %}
+            {% if map.image.startswith('http') %}
+                <img src="{{ map.image }}" class="map-card-image">
+            {% else %}
+                <img src="{{ url_for('static', filename=map.image) }}" class="map-card-image">
+            {% endif %}
+        {% else %}
+            <img src="{{ url_for('static', filename='uploads/default_map.jpg') }}" class="map-card-image">
+        {% endif %}
+    </div>
+    {% else %}
+    <div style="color:#888;font-size:1.1em;margin:40px auto;">暂无地图信息</div>
+    {% endfor %}
+</div>
+
+<a href="javascript:void(0);" class="add-btn" onclick="openAddModal()">申请添加地图</a>
+
+<!-- 分页控件 -->
+<div class="pagination-container">
+    <div class="pagination">
+        {% if current_page > 1 %}
+        <a href="{{ url_for('maplist.mainpage', page=current_page-1, region=request.args.get('region',''), type=request.args.get('type',''), level=request.args.get('level',''), search=request.args.get('search','')) }}" class="page-item">&lt;</a>
+        {% else %}
+        <span class="page-item disabled">&lt;</span>
+        {% endif %}
+
+        {% for page in range(1, total_pages + 1) %}
+        <a href="{{ url_for('maplist.mainpage', page=page, region=request.args.get('region',''), type=request.args.get('type',''), level=request.args.get('level',''), search=request.args.get('search','')) }}" class="page-item {% if page == current_page %}active{% endif %}">{{ page }}</a>
+        {% endfor %}
+
+        {% if current_page < total_pages %}
+        <a href="{{ url_for('maplist.mainpage', page=current_page+1, region=request.args.get('region',''), type=request.args.get('type',''), level=request.args.get('level',''), search=request.args.get('search','')) }}" class="page-item">&gt;</a>
+        {% else %}
+        <span class="page-item disabled">&gt;</span>
+        {% endif %}
+    </div>
+</div> 

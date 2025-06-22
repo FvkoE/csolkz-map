@@ -1,0 +1,18 @@
+<!-- 筛选结果统计和清除按钮 -->
+<div class="filter-row" style="border-bottom: none; padding-top: 8px;">
+    <div class="filter-item" style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="filter-stats">
+            <span style="color: #666; font-size: 14px;">
+                共找到 <strong>{{ total_maps }}</strong> 张地图
+                {% if request.args.get('region') or request.args.get('type') or request.args.get('level') or request.args.get('search') %}
+                (已筛选)
+                {% endif %}
+            </span>
+        </div>
+        {% if request.args.get('region') or request.args.get('type') or request.args.get('level') or request.args.get('search') %}
+        <div class="filter-actions">
+            <a href="{{ url_for('maplist.mainpage') }}" class="clear-filter-btn" style="color: #1976d2; text-decoration: none; font-size: 14px; padding: 4px 8px; border: 1px solid #1976d2; border-radius: 4px; transition: all 0.2s;">清除筛选</a>
+        </div>
+        {% endif %}
+    </div>
+</div> 

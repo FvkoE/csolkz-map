@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
-from models import SessionLocal, AdminUser, MapList, MapApply, MapHistory, Advice
+from models import SessionLocal, User, MapList, MapApply, MapHistory, Advice
 import os
 import uuid
 from imgbb_storage import upload_to_imgbb
@@ -12,7 +12,13 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
         session_db = SessionLocal()
-        user = session_db.query(AdminUser).filter_by(username=username, password=password).first()
+        # 使用新的User模型，只查询管理员角色
+        user = session_db.query(User).filter_by(
+            username=username, 
+            password=password,
+            role='admin',
+            is_active=True
+        ).first()
         session_db.close()
         if user:
             session['admin_logged_in'] = True
@@ -91,11 +97,13 @@ def admin_map_edit(map_id):
         region = request.form.get('mapRegion')
         mapper = request.form.get('mapAuthor')
         level = request.form.get('mapDifficulty')
+        map_type = request.form.get('mapType', '连跳')
         image_file = request.files.get('mapImage')
         setattr(map_obj, 'name', name or "")
         setattr(map_obj, 'region', region or "")
         setattr(map_obj, 'mapper', mapper or "")
         setattr(map_obj, 'level', level or "")
+        setattr(map_obj, 'type', map_type)
         # 保存新图片（如有）
         if image_file and image_file.filename:
             ext = os.path.splitext(image_file.filename)[1]
@@ -112,6 +120,7 @@ def admin_map_edit(map_id):
             region=map_obj.region,
             mapper=map_obj.mapper,
             level=map_obj.level,
+            type=map_obj.type,
             image=map_obj.image,
             note='管理员直接修改',
             action='edit',
@@ -149,6 +158,7 @@ def admin_apply_review(apply_id):
                     region=apply.region,
                     mapper=apply.mapper,
                     level=apply.level,
+                    type=getattr(apply, 'maptype', '连跳'),
                     image=apply_image
                 )
                 session_db.add(new_map)
@@ -160,6 +170,7 @@ def admin_apply_review(apply_id):
                     region=new_map.region,
                     mapper=new_map.mapper,
                     level=new_map.level,
+                    type=new_map.type,
                     image=new_map.image,
                     note=apply.note,
                     action='add',
@@ -175,6 +186,7 @@ def admin_apply_review(apply_id):
                     map_obj.region = apply.region
                     map_obj.mapper = apply.mapper
                     map_obj.level = apply.level
+                    map_obj.type = getattr(apply, 'maptype', '连跳')
                     if apply_image:
                         map_obj.image = apply_image
                     # 写入历史表
@@ -184,6 +196,7 @@ def admin_apply_review(apply_id):
                         region=apply.region,
                         mapper=apply.mapper,
                         level=apply.level,
+                        type=map_obj.type,
                         image=apply_image,
                         note=apply.note,
                         action='edit',
@@ -240,6 +253,7 @@ def admin_map_add():
     region = request.form.get('region')
     mapper = request.form.get('mapper')
     level = request.form.get('level')
+    map_type = request.form.get('type', '连跳')
     note = request.form.get('note')
     image_file = request.files.get('image')
     session_db = SessionLocal()
@@ -251,7 +265,7 @@ def admin_map_add():
     image_url = None
     if image_file and image_file.filename:
         image_url = upload_to_imgbb(image_file)
-    new_map = MapList(name=name, region=region, mapper=mapper, level=level, image=image_url)
+    new_map = MapList(name=name, region=region, mapper=mapper, level=level, type=map_type, image=image_url)
     session_db.add(new_map)
     session_db.commit()
     # 写入历史表
@@ -261,6 +275,7 @@ def admin_map_add():
         region=new_map.region,
         mapper=new_map.mapper,
         level=new_map.level,
+        type=new_map.type,
         image=new_map.image,
         note=note,
         action='add',

@@ -63,13 +63,14 @@ function confirmDeleteMap() {
         .catch(() => { alert('请求失败'); closeDeleteModal(); });
 }
 // 修改弹窗复用用户端样式
-function adminOpenEditModal(mapId, name, author, region, level, image) {
+function adminOpenEditModal(mapId, name, author, region, level, type, image) {
     document.getElementById('editModal').style.display = 'flex';
     document.getElementById('editMapId').value = mapId;
     document.getElementById('editMapName').value = name;
     document.getElementById('editMapAuthor').value = author;
     document.getElementById('editMapRegion').value = region;
     document.getElementById('editMapDifficulty').value = level;
+    document.getElementById('editMapType').value = type;
     document.getElementById('currentMapImage').src = image;
     document.getElementById('editMapForm').onsubmit = function(e) {
         e.preventDefault();
@@ -147,9 +148,9 @@ function showHistoryModal(mapId) {
         .then(data => {
             if(data.success && data.history && data.history.length > 0) {
                 let html = '<table class="apply-table-admin" style="margin:0;width:100%;"><thead><tr>' +
-                    '<th>操作时间</th><th>操作人</th><th>操作类型</th><th>名称</th><th>作者</th><th>大区</th><th>难度</th><th>备注</th></tr></thead><tbody>';
+                    '<th>操作时间</th><th>操作人</th><th>操作类型</th><th>名称</th><th>作者</th><th>大区</th><th>难度</th><th>类型</th><th>备注</th></tr></thead><tbody>';
                 data.history.forEach(h => {
-                    html += `<tr><td>${h.operate_time||''}</td><td>${h.operator||''}</td><td>${h.action||''}</td><td>${h.name||''}</td><td>${h.mapper||''}</td><td>${h.region||''}</td><td>${h.level||''}</td><td>${h.note||''}</td></tr>`;
+                    html += `<tr><td>${h.operate_time||''}</td><td>${h.operator||''}</td><td>${h.action||''}</td><td>${h.name||''}</td><td>${h.mapper||''}</td><td>${h.region||''}</td><td>${h.level||''}</td><td>${h.type||''}</td><td>${h.note||''}</td></tr>`;
                 });
                 html += '</tbody></table>';
                 content.innerHTML = html;

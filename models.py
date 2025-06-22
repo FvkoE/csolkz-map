@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, Enum
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from config import config
@@ -19,20 +19,18 @@ class MapList(Base):
     region = Column(String(50), nullable=False)
     mapper = Column(String(50))
     level = Column(String(50), nullable=False)
+    type = Column(Enum('连跳', '攀岩', '连跳/攀岩', '长跳', '滑坡', '其它', name='map_type'), nullable=False, default='连跳')
     image = Column(String(255))  # 恢复图片路径字段
 
-class AdminUser(Base):
-    __tablename__ = 'admin'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    username = Column(String(50))
-    password = Column(String(50))
-
-# 临时用户表 - 内测期间使用，公测后删除
-class TempUser(Base):
-    __tablename__ = 'temp_users'
+# 统一用户表
+class User(Base):
+    __tablename__ = 'users'
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(50), unique=True, nullable=False)
     password = Column(String(100), nullable=False)
+    role = Column(String(20), nullable=False, default='user')  # 'user', 'admin', 'temp_user'
+    create_time = Column(DateTime, default=datetime.now)
+    is_active = Column(Boolean, default=True)
 
 class MapApply(Base):
     __tablename__ = 'map_apply'
@@ -43,6 +41,7 @@ class MapApply(Base):
     region = Column(String(50))
     mapper = Column(String(50))
     level = Column(String(50))
+    maptype = Column(Enum('连跳', '攀岩', '连跳/攀岩', '长跳', '滑坡', '其它', name='apply_map_type'), nullable=False, default='连跳')
     image = Column(String(255))
     note = Column(String(255))
     status = Column(String(20), default='待审核')  # 待审核/通过/拒绝
@@ -57,6 +56,7 @@ class MapHistory(Base):
     region = Column(String(50), nullable=False)
     mapper = Column(String(50))
     level = Column(String(50), nullable=False)
+    type = Column(Enum('连跳', '攀岩', '连跳/攀岩', '长跳', '滑坡', '其它', name='history_map_type'), nullable=False, default='连跳')
     image = Column(String(255))
     note = Column(String(255))
     action = Column(String(20), nullable=False)  # 操作类型（add/edit/delete/rollback）

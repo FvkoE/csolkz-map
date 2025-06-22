@@ -17,6 +17,9 @@ IMGBB_API_KEY = getattr(app_config, 'IMGBB_API_KEY', None)
 if IMGBB_API_KEY:
     init_imgbb_storage(IMGBB_API_KEY)
 
+# 地图类型常量
+MAP_TYPES = ['连跳', '攀岩', '连跳/攀岩', '长跳', '滑坡', '其它']
+
 # =====================
 # Flask 蓝图注册
 # =====================
@@ -45,7 +48,9 @@ def mainpage():
     page = request.args.get('page', 1, type=int)
     region = request.args.get('region', '').strip()
     level = request.args.get('level', '').strip()
+    map_type = request.args.get('type', '').strip()
     search = request.args.get('search', '').strip()
+
     session = SessionLocal()
     try:
         query = session.query(MapList)
@@ -53,15 +58,29 @@ def mainpage():
             query = query.filter(MapList.region == region)
         if level:
             query = query.filter(MapList.level == level)
+        if map_type:
+            query = query.filter(MapList.type == map_type)
         if search:
             query = query.filter(MapList.name.like(f"%{search}%"))
+        
         total_maps = query.count()
-        maps = query.offset((page-1)*PER_PAGE).limit(PER_PAGE).all()
+        maps = query.offset((page - 1) * PER_PAGE).limit(PER_PAGE).all()
         total_pages = (total_maps + PER_PAGE - 1) // PER_PAGE
-        return render_template('mainpage.html', 
-                             maps=maps,
-                             current_page=page,
-                             total_pages=total_pages)
+
+        template_context = {
+            'maps': maps,
+            'current_page': page,
+            'total_pages': total_pages,
+            'map_types': MAP_TYPES,
+            'total_maps': total_maps
+        }
+
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            results_html = render_template('_filter_results_partial.html', **template_context)
+            maps_html = render_template('_map_list_partial.html', **template_context)
+            return jsonify(results_html=results_html, maps_html=maps_html)
+        else:
+            return render_template('mainpage.html', **template_context)
     finally:
         session.close()
 
@@ -76,6 +95,7 @@ def map_add():
     region = request.form.get('region')
     mapper = request.form.get('mapper')
     level = request.form.get('level')
+    map_type = request.form.get('type', '连跳')
     note = request.form.get('note')
     image_file = request.files.get('image')
     image_url = None
@@ -96,6 +116,7 @@ def map_add():
             region=region,
             mapper=mapper,
             level=level,
+            maptype=map_type,
             image=image_url or "",
             note=note,
             status='待审核'
@@ -115,6 +136,22 @@ def map_add():
     return redirect(url_for('maplist.mainpage'))
 
 # =====================
+# 路由：网站建议
+# =====================
+@maplist_bp.route('/advice/add', methods=['POST'])
+@login_required
+def add_advice():
+    """接收网站建议"""
+    data = request.get_json()
+    content = data.get('content')
+    if not content:
+        return jsonify({'success': False, 'msg': '建议内容不能为空'})
+    
+    # 在实际项目中，您应该将建议存储到数据库
+    print(f"收到建议: {content}") 
+    return jsonify({'success': True})
+
+# =====================
 # 路由：申请添加地图页面（预留）
 # =====================
 @maplist_bp.route('/map/apply')
@@ -122,46 +159,3 @@ def map_add():
 def map_apply():
     """申请添加地图页面（暂未实现）"""
     return "这里是申请添加地图的页面，后续可完善"
-
-# =====================
-# 路由：修改地图（POST）
-# =====================
-@maplist_bp.route('/map/edit/<int:map_id>', methods=['POST'])
-@login_required
-def map_edit_post(map_id):
-    """处理修改地图表单，写入 map_apply 申请表"""
-    name = request.form.get('mapName')
-    region = request.form.get('mapRegion')
-    mapper = request.form.get('mapAuthor')
-    level = request.form.get('mapDifficulty')
-    note = request.form.get('mapNote')
-    image_file = request.files.get('mapImage')
-    image_url = None
-    session = SessionLocal()
-    try:
-        if image_file and image_file.filename:
-            image_url = upload_to_imgbb(image_file)
-        new_apply = MapApply(
-            type='edit',
-            map_id=map_id,
-            name=name,
-            region=region,
-            mapper=mapper,
-            level=level,
-            image=image_url or "",
-            note=note,
-            status='待审核'
-        )
-        session.add(new_apply)
-        session.commit()
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return jsonify({'success': True})
-        flash('修改申请已提交，等待管理员审核！')
-    except Exception as e:
-        session.rollback()
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return jsonify({'success': False, 'msg': '修改申请提交失败：' + str(e)})
-        flash('修改申请提交失败：' + str(e))
-    finally:
-        session.close()
-    return redirect(url_for('maplist.mainpage'))
