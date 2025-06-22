@@ -116,7 +116,7 @@
     <!-- 申请添加地图 -->
     <div class="modal" id="addModal">
         <div class="modal-content">
-            <span class="close" onclick="closeAddModal()">&times;</span>
+            <span class="close" id="addModalCloseBtn">&times;</span>
             <h2 class="modal-title">申请添加地图</h2>
             <form class="add-map-form" method="post" action="{{ url_for('maplist.map_add') }}" enctype="multipart/form-data">
                 <div class="form-group">
@@ -184,7 +184,7 @@
                 
                 <div class="form-actions">
                     <button type="submit" class="submit-btn">提交申请</button>
-                    <button type="button" class="cancel-btn" onclick="closeAddModal()">取消</button>
+                    <button type="button" class="cancel-btn" id="addModalCancelBtn">取消</button>
                 </div>
             </form>
         </div>
@@ -278,6 +278,9 @@
             <div id="adviceSuccessMsg" style="display:none;color:#43a047;font-size:1.1em;text-align:center;margin-top:18px;">感谢您的建议！</div>
         </div>
     </div>
+
+    <!-- 申请添加地图按钮 -->
+    <button id="openAddModalBtn">申请添加地图</button>
 
     <script src="{{ static_url(filename='mainpage.js') }}"></script>
 </body>

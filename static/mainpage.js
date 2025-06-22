@@ -183,25 +183,100 @@ function showSuccessModal(msg) {
 
 document.addEventListener('DOMContentLoaded', function() {
     // ===================================
-    //  初始化：表单草稿和AJAX提交
+    //  常量获取
     // ===================================
+    const addModal = document.getElementById('addModal');
+    const openAddModalBtn = document.getElementById('openAddModalBtn');
+    const addModalCloseBtn = document.getElementById('addModalCloseBtn');
+    const addModalCancelBtn = document.getElementById('addModalCancelBtn');
     const addMapForm = document.querySelector('.add-map-form');
+    const loadingMask = document.getElementById('loadingMask');
     
+    // ===================================
+    //  草稿处理函数
+    // ===================================
+    const DRAFT_KEY_PREFIX = 'add_map_draft_';
+
+    function saveDraft() {
+        if (!addMapForm) return;
+        const formData = new FormData(addMapForm);
+        for (let [key, value] of formData.entries()) {
+            if (key !== 'image' && value) {
+                sessionStorage.setItem(DRAFT_KEY_PREFIX + key, value);
+            }
+        }
+    }
+
+    function loadDraft() {
+        if (!addMapForm) return;
+        for (let i = 0; i < sessionStorage.length; i++) {
+            const key = sessionStorage.key(i);
+            if (key.startsWith(DRAFT_KEY_PREFIX)) {
+                const formKey = key.replace(DRAFT_KEY_PREFIX, '');
+                const element = addMapForm.elements[formKey];
+                const value = sessionStorage.getItem(key);
+                if (element && value) {
+                    element.value = value;
+                }
+            }
+        }
+    }
+
+    function clearDraft() {
+        if (!addMapForm) return;
+        const keysToRemove = [];
+        for (let i = 0; i < sessionStorage.length; i++) {
+            const key = sessionStorage.key(i);
+            if (key.startsWith(DRAFT_KEY_PREFIX)) {
+                keysToRemove.push(key);
+            }
+        }
+        keysToRemove.forEach(key => sessionStorage.removeItem(key));
+        addMapForm.reset();
+        const preview = addMapForm.querySelector('.file-preview');
+        if (preview) preview.innerHTML = '';
+    }
+
+    // ===================================
+    //  模态框控制
+    // ===================================
+    if (addModal) {
+        // 打开
+        openAddModalBtn?.addEventListener('click', () => {
+            loadDraft();
+            addModal.style.display = 'flex';
+        });
+
+        // 关闭 (X 按钮)
+        addModalCloseBtn?.addEventListener('click', () => {
+            addModal.style.display = 'none';
+        });
+
+        // 关闭 (取消按钮)
+        addModalCancelBtn?.addEventListener('click', () => {
+            addModal.style.display = 'none';
+        });
+
+        // 点击模态框外部关闭
+        addModal.addEventListener('click', (event) => {
+            if (event.target === addModal) {
+                addModal.style.display = 'none';
+            }
+        });
+    }
+
+    // ===================================
+    //  表单处理
+    // ===================================
     if (addMapForm) {
-        // 页面加载后，立即加载草稿
-        loadDraft(addMapForm);
-        
-        // 监听表单输入，实时保存草稿
-        addMapForm.addEventListener('input', () => saveDraft(addMapForm));
+        // 实时保存草稿
+        addMapForm.addEventListener('input', saveDraft);
         
         // AJAX提交
-        const loadingMask = document.getElementById('loadingMask');
-        const showLoading = () => { if(loadingMask) loadingMask.style.display = 'flex'; };
-        const hideLoading = () => { if(loadingMask) loadingMask.style.display = 'none'; };
-
-        addMapForm.onsubmit = function(e){
+        addMapForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            showLoading(); // 显示加载动画
+            if(loadingMask) loadingMask.style.display = 'flex';
+            
             const formData = new FormData(this);
             fetch('/map/add', {
                 method: 'POST',
@@ -210,24 +285,23 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(res => res.json())
             .then(data => {
-                hideLoading(); // 隐藏加载动画
+                if(loadingMask) loadingMask.style.display = 'none';
                 if (data.success) {
-                    // 申请成功后，清除草稿和表单
-                    clearDraft(addMapForm);
+                    clearDraft();
                     showSuccessModal('申请成功！您可以关闭窗口或继续添加。');
                 } else {
                     showErrorModal(data.msg || '申请失败');
                 }
             })
             .catch(() => {
-                hideLoading(); // 隐藏加载动画
+                if(loadingMask) loadingMask.style.display = 'none';
                 showErrorModal('网络错误');
             });
-        }
+        });
     }
 
     // ===================================
-    //  初始化：筛选功能
+    //  筛选功能 (保持不变)
     // ===================================
     const filterResultsContainer = document.getElementById('filter-results-container');
     const mapListContainer = document.getElementById('map-list-container');
