@@ -24,7 +24,7 @@
         <div style="color:#888;font-size:1.1em;margin:40px auto;">暂无地图信息</div>
         {% endfor %}
     </div>
-    <div class="map-list-table-wrapper" style="display:none;">
+    <div class="map-list-table-wrapper" id="infinite-table-wrapper" style="display:none;">
         <table class="map-list-table">
             <thead>
                 <tr>
@@ -32,12 +32,15 @@
                     <th>图名</th>
                     <th>作者</th>
                     <th>大区</th>
-                    <th>难度</th>
+                    <th id="level-sort-th" style="cursor:pointer;user-select:none;">难度 <span id="level-sort-arrow">⇅</span></th>
                     <th>类型</th>
                 </tr>
             </thead>
             <tbody>
-            {% for map in maps %}
+            {% if maps|length == 0 and current_page == 1 %}
+                <tr><td colspan="6" style="color:#888;text-align:center;padding:40px 0;">暂无地图信息</td></tr>
+            {% else %}
+                {% for map in maps %}
                 <tr>
                     <td>
                         {% if map.image %}
@@ -56,9 +59,8 @@
                     <td>{{ map.level }}</td>
                     <td>{{ map.type }}</td>
                 </tr>
-            {% else %}
-                <tr><td colspan="6" style="color:#888;text-align:center;padding:40px 0;">暂无地图信息</td></tr>
-            {% endfor %}
+                {% endfor %}
+            {% endif %}
             </tbody>
         </table>
     </div>

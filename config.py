@@ -40,7 +40,7 @@ class Config:
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
     
     # 分页配置
-    MAPS_PER_PAGE = 6
+    MAPS_PER_PAGE = 30
 
     # local: 仅本地存储
     # imgbb: 仅ImgBB云存储

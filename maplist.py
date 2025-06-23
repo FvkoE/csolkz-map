@@ -3,7 +3,7 @@ from models import SessionLocal, MapList, MapApply
 from config import config
 from auth import login_required
 from storage import init_storage, upload_image, get_storage_method
-from sqlalchemy import or_, and_
+from sqlalchemy import or_, and_, text
 
 # =====================
 # 配置与常量
@@ -53,6 +53,7 @@ def mainpage():
     level = request.args.get('level', '').strip()
     map_type = request.args.get('type', '').strip()
     search = request.args.get('search', '').strip()
+    level_sort = request.args.get('level_sort', 'none')
 
     session = SessionLocal()
     try:
@@ -107,6 +108,20 @@ def mainpage():
                     MapList.mapper.like(search_term)
                 )
             )
+        
+        # 排序逻辑
+        if level_sort in ['asc', 'desc']:
+            level_order = [
+                '入门', '初级', '中级', '中级+', '高级', '高级+', '骨灰', '骨灰+',
+                '火星', '极限(1)', '极限(2)', '极限(3)', '极限(4)', '死亡(1)', '死亡(2)', '死亡(3)'
+            ]
+            case_expr = "CASE " + " ".join([f"WHEN level='{lv}' THEN {i}" for i, lv in enumerate(level_order)]) + " ELSE 999 END"
+            if level_sort == 'asc':
+                query = query.order_by(text(case_expr))
+            else:
+                query = query.order_by(text(f"{case_expr} DESC"))
+        else:
+            query = query.order_by(MapList.id.asc())
         
         total_maps = query.count()
         maps = query.offset((page - 1) * PER_PAGE).limit(PER_PAGE).all()

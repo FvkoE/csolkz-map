@@ -524,53 +524,54 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // 大区按钮点击事件
         regionButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                // 如果点击的是"全部"按钮
-                if (button.dataset.value === '') {
-                    // 清除所有其他按钮的选中状态
-                    regionButtons.forEach(btn => {
-                        btn.classList.remove('active');
-                    });
-                    // 激活"全部"按钮
-                    button.classList.add('active');
-                    regionValue = '';
-                } else {
-                    // 如果点击的是其他大区按钮，先移除"全部"按钮的选中状态
-                    const allButton = filterForm.querySelector('.region-btn[data-value=""]');
-                    if (allButton) {
-                        allButton.classList.remove('active');
-                    }
-                    
-                    // 切换当前按钮的选中状态
-                    button.classList.toggle('active');
-                    
-                    // 获取所有选中的大区（排除"全部"按钮）
-                    const selectedRegions = Array.from(regionButtons)
-                        .filter(btn => btn.classList.contains('active') && btn.dataset.value !== '')
-                        .map(btn => btn.dataset.value);
-                    
-                    // 根据选中数量决定筛选逻辑
-                    if (selectedRegions.length === 0) {
-                        // 没有选中任何大区，激活"全部"按钮
-                        if (allButton) {
-                            allButton.classList.add('active');
-                        }
+            button.addEventListener(
+                'click', () => {
+                    // 如果点击的是"全部"按钮
+                    if (button.dataset.value === '') {
+                        // 清除所有其他按钮的选中状态
+                        regionButtons.forEach(btn => {
+                            btn.classList.remove('active');
+                        });
+                        // 激活"全部"按钮
+                        button.classList.add('active');
                         regionValue = '';
-                    } else if (selectedRegions.length === 3) {
-                        // 选中3个大区，筛选"全区"
-                        regionValue = '全区';
                     } else {
-                        // 选中1-2个大区，用'/'分隔
-                        regionValue = selectedRegions.join('/');
+                        // 如果点击的是其他大区按钮，先移除"全部"按钮的选中状态
+                        const allButton = filterForm.querySelector('.region-btn[data-value=""]');
+                        if (allButton) {
+                            allButton.classList.remove('active');
+                        }
+                        
+                        // 切换当前按钮的选中状态
+                        button.classList.toggle('active');
+                        
+                        // 获取所有选中的大区（排除"全部"按钮）
+                        const selectedRegions = Array.from(regionButtons)
+                            .filter(btn => btn.classList.contains('active') && btn.dataset.value !== '')
+                            .map(btn => btn.dataset.value);
+                        
+                        // 根据选中数量决定筛选逻辑
+                        if (selectedRegions.length === 0) {
+                            // 没有选中任何大区，激活"全部"按钮
+                            if (allButton) {
+                                allButton.classList.add('active');
+                            }
+                            regionValue = '';
+                        } else if (selectedRegions.length === 3) {
+                            // 选中3个大区，筛选"全区"
+                            regionValue = '全区';
+                        } else {
+                            // 选中1-2个大区，用'/'分隔
+                            regionValue = selectedRegions.join('/');
+                        }
                     }
-                }
-                
-                // 更新隐藏输入框的值
-                regionInput.value = regionValue;
-                
-                // 提交筛选
-                filterForm.dispatchEvent(new Event('submit', { cancelable: true }));
-            });
+                    
+                    // 更新隐藏输入框的值
+                    regionInput.value = regionValue;
+                    
+                    // 提交筛选
+                    filterForm.dispatchEvent(new Event('submit', { cancelable: true }));
+                });
         });
 
         // 地图类型筛选（保持原有逻辑）
@@ -755,21 +756,33 @@ document.addEventListener('DOMContentLoaded', function() {
         const listBtn = document.getElementById('listViewBtn');
         const cardBtn = document.getElementById('cardViewBtn');
         const cardWrapper = document.querySelector('.map-list');
-        const tableWrapper = document.querySelector('.map-list-table-wrapper');
+        const tableWrapper = document.getElementById('infinite-table-wrapper');
+        const pagination = document.querySelector('.pagination-container');
         if (!listBtn || !cardBtn || !cardWrapper || !tableWrapper) return;
-        // 读取本地存储的视图
         let view = localStorage.getItem('mapViewMode') || 'card';
-        function setView(mode) {
+        async function setView(mode) {
             if (mode === 'list') {
                 listBtn.classList.add('active');
                 cardBtn.classList.remove('active');
                 cardWrapper.style.display = 'none';
                 tableWrapper.style.display = '';
+                if (pagination) pagination.style.display = 'none';
+                // AJAX加载第一页数据并重置下拉状态
+                const urlParams = new URLSearchParams(window.location.search);
+                urlParams.set('page', '1');
+                const url = window.location.pathname + '?' + urlParams.toString();
+                if (typeof window.loadListFirstPage === 'function') {
+                    await window.loadListFirstPage(url);
+                }
+                if (typeof window.resetInfiniteScroll === 'function') {
+                    window.resetInfiniteScroll();
+                }
             } else {
                 cardBtn.classList.add('active');
                 listBtn.classList.remove('active');
                 cardWrapper.style.display = '';
                 tableWrapper.style.display = 'none';
+                if (pagination) pagination.style.display = '';
             }
             localStorage.setItem('mapViewMode', mode);
         }
@@ -777,6 +790,62 @@ document.addEventListener('DOMContentLoaded', function() {
         cardBtn.onclick = function() { setView('card'); };
         setView(view);
     }
+    // 实现AJAX加载第一页并重置下拉
+    window.loadListFirstPage = async function(url) {
+        if (!url) return;
+        let infinitePage = 1;
+        let infiniteNoMore = false;
+        let infiniteLoading = false;
+        if (infiniteLoadingDiv) infiniteLoadingDiv.style.display = '';
+        try {
+            const resp = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            if (!resp.ok) throw new Error('网络错误');
+            const data = await resp.json();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(data.maps_html, 'text/html');
+            const newTbody = doc.querySelector('tbody');
+            const table = document.querySelector('.map-list-table');
+            const tbody = table.querySelector('tbody');
+            tbody.innerHTML = '';
+            if (newTbody && newTbody.children.length > 0) {
+                Array.from(newTbody.children).forEach(tr => {
+                    if (tr.tagName === 'TR') tbody.appendChild(tr);
+                });
+            }
+            // 处理"暂无地图信息"时隐藏加载动画
+            if (tbody.textContent.includes('暂无地图信息')) {
+                if (infiniteLoadingDiv) infiniteLoadingDiv.style.display = 'none';
+            }
+            // 新增：刷新后重新绑定图片放大预览
+            if (typeof bindImagePreview === 'function') bindImagePreview();
+        } catch (e) {
+            if (infiniteLoadingDiv) infiniteLoadingDiv.style.display = 'none';
+        }
+    };
+    // 加载动画超时1秒
+    let loadingTimeout = null;
+    function showLoadingWithTimeout() {
+        if (infiniteLoadingDiv) infiniteLoadingDiv.style.display = '';
+        if (loadingTimeout) clearTimeout(loadingTimeout);
+        loadingTimeout = setTimeout(() => {
+            if (infiniteLoadingDiv) infiniteLoadingDiv.style.display = 'none';
+        }, 1000);
+    }
+    // 保证无数据时加载动画消失
+    if (document.querySelector('.map-list-table tbody tr') && document.querySelector('.map-list-table tbody tr').textContent.includes('暂无地图信息')) {
+        if (infiniteLoadingDiv) infiniteLoadingDiv.style.display = 'none';
+    }
+    // 禁用列表视图下分页点击
+    document.addEventListener('click', function(e) {
+        const pagination = document.querySelector('.pagination-container');
+        const tableWrapper = document.getElementById('infinite-table-wrapper');
+        if (pagination && tableWrapper && tableWrapper.style.display !== 'none') {
+            if (e.target.closest('.page-item')) {
+                e.preventDefault();
+                return false;
+            }
+        }
+    }, true);
     // 页面初次加载绑定
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', bindViewSwitcher);
@@ -784,7 +853,178 @@ document.addEventListener('DOMContentLoaded', function() {
         bindViewSwitcher();
     }
     // 内容异步刷新后重新绑定
-    window.bindMapViewSwitcher = bindViewSwitcher;
+    if (window.bindMapViewSwitcher) {
+        const oldBind = window.bindMapViewSwitcher;
+        window.bindMapViewSwitcher = function() {
+            oldBind();
+            if (typeof bindImagePreview === 'function') bindImagePreview();
+        };
+    }
+
+    // ======================
+    // 列表视图无限下拉加载（全页面滚动监听）
+    // ======================
+    let infinitePage = 1;
+    let infiniteLoading = false;
+    let infiniteNoMore = false;
+    const infiniteLoadingDiv = document.getElementById('infinite-loading');
+    function getCurrentListUrl(page) {
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set('page', page);
+        return window.location.pathname + '?' + urlParams.toString();
+    }
+    async function loadNextPage() {
+        if (infiniteLoading || infiniteNoMore) return;
+        infiniteLoading = true;
+        showLoadingWithTimeout();
+        infinitePage++;
+        const url = getCurrentListUrl(infinitePage);
+        try {
+            const resp = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            if (!resp.ok) throw new Error('网络错误');
+            const data = await resp.json();
+            // 只提取新页tbody的<tr>，追加到现有tbody
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(data.maps_html, 'text/html');
+            const newTbody = doc.querySelector('tbody');
+            if (newTbody && newTbody.children.length > 0) {
+                const table = document.querySelector('.map-list-table');
+                const tbody = table.querySelector('tbody');
+                Array.from(newTbody.children).forEach(tr => {
+                    if (tr.tagName === 'TR') tbody.appendChild(tr);
+                });
+            } else {
+                infiniteNoMore = true;
+            }
+        } catch (e) {
+            infiniteNoMore = true;
+        } finally {
+            infiniteLoading = false;
+            if (infiniteLoadingDiv) infiniteLoadingDiv.style.display = infiniteNoMore ? 'none' : '';
+        }
+    }
+    function onWindowScroll() {
+        if (infiniteNoMore) return;
+        if ((window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 40)) {
+            loadNextPage();
+        }
+    }
+    // 绑定滚动事件（防止多次绑定）
+    window.removeEventListener('scroll', onWindowScroll);
+    window.addEventListener('scroll', onWindowScroll);
+    // 切换到列表视图时重置下拉状态
+    window.resetInfiniteScroll = function() {
+        infinitePage = 1;
+        infiniteNoMore = false;
+        infiniteLoading = false;
+    };
+
+    // 难度排序三态切换（升序/降序/无）
+    let levelSortState = 'none'; // 'none' | 'asc' | 'desc'
+    function updateLevelSortArrow() {
+        const arrow = document.getElementById('level-sort-arrow');
+        if (!arrow) return;
+        if (levelSortState === 'asc') arrow.textContent = '↑';
+        else if (levelSortState === 'desc') arrow.textContent = '↓';
+        else arrow.textContent = '⇅';
+    }
+    function bindLevelSortEvent() {
+        const levelTh = document.getElementById('level-sort-th');
+        if (!levelTh) return;
+        levelTh.onclick = async function() {
+            if (levelSortState === 'none') levelSortState = 'asc';
+            else if (levelSortState === 'asc') levelSortState = 'desc';
+            else levelSortState = 'none';
+            updateLevelSortArrow();
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('page', '1');
+            if (levelSortState !== 'none') {
+                urlParams.set('level_sort', levelSortState);
+            } else {
+                urlParams.delete('level_sort');
+            }
+            const url = window.location.pathname + '?' + urlParams.toString();
+            if (typeof window.loadListFirstPage === 'function') {
+                await window.loadListFirstPage(url);
+            }
+            if (typeof window.resetInfiniteScroll === 'function') {
+                window.resetInfiniteScroll();
+            }
+            window.history.replaceState(null, '', url);
+        };
+        // 初始化箭头
+        updateLevelSortArrow();
+    }
+    // 页面初次加载和每次AJAX刷新后都调用
+    bindLevelSortEvent();
+    // 在loadListFirstPage最后也调用
+    const oldLoadListFirstPage = window.loadListFirstPage;
+    window.loadListFirstPage = async function(url) {
+        if (!url) return;
+        let infinitePage = 1;
+        let infiniteNoMore = false;
+        let infiniteLoading = false;
+        if (infiniteLoadingDiv) infiniteLoadingDiv.style.display = '';
+        try {
+            const resp = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            if (!resp.ok) throw new Error('网络错误');
+            const data = await resp.json();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(data.maps_html, 'text/html');
+            const newTbody = doc.querySelector('tbody');
+            const table = document.querySelector('.map-list-table');
+            const tbody = table.querySelector('tbody');
+            tbody.innerHTML = '';
+            if (newTbody && newTbody.children.length > 0) {
+                Array.from(newTbody.children).forEach(tr => {
+                    if (tr.tagName === 'TR') tbody.appendChild(tr);
+                });
+            }
+            // 处理"暂无地图信息"时隐藏加载动画
+            if (tbody.textContent.includes('暂无地图信息')) {
+                if (infiniteLoadingDiv) infiniteLoadingDiv.style.display = 'none';
+            }
+        } catch (e) {
+            if (infiniteLoadingDiv) infiniteLoadingDiv.style.display = 'none';
+        }
+        // 重新绑定排序事件
+        bindLevelSortEvent();
+    };
+
+    // =====================
+    // 图片点击放大预览功能
+    // =====================
+    function bindImagePreview() {
+        // 移除旧的模态框
+        let oldModal = document.getElementById('imagePreviewModal');
+        if (oldModal) oldModal.remove();
+        // 绑定所有图片点击
+        document.querySelectorAll('.map-card-image, .map-list-thumb').forEach(img => {
+            img.style.cursor = 'zoom-in';
+            img.onclick = function(e) {
+                e.stopPropagation();
+                // 创建模态框
+                let modal = document.createElement('div');
+                modal.id = 'imagePreviewModal';
+                modal.style.position = 'fixed';
+                modal.style.left = '0';
+                modal.style.top = '0';
+                modal.style.width = '100vw';
+                modal.style.height = '100vh';
+                modal.style.background = 'rgba(0,0,0,0.7)';
+                modal.style.display = 'flex';
+                modal.style.alignItems = 'center';
+                modal.style.justifyContent = 'center';
+                modal.style.zIndex = '9999';
+                modal.innerHTML = `<img src='${img.src}' style='max-width:90vw;max-height:90vh;border-radius:12px;box-shadow:0 4px 32px #0008;display:block;'>`;
+                // 点击模态框关闭
+                modal.onclick = function() { modal.remove(); };
+                document.body.appendChild(modal);
+            };
+        });
+    }
+    // 内容刷新后重新绑定图片预览
+    if (typeof bindImagePreview === 'function') bindImagePreview();
 });
 
 // 检查登录状态的函数
@@ -1009,4 +1249,26 @@ function closeEditModal() {
 // 将函数绑定到全局
 window.openEditModal = openEditModal;
 window.closeEditModal = closeEditModal;
+
+// 加载动画样式
+(function(){
+    const style = document.createElement('style');
+    style.innerHTML = `
+    .loader {
+        display: inline-block;
+        width: 24px;
+        height: 24px;
+        border: 3px solid #1976d2;
+        border-radius: 50%;
+        border-top: 3px solid transparent;
+        animation: spin 1s linear infinite;
+        vertical-align: middle;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    `;
+    document.head.appendChild(style);
+})();
 

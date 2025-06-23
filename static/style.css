@@ -1204,3 +1204,10 @@ body.admin-bg {
     transform: translateY(-1px) scale(1.006);
     z-index: 2;
 }
+
+#infinite-table-wrapper {
+    max-height: 600px;
+    min-height: 300px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
