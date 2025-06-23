@@ -626,31 +626,33 @@ body.admin-bg {
 }
 
 .search-btn {
-    padding: 6px 12px;
-    background: #1976d2;
-    color: white;
+    padding: 8px 20px;
+    background: linear-gradient(90deg, #1565c0 0%, #42a5f5 100%);
+    color: #fff;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
     cursor: pointer;
-    font-size: 14px;
-    flex-shrink: 0; /* 防止按钮被压缩 */
+    transition: all 0.2s cubic-bezier(.4,0,.2,1);
+    opacity: 0.8;
 }
 .search-btn:hover {
-    background: #1565c0;
+    background: linear-gradient(90deg, #0d47a1 0%, #64b5f6 100%);
+    opacity: 1;
 }
 
-/* 分页控制样式 */
+/* 分页控件居中显示 */
 .pagination-container {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    gap: 16px;
-    margin: 30px 0;
-    padding: 0 20px;
+    width: 100%;
+    margin-top: 4px;
 }
-
 .pagination {
     display: flex;
+    justify-content: center;
     align-items: center;
     gap: 8px;
 }
@@ -676,9 +678,12 @@ body.admin-bg {
 }
 
 .page-item.active {
-    background: #1976d2;
-    color: white;
-    border-color: #1976d2;
+    background: linear-gradient(90deg, #1565c0 0%, #42a5f5 100%) !important;
+    color: #fff !important;
+    border: none !important;
+    opacity: 0.8;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(25, 118, 210, 0.13);
 }
 
 .page-item.disabled {
@@ -1027,4 +1032,175 @@ body.admin-bg {
         opacity: 0;
         transform: translateY(-20px);
     }
+}
+
+/* 视图切换按钮样式 */
+.view-switcher {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    margin: -36px 0 8px 0; /* 上移36px，底部间距减小 */
+    gap: 10px;
+    z-index: 2;
+    position: relative;
+}
+.view-switcher .view-btn {
+    width: 40px;
+    height: 40px;
+    box-sizing: border-box;
+    background: transparent;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    outline: none;
+    transition: background 0.2s, border 0.2s;
+    box-shadow: none;
+}
+.view-switcher .view-btn svg {
+    width: 22px;
+    height: 22px;
+    display: block;
+}
+.view-switcher .view-btn svg rect {
+    fill: #1976d2 !important;
+    transition: fill 0.2s;
+}
+.view-switcher .view-btn.active,
+.view-switcher .view-btn:hover {
+    background: #f2f3f5;
+    border-color: #e3e8f0;
+}
+.view-switcher .view-btn.active svg rect,
+.view-switcher .view-btn:hover svg rect {
+    fill: #1976d2 !important;
+}
+
+/* 列表视图表格样式优化 */
+.map-list-table-wrapper {
+    margin-top: -36px; /* 上移表格整体 */
+    margin-bottom: 16px; /* 底部间距减小 */
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px #e3e3e3;
+    padding: 0 0 10px 0;
+    overflow-x: auto;
+}
+.map-list-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #fff;
+    border-radius: 12px;
+    font-size: 15px;
+    overflow: hidden;
+    box-shadow: none;
+}
+.map-list-table th, .map-list-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #f0f0f0;
+    color: #222;
+    text-align: left;
+    background: none;
+}
+.map-list-table th {
+    background: #f4f8fb;
+    font-weight: 600;
+    color: #1976d2;
+    border-bottom: 2px solid #e3e8f0;
+}
+.map-list-table tr:last-child td {
+    border-bottom: none;
+}
+.map-list-thumb {
+    width: 60px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 6px;
+    background: #f4f8fb;
+    border: 1px solid #e3e8f0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.map-list-table td span[style*="color:#aaa"] {
+    color: #bbb !important;
+    font-style: italic;
+}
+
+/* 修正切换按钮被内容遮挡问题 */
+.view-switcher {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    margin: -55px 0 8px 0; /* 上移36px，底部间距减小 */
+    gap: 10px;
+    z-index: 2;
+    position: relative;
+}
+.map-list,
+.map-list-table-wrapper {
+    margin-top: 0px; /* 上移列表整体 */
+}
+
+/* 视图切换与申请按钮容器样式 */
+.view-switcher-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+/* 新的申请添加地图按钮样式 */
+.add-map-btn-main {
+    height: 40px;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 28px;
+    background: linear-gradient(90deg, #1565c0 0%, #42a5f5 100%);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s cubic-bezier(.4,0,.2,1);
+    box-shadow: 0 2px 8px rgba(25, 118, 210, 0.13);
+    opacity: 0.8;
+}
+.add-map-btn-main:hover {
+    background: linear-gradient(90deg, #0d47a1 0%, #64b5f6 100%);
+    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.18);
+    transform: translateY(-1px) scale(1.03);
+    opacity: 1;
+}
+
+.map-list-table .map-title {
+    color: #1976d2;
+    font-size: 1.0em;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    max-width: 180px;
+    vertical-align: middle;
+}
+
+.map-list-table tbody tr {
+    transition: box-shadow 0.18s, transform 0.18s, background 0.18s;
+    position: relative;
+    z-index: 1;
+}
+.map-list-table tbody tr:hover {
+    background: rgba(25, 118, 210, 0.08);
+    box-shadow: 0 2px 8px 0 rgba(25, 118, 210, 0.07), 0 1px 3px 0 rgba(0,0,0,0.04);
+    transform: translateY(-1px) scale(1.006);
+    z-index: 2;
 }

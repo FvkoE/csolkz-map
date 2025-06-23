@@ -479,6 +479,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 btn.classList.toggle('active', btn.dataset.value === type);
             });
 
+            // 新增：每次内容刷新后，重新绑定视图切换逻辑
+            if (window.bindMapViewSwitcher) window.bindMapViewSwitcher();
+
         } catch (error) {
             console.error('筛选请求失败:', error);
             mapListContainer.innerHTML = '<p style="color:red;text-align:center;">内容加载失败，请刷新页面重试。</p>';
@@ -746,6 +749,42 @@ document.addEventListener('DOMContentLoaded', function() {
     window.openAddModal = window.modal.add.open;
     window.closeAddModal = window.modal.add.close;
     // ... 其他全局函数绑定 ...
+
+    // 视图切换按钮逻辑（记忆视图状态，内容刷新后自动恢复）
+    function bindViewSwitcher() {
+        const listBtn = document.getElementById('listViewBtn');
+        const cardBtn = document.getElementById('cardViewBtn');
+        const cardWrapper = document.querySelector('.map-list');
+        const tableWrapper = document.querySelector('.map-list-table-wrapper');
+        if (!listBtn || !cardBtn || !cardWrapper || !tableWrapper) return;
+        // 读取本地存储的视图
+        let view = localStorage.getItem('mapViewMode') || 'card';
+        function setView(mode) {
+            if (mode === 'list') {
+                listBtn.classList.add('active');
+                cardBtn.classList.remove('active');
+                cardWrapper.style.display = 'none';
+                tableWrapper.style.display = '';
+            } else {
+                cardBtn.classList.add('active');
+                listBtn.classList.remove('active');
+                cardWrapper.style.display = '';
+                tableWrapper.style.display = 'none';
+            }
+            localStorage.setItem('mapViewMode', mode);
+        }
+        listBtn.onclick = function() { setView('list'); };
+        cardBtn.onclick = function() { setView('card'); };
+        setView(view);
+    }
+    // 页面初次加载绑定
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bindViewSwitcher);
+    } else {
+        bindViewSwitcher();
+    }
+    // 内容异步刷新后重新绑定
+    window.bindMapViewSwitcher = bindViewSwitcher;
 });
 
 // 检查登录状态的函数

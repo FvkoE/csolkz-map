@@ -1,30 +1,68 @@
 <!-- 地图列表 -->
-<div class="map-list">
-    {% for map in maps %}
-    <div class="map-card map-card-flex">
-        <div class="map-card-content">
-            <div class="map-title" title="{{ map.name }}">{{ map.name }}</div>
-            <div class="map-info">作者：{{ map.mapper }}</div>
-            <div class="map-info">大区：{{ map.region }}</div>
-            <div class="map-info">难度：{{ map.level }}</div>
-            <div class="map-info">类型：{{ map.type }}</div>
-        </div>
-        {% if map.image %}
-            {% if map.image.startswith('http') %}
-                <img src="{{ map.image }}" class="map-card-image">
+<div id="map-views-wrapper">
+    <div class="map-list">
+        {% for map in maps %}
+        <div class="map-card map-card-flex">
+            <div class="map-card-content">
+                <div class="map-title" title="{{ map.name }}">{{ map.name }}</div>
+                <div class="map-info">作者：{{ map.mapper }}</div>
+                <div class="map-info">大区：{{ map.region }}</div>
+                <div class="map-info">难度：{{ map.level }}</div>
+                <div class="map-info">类型：{{ map.type }}</div>
+            </div>
+            {% if map.image %}
+                {% if map.image.startswith('http') %}
+                    <img src="{{ map.image }}" class="map-card-image">
+                {% else %}
+                    <img src="{{ url_for('static', filename=map.image) }}" class="map-card-image">
+                {% endif %}
             {% else %}
-                <img src="{{ url_for('static', filename=map.image) }}" class="map-card-image">
+                <div class="map-card-image-placeholder">暂无图片</div>
             {% endif %}
+        </div>
         {% else %}
-            <div class="map-card-image-placeholder">暂无图片</div>
-        {% endif %}
+        <div style="color:#888;font-size:1.1em;margin:40px auto;">暂无地图信息</div>
+        {% endfor %}
     </div>
-    {% else %}
-    <div style="color:#888;font-size:1.1em;margin:40px auto;">暂无地图信息</div>
-    {% endfor %}
+    <div class="map-list-table-wrapper" style="display:none;">
+        <table class="map-list-table">
+            <thead>
+                <tr>
+                    <th>封面</th>
+                    <th>图名</th>
+                    <th>作者</th>
+                    <th>大区</th>
+                    <th>难度</th>
+                    <th>类型</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for map in maps %}
+                <tr>
+                    <td>
+                        {% if map.image %}
+                            {% if map.image.startswith('http') %}
+                                <img src="{{ map.image }}" class="map-list-thumb">
+                            {% else %}
+                                <img src="{{ url_for('static', filename=map.image) }}" class="map-list-thumb">
+                            {% endif %}
+                        {% else %}
+                            <span style="color:#aaa;">暂无图片</span>
+                        {% endif %}
+                    </td>
+                    <td><span class="map-title" title="{{ map.name }}">{{ map.name }}</span></td>
+                    <td>{{ map.mapper }}</td>
+                    <td>{{ map.region }}</td>
+                    <td>{{ map.level }}</td>
+                    <td>{{ map.type }}</td>
+                </tr>
+            {% else %}
+                <tr><td colspan="6" style="color:#888;text-align:center;padding:40px 0;">暂无地图信息</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
-
-<a href="javascript:void(0);" class="add-btn" onclick="openAddModal()">申请添加地图</a>
 
 <!-- 分页控件 -->
 <div class="pagination-container">
