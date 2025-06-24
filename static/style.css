@@ -9,14 +9,14 @@ body {
     margin: 0;
 }
 body:not(.admin-bg) {
-    background: #f7f7f9 url("/static/background/body-background.png") no-repeat center top fixed;
+    background: #f7f7f9 url("/static/background/body-background.png?v=20240613") no-repeat center top fixed;
     background-size: cover;
 }
 body.admin-bg {
     background: #f4f8fb;
 }
 body.night-mode {
-    background: url('/static/background/body-background-night.png') no-repeat center top fixed !important;
+    background: url('/static/background/body-background-night.png?v=20240613') no-repeat center top fixed !important;
     background-size: cover !important;
     background-position: center top !important;
 }
