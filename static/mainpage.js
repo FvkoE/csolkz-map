@@ -455,6 +455,9 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.maps_html) mapListContainer.innerHTML = data.maps_html;
             history.pushState({}, '', url);
 
+            // 修复：内容替换后重新绑定图片预览
+            if (typeof bindImagePreview === 'function') bindImagePreview();
+
             // 更新按钮的激活状态
             const params = new URL(url).searchParams;
             const region = params.get('region') || '';
