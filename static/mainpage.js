@@ -463,14 +463,11 @@ document.addEventListener('DOMContentLoaded', function() {
             // 更新大区按钮激活状态（支持多选）
             document.querySelectorAll('.region-btn').forEach(btn => {
                 if (region === '全区') {
-                    // 如果筛选"全区"，激活所有大区按钮
                     btn.classList.add('active');
                 } else if (region && region.includes('/')) {
-                    // 多选大区，检查是否在选中列表中
                     const selectedRegions = region.split('/').map(r => r.trim());
                     btn.classList.toggle('active', selectedRegions.includes(btn.dataset.value));
                 } else {
-                    // 单选大区或无筛选
                     btn.classList.toggle('active', btn.dataset.value === region);
                 }
             });
@@ -480,7 +477,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             // 新增：每次内容刷新后，重新绑定视图切换逻辑
-            if (window.bindMapViewSwitcher) window.bindMapViewSwitcher();
+            if (typeof bindViewSwitcher === 'function') bindViewSwitcher();
 
         } catch (error) {
             console.error('筛选请求失败:', error);
@@ -758,18 +755,27 @@ document.addEventListener('DOMContentLoaded', function() {
         const cardWrapper = document.querySelector('.map-list');
         const tableWrapper = document.getElementById('infinite-table-wrapper');
         const pagination = document.querySelector('.pagination-container');
+        const viewInput = document.getElementById('viewModeInput');
         if (!listBtn || !cardBtn || !cardWrapper || !tableWrapper) return;
-        let view = localStorage.getItem('mapViewMode') || 'card';
+        // 优先读取URL参数view
+        function getUrlViewMode() {
+            const params = new URLSearchParams(window.location.search);
+            const v = params.get('view');
+            if (v === 'list' || v === 'card') return v;
+            return null;
+        }
+        let view = getUrlViewMode() || localStorage.getItem('mapViewMode') || 'card';
         async function setView(mode) {
+            if (viewInput) viewInput.value = mode;
             if (mode === 'list') {
                 listBtn.classList.add('active');
                 cardBtn.classList.remove('active');
                 cardWrapper.style.display = 'none';
                 tableWrapper.style.display = '';
                 if (pagination) pagination.style.display = 'none';
-                // AJAX加载第一页数据并重置下拉状态
                 const urlParams = new URLSearchParams(window.location.search);
                 urlParams.set('page', '1');
+                urlParams.set('view', 'list');
                 const url = window.location.pathname + '?' + urlParams.toString();
                 if (typeof window.loadListFirstPage === 'function') {
                     await window.loadListFirstPage(url);

@@ -54,6 +54,7 @@
         <div class="main-title">地图列表</div>
         <!-- 筛选地图 -->
         <form id="filter-box" class="filter-section" method="get" action="{{ url_for('maplist.mainpage') }}#filter-box">
+            <input type="hidden" name="view" id="viewModeInput" value="{{ request.args.get('view', 'card') }}">
             <div class="filter-row">
                 <div class="filter-item">
                     <span class="filter-label">地图大区：</span>

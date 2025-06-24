@@ -3,7 +3,7 @@
 """
 删除map_apply表中特定数据的脚本
 """
-
+##删除脚本，用于删除map_apply表中特定数据
 import mysql.connector
 import os
 import sys

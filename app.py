@@ -32,7 +32,8 @@ def create_app(config_name='default'):
         def static_url(filename):
             try:
                 # 获取文件在服务器上的物理路径
-                filepath = os.path.join(app.static_folder, filename)
+                static_folder = app.static_folder or 'static'
+                filepath = os.path.join(static_folder, filename)
                 if os.path.exists(filepath):
                     # 获取文件修改时间作为版本号
                     version = int(os.path.getmtime(filepath))

@@ -1,6 +1,7 @@
 <!-- 地图列表 -->
 <div id="map-views-wrapper">
-    <div class="map-list">
+    <!-- 卡片视图 -->
+    <div class="map-list" {% if request.args.get('view', 'card') == 'list' %}style="display:none;"{% endif %}>
         {% for map in maps %}
         <div class="map-card map-card-flex">
             <div class="map-card-content">
@@ -24,7 +25,8 @@
         <div style="color:#888;font-size:1.1em;margin:40px auto;">暂无地图信息</div>
         {% endfor %}
     </div>
-    <div class="map-list-table-wrapper" id="infinite-table-wrapper" style="display:none;">
+    <!-- 列表视图 -->
+    <div class="map-list-table-wrapper" id="infinite-table-wrapper" {% if request.args.get('view', 'card') != 'list' %}style="display:none;"{% endif %}>
         <table class="map-list-table">
             <thead>
                 <tr>
@@ -70,17 +72,17 @@
 <div class="pagination-container">
     <div class="pagination">
         {% if current_page > 1 %}
-        <a href="{{ url_for('maplist.mainpage', page=current_page-1, region=request.args.get('region',''), type=request.args.get('type',''), level=request.args.get('level',''), search=request.args.get('search','')) }}" class="page-item">&lt;</a>
+        <a href="{{ url_for('maplist.mainpage', page=current_page-1, region=request.args.get('region',''), type=request.args.get('type',''), level=request.args.get('level',''), search=request.args.get('search',''), view=request.args.get('view','card')) }}" class="page-item">&lt;</a>
         {% else %}
         <span class="page-item disabled">&lt;</span>
         {% endif %}
 
         {% for page in range(1, total_pages + 1) %}
-        <a href="{{ url_for('maplist.mainpage', page=page, region=request.args.get('region',''), type=request.args.get('type',''), level=request.args.get('level',''), search=request.args.get('search','')) }}" class="page-item {% if page == current_page %}active{% endif %}">{{ page }}</a>
+        <a href="{{ url_for('maplist.mainpage', page=page, region=request.args.get('region',''), type=request.args.get('type',''), level=request.args.get('level',''), search=request.args.get('search',''), view=request.args.get('view','card')) }}" class="page-item {% if page == current_page %}active{% endif %}">{{ page }}</a>
         {% endfor %}
 
         {% if current_page < total_pages %}
-        <a href="{{ url_for('maplist.mainpage', page=current_page+1, region=request.args.get('region',''), type=request.args.get('type',''), level=request.args.get('level',''), search=request.args.get('search','')) }}" class="page-item">&gt;</a>
+        <a href="{{ url_for('maplist.mainpage', page=current_page+1, region=request.args.get('region',''), type=request.args.get('type',''), level=request.args.get('level',''), search=request.args.get('search',''), view=request.args.get('view','card')) }}" class="page-item">&gt;</a>
         {% else %}
         <span class="page-item disabled">&gt;</span>
         {% endif %}
