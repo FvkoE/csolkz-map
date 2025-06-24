@@ -9,7 +9,7 @@ body {
     margin: 0;
 }
 body:not(.admin-bg) {
-    background: #f7f7f9 url("/static/background/body-background.png") no-repeat center top fixed;
+    background: #f7f7f9 url('/static/background/body-background.png') no-repeat center top fixed !important;
     background-size: cover;
 }
 body.admin-bg {
