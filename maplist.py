@@ -113,7 +113,8 @@ def mainpage():
         if level_sort in ['asc', 'desc']:
             level_order = [
                 '入门', '初级', '中级', '中级+', '高级', '高级+', '骨灰', '骨灰+',
-                '火星', '极限(1)', '极限(2)', '极限(3)', '极限(4)', '死亡(1)', '死亡(2)', '死亡(3)'
+                '火星', '火星+', '极限(1)', '极限(2)', '极限(3)', '极限(4)',
+                '死亡(1)', '死亡(2)', '死亡(3)', '死亡(4)'
             ]
             case_expr = "CASE " + " ".join([f"WHEN level='{lv}' THEN {i}" for i, lv in enumerate(level_order)]) + " ELSE 999 END"
             if level_sort == 'asc':

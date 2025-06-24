@@ -20,6 +20,7 @@ class MapList(Base):
     region = Column(String(50), nullable=False)
     mapper = Column(String(50))
     level = Column(String(50), nullable=False)
+    theory_level = Column(String(50), nullable=True, comment='理论难度')
     type = Column(Enum('连跳', '攀岩', '连跳/攀岩', '长跳', '滑坡', '其它', name='map_type'), nullable=False, comment='地图类型')
     image = Column(String(255))  # 恢复图片路径字段
     create_date = Column(Date, default=date.today, nullable=False, comment='上传日期')
