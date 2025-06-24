@@ -1034,6 +1034,30 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     // 内容刷新后重新绑定图片预览
     if (typeof bindImagePreview === 'function') bindImagePreview();
+
+    // 夜间模式按钮动画和图标切换，并切换页面主题
+    (function() {
+        const btn = document.getElementById('nightModeToggle');
+        if (!btn) return;
+        const iconWrap = document.getElementById('nightModeIconWrap');
+        const sun = document.getElementById('nightModeIconSun');
+        const moon = document.getElementById('nightModeIconMoon');
+        let isNight = false;
+        btn.onclick = function() {
+            isNight = !isNight;
+            if (isNight) {
+                sun.style.display = 'none';
+                moon.style.display = 'block';
+                iconWrap.style.transform = 'rotate(-180deg) scale(1.1)';
+                document.body.classList.add('night-mode');
+            } else {
+                sun.style.display = 'block';
+                moon.style.display = 'none';
+                iconWrap.style.transform = 'rotate(0deg) scale(1)';
+                document.body.classList.remove('night-mode');
+            }
+        };
+    })();
 });
 
 // 检查登录状态的函数

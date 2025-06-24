@@ -14,6 +14,11 @@ body:not(.admin-bg) {
 body.admin-bg {
     background: #f4f8fb;
 }
+body.night-mode {
+    background: url('/static/background/body-background-night.png') no-repeat center top fixed !important;
+    background-size: cover !important;
+    background-position: center top !important;
+}
 
 /* 顶部标题栏样式 */
 .header {
@@ -1210,4 +1215,16 @@ body.admin-bg {
     min-height: 300px;
     overflow-y: auto;
     overflow-x: hidden;
+}
+
+/* 夜间模式切换按钮美化 */
+#nightModeToggle {
+    background: transparent !important;
+    box-shadow: none !important;
+    transition: box-shadow 0.2s, transform 0.2s, background 0.2s;
+}
+#nightModeToggle:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+    transform: translateY(-2px) scale(1.03);
+    background: rgba(255,255,255,0.18) !important;
 }
