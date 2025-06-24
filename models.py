@@ -1,9 +1,9 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, Enum, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, Enum, ForeignKey, Date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from werkzeug.security import generate_password_hash, check_password_hash
 from config import config
-from datetime import datetime
+from datetime import datetime, date
 
 # 获取配置
 app_config = config['default']
@@ -20,8 +20,9 @@ class MapList(Base):
     region = Column(String(50), nullable=False)
     mapper = Column(String(50))
     level = Column(String(50), nullable=False)
-    type = Column(Enum('连跳', '攀岩', '连跳/攀岩', '长跳', '滑坡', '其它', name='map_type'), nullable=False, default='连跳')
+    type = Column(Enum('连跳', '攀岩', '连跳/攀岩', '长跳', '滑坡', '其它', name='map_type'), nullable=False, comment='地图类型')
     image = Column(String(255))  # 恢复图片路径字段
+    create_date = Column(Date, default=date.today, nullable=False, comment='上传日期')
 
 # 统一用户表
 class User(Base):
