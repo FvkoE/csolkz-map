@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>地图详情</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='map_detail.css') }}">
+</head>
+<body>
+    <!-- 导航栏移植自mainpage.html -->
+    <nav class="nav-bar">
+        <div class="nav-logo" style="cursor:pointer;" onclick="window.location.href='{{ url_for('maplist.mainpage') }}'">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="" class="logo-img">
+            <span class="logo-text">csolkz地图</span>
+        </div>
+        <div class="nav-links">
+            <a href="#" class="nav-link">暂定</a>
+            <a href="#" class="nav-link">暂定</a>
+            <a href="#" class="nav-link">暂定</a>
+            <a href="#" class="nav-link">暂定</a>
+        </div>
+        <div class="nav-actions">
+            <div class="user-dropdown">
+                <div class="user-info" id="userDropdownToggle">
+                    <img src="{{ session.avatar_url or url_for('static', filename='default_avatar.png') }}" class="user-avatar" alt="头像">
+                    <span class="username">{{ session.username }}</span>
+                    <svg class="dropdown-arrow" width="16" height="16" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" stroke="#1976d2" stroke-width="2" fill="none"/></svg>
+                </div>
+                <div class="dropdown-menu" id="userDropdownMenu">
+                    {% if session.user_role == 'admin' %}
+                    <a href="{{ url_for('admin.admin_home') }}" class="dropdown-item" target="_blank">管理后台</a>
+                    {% endif %}
+                    <a href="{{ url_for('auth.logout') }}" class="dropdown-item">退出</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="main-content-card" style="box-shadow:none;background:transparent;">
+        <div class="main-title" style="margin-bottom:0;"></div>
+    </div>
+    <div class="map-detail-container wide">
+        <div class="map-detail-mainbox-wide">
+            <div class="map-detail-mainbox-img">
+                {% if map.image %}
+                    {% if map.image.startswith('http') %}
+                        <img src="{{ map.image }}" alt="地图大图" class="map-detail-image">
+                    {% else %}
+                        <img src="{{ url_for('static', filename=map.image) }}" alt="" class="map-detail-image">
+                    {% endif %}
+                {% else %}
+                    <img src="https://via.placeholder.com/360x240?text=暂无图片" alt="地图大图" class="map-detail-image">
+                {% endif %}
+                <div class="map-detail-title"></div>
+            </div>
+            <div class="map-detail-mainbox-info">
+                <table class="map-detail-info-table">
+                    <tr><th>图名：</th><td>{{ map.name }}</td></tr>
+                    <tr><th>作者：</th><td>{{ map.mapper or '-' }}</td></tr>
+                    <tr><th>大区：</th><td>{{ map.region }}</td></tr>
+                    <tr><th>难度：</th><td>{{ map.level }}</td></tr>
+                    <tr><th>类型：</th><td>{{ map.type }}</td></tr>
+                    <tr><th>添加时间：</th><td>{{ map.create_date.strftime('%Y-%m-%d') if map.create_date else '-' }}</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- 下方记录列表区域 -->
+    <div class="map-detail-records">
+        <div class="map-detail-records-title">地图记录</div>
+        <table class="map-detail-records-table">
+            <thead>
+                <tr>
+                    <th>排名</th>
+                    <th>玩家</th>
+                    <th>用时</th>
+                    <th>积分</th>
+                    <th>日期</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- 记录表未创建，暂留空 -->
+            </tbody>
+        </table>
+    </div>
+    <!-- 夜间模式切换按钮 -->
+    <button id="nightModeToggle" style="position:fixed;right:32px;bottom:32px;z-index:999;background:rgba(255,255,255,0.85);border-radius:50%;width:48px;height:48px;box-shadow:0 2px 8px #e3e3e3;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;transition:background 0.2s;">
+        <span id="nightModeIconWrap" style="display:inline-block;transition:transform 0.3s;">
+            <svg id="nightModeIconSun" width="28" height="28" viewBox="0 0 28 28" fill="none" style="display:block;"><circle cx="14" cy="14" r="7" fill="#FFD600"/><g stroke="#FFD600" stroke-width="2"><line x1="14" y1="2" x2="14" y2="6"/><line x1="14" y1="22" x2="14" y2="26"/><line x1="2" y1="14" x2="6" y2="14"/><line x1="22" y1="14" x2="26" y2="14"/><line x1="5.05" y1="5.05" x2="7.88" y2="7.88"/><line x1="20.12" y1="20.12" x2="22.95" y2="22.95"/><line x1="5.05" y1="22.95" x2="7.88" y2="20.12"/><line x1="20.12" y1="7.88" x2="22.95" y2="5.05"/></g></svg>
+            <svg id="nightModeIconMoon" width="28" height="28" viewBox="0 0 28 28" fill="none" style="display:none;"><path d="M22 19.5C20.5 20.5 18.5 21 16.5 21C11.2533 21 7 16.7467 7 11.5C7 9.5 7.5 7.5 8.5 6C5.5 7.5 3.5 10.5 3.5 14C3.5 19.2467 7.75329 23.5 13 23.5C16.5 23.5 19.5 21.5 21 18.5C21.5 18.5 22 19 22 19.5Z" fill="#FFD600"/></svg>
+        </span>
+    </button>
+    <script src="{{ url_for('static', filename='map_detail.js') }}"></script>
+</body>
+</html> 

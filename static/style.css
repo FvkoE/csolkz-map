@@ -82,14 +82,18 @@ body.night-mode {
     display: flex;
     gap: 2rem;
     align-items: center;
-    margin-left: auto; /* 将链接推向右侧 */
 }
 
 .nav-actions {
     display: flex;
     align-items: center;
     gap: 1rem;
-    margin-left: 2rem;
+    margin-left: 0;
+    margin-right: 0;
+    position: static;
+    right: 0;
+    top: 0;
+    height: 56px;
 }
 
 .nav-actions .username {
@@ -935,13 +939,24 @@ body.night-mode {
 
 /* 用户信息和登出按钮样式 */
 .user-info {
-    position: absolute;
-    top: 10px;
-    right: 10px;
     display: flex;
     align-items: center;
-    gap: 15px;
-    font-size: 0.9em;
+    cursor: pointer;
+    gap: 8px;
+    padding: 0 6px;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    height: 56px;
+    position: relative;
+    z-index: 2;
+    color: #222;
+    font-weight: 500;
+    transition: background 0.18s, color 0.18s;
+}
+.user-info:hover {
+    background: rgba(0,0,0,0.06);
+    color: #1976d2;
 }
 
 .username {
@@ -1228,4 +1243,99 @@ body.night-mode {
     box-shadow: 0 2px 8px rgba(0,0,0,0.10);
     transform: translateY(-2px) scale(1.03);
     background: rgba(255,255,255,0.18) !important;
+}
+
+.user-dropdown {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+.user-info {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    gap: 8px;
+    padding: 4px 12px;
+    border-radius: 12px;
+    background: #fff;
+    height: 40px;
+    position: relative;
+    z-index: 2;
+    transition: background 0.18s, box-shadow 0.18s;
+}
+.user-info:hover {
+    background: rgba(255, 255, 255, 0.325);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.318);
+}
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: none;
+    box-shadow: none;
+    background: #e3eafc;
+}
+.dropdown-arrow {
+    margin-left: 2px;
+    transition: transform 0.2s;
+}
+.user-dropdown.open .dropdown-arrow {
+    transform: rotate(180deg);
+}
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    transform: translateX(-50%) translateY(6px);
+    min-width: 148px;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(25, 118, 210, 0.10);
+    z-index: 1001;
+    padding: 6px 0;
+    transition: opacity 0.2s;
+    font-size: 1.05em;
+    border: none;
+}
+.user-dropdown.open .dropdown-menu {
+    display: block;
+}
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 22px 10px 18px;
+    color: #222;
+    text-decoration: none;
+    font-size: 1em;
+    border-radius: 8px;
+    background: transparent;
+    transition: background 0.18s, color 0.18s;
+    min-height: 36px;
+}
+.dropdown-item:hover {
+    background: rgba(0,0,0,0.06);
+    color: #1976d2;
+}
+
+/* 去除按钮选中（active/focus）效果 */
+.view-btn:active,
+.view-btn:focus,
+.nav-link:active,
+.nav-link:focus {
+    outline: none;
+    box-shadow: none;
+    background: none;
+}
+/* 鼠标悬停头像/用户名时显示下拉菜单 */
+.user-dropdown.open .dropdown-menu,
+.user-dropdown:hover .dropdown-menu {
+    display: block;
+}
+.user-dropdown.open .user-info,
+.user-dropdown:hover .user-info {
+    background: rgba(25, 118, 210, 0.08);
 }

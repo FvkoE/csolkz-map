@@ -3,7 +3,7 @@
     <!-- 卡片视图 -->
     <div class="map-list" {% if request.args.get('view', 'card') == 'list' %}style="display:none;"{% endif %}>
         {% for map in maps %}
-        <div class="map-card map-card-flex">
+        <div class="map-card map-card-flex map-detail-link" data-map-id="{{ map.id }}" style="cursor:pointer;">
             <div class="map-card-content">
                 <div class="map-title" title="{{ map.name }}">{{ map.name }}</div>
                 <div class="map-info">作者：{{ map.mapper }}</div>
@@ -43,7 +43,7 @@
                 <tr><td colspan="6" style="color:#888;text-align:center;padding:40px 0;">暂无地图信息</td></tr>
             {% else %}
                 {% for map in maps %}
-                <tr>
+                <tr class="map-detail-link" data-map-id="{{ map.id }}" style="cursor:pointer;">
                     <td>
                         {% if map.image %}
                             {% if map.image.startswith('http') %}

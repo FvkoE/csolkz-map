@@ -482,6 +482,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // 新增：每次内容刷新后，重新绑定视图切换逻辑
             if (typeof bindViewSwitcher === 'function') bindViewSwitcher();
 
+            // 在AJAX筛选内容替换后调用
+            if (typeof window._afterMapListUpdate === 'function') window._afterMapListUpdate();
+
         } catch (error) {
             console.error('筛选请求失败:', error);
             mapListContainer.innerHTML = '<p style="color:red;text-align:center;">内容加载失败，请刷新页面重试。</p>';
@@ -1042,9 +1045,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const iconWrap = document.getElementById('nightModeIconWrap');
         const sun = document.getElementById('nightModeIconSun');
         const moon = document.getElementById('nightModeIconMoon');
-        let isNight = false;
-        btn.onclick = function() {
-            isNight = !isNight;
+        // 读取本地存储，决定初始模式
+        let isNight = localStorage.getItem('nightMode') === 'true';
+        function applyMode() {
             if (isNight) {
                 sun.style.display = 'none';
                 moon.style.display = 'block';
@@ -1056,8 +1059,59 @@ document.addEventListener('DOMContentLoaded', function() {
                 iconWrap.style.transform = 'rotate(0deg) scale(1)';
                 document.body.classList.remove('night-mode');
             }
+        }
+        btn.onclick = function() {
+            isNight = !isNight;
+            localStorage.setItem('nightMode', isNight);
+            applyMode();
         };
+        applyMode();
     })();
+
+    // ========== 地图详情跳转 ========== //
+    function bindMapDetailLinks() {
+        // 先移除旧的事件（防止重复绑定）
+        const wrapper = document.getElementById('map-views-wrapper');
+        if (!wrapper) return;
+        wrapper._mapDetailHandler && wrapper.removeEventListener('click', wrapper._mapDetailHandler);
+        wrapper._mapDetailHandler = function(e) {
+            let target = e.target;
+            while (target && !target.classList.contains('map-detail-link') && target !== this) {
+                target = target.parentElement;
+            }
+            if (target && target.classList.contains('map-detail-link')) {
+                const mapId = target.getAttribute('data-map-id');
+                if (mapId) {
+                    window.open(`/map/${mapId}`, '_blank');
+                }
+            }
+        };
+        wrapper.addEventListener('click', wrapper._mapDetailHandler);
+    }
+    // 页面加载和每次AJAX内容更新后都要调用
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bindMapDetailLinks);
+    } else {
+        bindMapDetailLinks();
+    }
+    // 在AJAX筛选内容替换后也调用
+    window._afterMapListUpdate = function() {
+        bindMapDetailLinks();
+    };
+
+    // 用户下拉菜单交互（悬停触发）
+    function setupUserDropdown() {
+        const dropdown = document.querySelector('.user-dropdown');
+        if (!dropdown) return;
+        dropdown.addEventListener('mouseenter', function() {
+            dropdown.classList.add('open');
+        });
+        dropdown.addEventListener('mouseleave', function() {
+            dropdown.classList.remove('open');
+        });
+    }
+    // 页面加载后初始化
+    window.addEventListener('DOMContentLoaded', setupUserDropdown);
 });
 
 // 检查登录状态的函数

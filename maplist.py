@@ -284,3 +284,21 @@ def test_imgbb():
             'api_key_configured': True,
             'connection_test': 'unknown_error'
         })
+
+# =====================
+# 路由：地图详情页
+# =====================
+@maplist_bp.route('/map/<int:map_id>', methods=['GET'])
+@login_required
+def map_detail(map_id):
+    """地图详情页，展示地图详细信息和记录"""
+    session = SessionLocal()
+    try:
+        map_obj = session.query(MapList).filter_by(id=map_id).first()
+        if not map_obj:
+            return "地图不存在", 404
+        # 记录列表暂时为空
+        records = []
+        return render_template('map_detail.html', map=map_obj, records=records)
+    finally:
+        session.close()

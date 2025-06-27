@@ -41,11 +41,18 @@
             <a href="#" class="nav-link">暂定</a>
         </div>
         <div class="nav-actions">
-             <span class="username">欢迎, {{ session.username }}</span>
-             {% if session.user_role == 'admin' %}
-             <a href="{{ url_for('admin.admin_home') }}" class="nav-link" target="_blank">管理后台</a>
-             {% endif %}
-             <a href="{{ url_for('auth.logout') }}" class="nav-link">退出</a>
+            <div class="user-dropdown">
+                <div class="user-info" id="userDropdownToggle">
+                    <img src="{{ session.avatar_url or url_for('static', filename='default_avatar.png') }}" class="user-avatar" alt="头像">
+                    <span class="username">{{ session.username }}</span>
+                </div>
+                <div class="dropdown-menu" id="userDropdownMenu">
+                    {% if session.user_role == 'admin' %}
+                    <a href="{{ url_for('admin.admin_home') }}" class="dropdown-item" target="_blank">管理后台</a>
+                    {% endif %}
+                    <a href="{{ url_for('auth.logout') }}" class="dropdown-item">退出</a>
+                </div>
+            </div>
         </div>
     </nav>
 

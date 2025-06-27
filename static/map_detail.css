@@ -1,0 +1,279 @@
+/* 地图详情页专用样式 */
+.map-detail-container {
+    display: flex;
+    flex-direction: row;
+    gap: 32px;
+    margin: -10px auto 0 auto;
+    max-width: 1100px;
+    align-items: flex-start;
+    justify-content: center;
+}
+.map-detail-mainbox {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 2px 18px #e3e3e3;
+    padding: 32px 38px 28px 38px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 420px;
+    max-width: 520px;
+}
+.map-detail-image {
+    width: 360px;
+    height: 240px;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px #e3e3e3;
+    background: #f5f5f5;
+    margin-bottom: 18px;
+}
+.map-detail-title {
+    font-size: 1.5em;
+    color: #1976d2;
+    font-weight: bold;
+    margin: 18px 0 0 0;
+    text-align: center;
+    width: 100%;
+    word-break: break-all;
+}
+.map-detail-info-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 0;
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 12px;
+}
+.map-detail-info-table th, .map-detail-info-table td {
+    text-align: left;
+    padding: 4px 8px;
+    font-size: 1.08em;
+    color: #333;
+    border-bottom: none;
+}
+.map-detail-info-table th {
+    color: #1976d2;
+    font-weight: 600;
+    width: 110px;
+    background: #f4f8fb;
+    text-align: left;
+    padding-left: 12px;
+    min-width: 80px;
+    white-space: nowrap;
+}
+.map-detail-info-table td {
+    font-weight: bold;
+    min-width: 180px;
+    text-align: left;
+    padding-left: 12px;
+}
+.map-detail-info-table tr:last-child td, .map-detail-info-table tr:last-child th {
+    border-bottom: none;
+}
+.map-detail-records {
+    margin: 38px auto 0 auto;
+    max-width: 1100px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px #e3e3e3;
+    padding: 24px 32px 32px 32px;
+}
+.map-detail-records-title {
+    font-size: 1.18em;
+    color: #1976d2;
+    font-weight: bold;
+    margin-bottom: 18px;
+}
+.map-detail-records-table {
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 12px;
+    width: 100%;
+    margin: 0 auto;
+    box-shadow: 0 2px 18px #e3e3e3;
+}
+.map-detail-records-table th,
+.map-detail-records-table td {
+    background: transparent !important;
+}
+.map-detail-records-table th {
+    color: #1976d2;
+    font-weight: 600;
+    background: #f4f8fb;
+}
+.map-detail-records-table tr:last-child td, .map-detail-records-table tr:last-child th {
+    border-bottom: none;
+}
+@media (max-width: 900px) {
+    .map-detail-container { flex-direction: column; gap: 18px; }
+    .map-detail-mainbox { max-width: 100%; min-width: 0; padding: 16px; }
+    .map-detail-image { width: 100%; height: 180px; }
+}
+
+body:not(.admin-bg) {
+    background: #f7f7f9 url("/static/background/body-background.png?v=20240613") no-repeat center top fixed;
+    background-size: cover;
+}
+body.night-mode {
+    background: url('/static/background/body-background-night.png?v=20240613') no-repeat center top fixed !important;
+    background-size: cover !important;
+    background-position: center top !important;
+}
+#nightModeToggle {
+    background: transparent !important;
+    box-shadow: none !important;
+    transition: box-shadow 0.2s, transform 0.2s, background 0.2s;
+}
+#nightModeToggle:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+    transform: translateY(-2px) scale(1.03);
+    background: rgba(255,255,255,0.18) !important;
+}
+
+.map-detail-container.wide {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    margin: 0px auto 0 auto;
+    max-width: 1200px;
+}
+.map-detail-mainbox-wide {
+    display: flex;
+    flex-direction: row;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 2px 18px #e3e3e3;
+    padding: 38px 48px 38px 48px;
+    min-width: 700px;
+    max-width: 900px;
+    margin-top: -300px;
+    align-items: flex-start;
+    gap: 38px;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: box-shadow 0.3s, transform 0.3s;
+}
+.map-detail-mainbox-wide:hover {
+    transform: translateY(-3px) scale(1.007);
+    box-shadow: 0 4px 16px rgba(25, 118, 210, 0.12), 0 2px 12px #e3e3e3;
+}
+.map-detail-mainbox-img {
+    flex: 0 0 380px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+.map-detail-image {
+    width: 300px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px #e3e3e3;
+    background: #f5f5f5;
+    margin-bottom: 0;
+}
+.map-detail-mainbox-info {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    min-width: 260px;
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 18px;
+    box-shadow: 0 2px 18px #e3e3e3;
+    padding: 18px 18px;
+}
+.map-detail-title {
+    font-size: 1.5em;
+    color: #1976d2;
+    font-weight: bold;
+    margin: 18px 0 0 0;
+    text-align: center;
+    width: 100%;
+    word-break: break-all;
+}
+.map-detail-info-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 0;
+}
+.map-detail-info-table th, .map-detail-info-table td {
+    text-align: left;
+    padding: 4px 8px;
+    font-size: 1.08em;
+    color: #333;
+    border-bottom: none;
+}
+.map-detail-info-table th {
+    color: #1976d2;
+    font-weight: 600;
+    width: 110px;
+    background: #f4f8fb;
+    text-align: left;
+    padding-left: 12px;
+    min-width: 80px;
+    white-space: nowrap;
+}
+.map-detail-info-table td {
+    font-weight: bold;
+    min-width: 180px;
+    text-align: left;
+    padding-left: 12px;
+}
+.map-detail-info-table tr:last-child td, .map-detail-info-table tr:last-child th {
+    border-bottom: none;
+}
+@media (max-width: 900px) {
+    .map-detail-container.wide { flex-direction: column; gap: 18px; }
+    .map-detail-mainbox-wide { flex-direction: column; max-width: 100%; min-width: 0; padding: 16px; gap: 18px; }
+    .map-detail-mainbox-img { justify-content: center; }
+    .map-detail-image { width: 100%; height: 180px; }
+    .map-detail-mainbox-info { min-width: 0; }
+}
+
+/* 只给外层大盒子加毛玻璃 */
+.map-detail-mainbox-wide,
+.map-detail-records {
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 2px 18px #e3e3e3;
+    border-radius: 18px;
+}
+
+/* 内部子盒子全部透明，不要背景和毛玻璃 */
+.map-detail-mainbox-img,
+.map-detail-mainbox-info,
+.map-detail-records-title,
+.map-detail-records-table {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+}
+
+/* 表格和单元格透明，保证毛玻璃只由父盒子提供 */
+.map-detail-info-table,
+.map-detail-info-table th,
+.map-detail-info-table td {
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* 移除 main-content-card 的毛玻璃样式，恢复默认或纯白 */
+.main-content-card {
+    background: #fff;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
