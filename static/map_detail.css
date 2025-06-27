@@ -113,26 +113,6 @@
     .map-detail-image { width: 100%; height: 180px; }
 }
 
-body:not(.admin-bg) {
-    background: #f7f7f9 url("/static/background/body-background.png?v=20240613") no-repeat center top fixed;
-    background-size: cover;
-}
-body.night-mode {
-    background: url('/static/background/body-background-night.png?v=20240613') no-repeat center top fixed !important;
-    background-size: cover !important;
-    background-position: center top !important;
-}
-#nightModeToggle {
-    background: transparent !important;
-    box-shadow: none !important;
-    transition: box-shadow 0.2s, transform 0.2s, background 0.2s;
-}
-#nightModeToggle:hover {
-    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-    transform: translateY(-2px) scale(1.03);
-    background: rgba(255,255,255,0.18) !important;
-}
-
 .map-detail-container.wide {
     display: flex;
     flex-direction: row;

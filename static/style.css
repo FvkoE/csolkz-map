@@ -25,7 +25,7 @@ body.night-mode {
 .header {
     background: #ffffff;
     color: #fff;
-    padding: 64px 0 100px 0; /* 增加上下内边距，使标题栏更高 */
+    padding: 64px 0 100px 0; 
     text-align: center;
     font-size: 2.2em;
     letter-spacing: 4px;
@@ -1258,19 +1258,20 @@ body.night-mode {
     gap: 8px;
     padding: 4px 12px;
     border-radius: 12px;
-    background: #fff;
+    background: rgba(255, 255, 255, 0.1);
     height: 40px;
     position: relative;
     z-index: 2;
-    transition: background 0.18s, box-shadow 0.18s;
+
 }
 .user-info:hover {
     background: rgba(255, 255, 255, 0.325);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.318);
+    
 }
 .user-avatar {
-    width: 32px;
-    height: 32px;
+    width: 35px;
+    height: 35px;
     border-radius: 50%;
     object-fit: cover;
     border: none;
@@ -1290,9 +1291,10 @@ body.night-mode {
     left: 50%;
     top: 100%;
     transform: translateX(-50%) translateY(6px);
-    min-width: 148px;
+    min-width: 105px;
     background: #fff;
     border-radius: 14px;
+    margin-top: -8px;
     box-shadow: 0 8px 32px rgba(25, 118, 210, 0.10);
     z-index: 1001;
     padding: 6px 0;
@@ -1307,7 +1309,7 @@ body.night-mode {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 22px 10px 18px;
+    padding: 8px 16px 8px 14px;
     color: #222;
     text-decoration: none;
     font-size: 1em;

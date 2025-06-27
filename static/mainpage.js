@@ -1099,7 +1099,7 @@ document.addEventListener('DOMContentLoaded', function() {
         bindMapDetailLinks();
     };
 
-    // 用户下拉菜单交互（悬停触发）
+    // 用户下拉菜单交互（悬停触发，所有页面共用）
     function setupUserDropdown() {
         const dropdown = document.querySelector('.user-dropdown');
         if (!dropdown) return;
