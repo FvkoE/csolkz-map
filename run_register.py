@@ -164,7 +164,7 @@ def create_register_app():
 def main():
     """主函数"""
     print("🚀 启动独立注册页面服务器...")
-    print("📝 注册页面地址: http://localhost:5050")
+    print("📝 注册页面地址: http://localhost:5001")
     print("🔧 按 Ctrl+C 停止服务器")
     print("-" * 50)
     
@@ -183,15 +183,10 @@ def main():
     # 启动服务器
     app.run(
         host='0.0.0.0',
-        port=5050,
+        port=5001,
         debug=True,
         use_reloader=True
     )
 
 if __name__ == '__main__':
     main() 
-    import os
-os.environ['SENDER_EMAIL'] = '782074627@qq.com'
-os.environ['SENDER_PASSWORD'] = 'ktqyjdktcouzbfaj'
-os.environ['SMTP_SERVER'] = 'smtp.qq.com'
-os.environ['SMTP_PORT'] = '587' 
