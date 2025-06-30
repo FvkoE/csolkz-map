@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSOL KZ - 注册成功</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .success-container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: #27ae60;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 40px;
+        }
+
+        .success-title {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .success-message {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.2s ease;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #e1e5e9;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+
+        .info-box {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .info-box h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .info-box p {
+            margin-bottom: 8px;
+        }
+
+        .highlight {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        @media (max-width: 480px) {
+            .success-container {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <div class="success-icon">✓</div>
+        
+        <h1 class="success-title">注册成功！</h1>
+        
+        <p class="success-message">
+            恭喜您成功注册CSOL KZ地图管理平台！<br>
+            您的账号已经创建完成，现在可以使用新账号登录系统。
+        </p>
+        
+        <div class="action-buttons">
+            <a href="/" class="btn btn-primary">继续注册</a>
+            <a href="http://localhost:5000" class="btn btn-secondary">前往登录</a>
+        </div>
+        
+        <div class="info-box">
+            <h4>📋 注册信息</h4>
+            <p>• 用户名：<span class="highlight">{{ session.get('registered_username', '') }}</span></p>
+            <p>• 邮箱：<span class="highlight">{{ session.get('registered_email', '') }}</span></p>
+            <p>• 注册时间：<span class="highlight">{{ session.get('registered_time', '') }}</span></p>
+            <br>
+            <p><strong>💡 提示：</strong>请妥善保管您的登录信息，如有问题请联系管理员。</p>
+        </div>
+    </div>
+
+    <script>
+        // 自动聚焦到继续注册按钮
+        window.addEventListener('load', function() {
+            const continueBtn = document.querySelector('.btn-primary');
+            if (continueBtn) {
+                continueBtn.focus();
+            }
+        });
+        
+        // 键盘快捷键
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                // 回车键跳转到继续注册
+                window.location.href = '/';
+            } else if (e.key === 'Escape') {
+                // ESC键跳转到登录页面
+                window.location.href = 'http://localhost:5000';
+            }
+        });
+    </script>
+</body>
+</html> 

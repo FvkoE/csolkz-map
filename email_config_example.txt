@@ -1,0 +1,50 @@
+# 邮箱配置示例
+# 请将以下内容复制到环境变量或 .env 文件中
+
+# 发件人邮箱地址（推荐使用QQ邮箱）
+SENDER_EMAIL=your_email@qq.com
+
+# 邮箱授权码（不是登录密码）
+# QQ邮箱获取授权码步骤：
+# 1. 登录QQ邮箱网页版
+# 2. 点击"设置" -> "账户"
+# 3. 找到"POP3/IMAP/SMTP/Exchange/CardDAV/CalDAV服务"
+# 4. 开启"POP3/SMTP服务"
+# 5. 按照提示获取授权码
+SENDER_PASSWORD=your_email_authorization_code
+
+# 发件人显示名称（可选）
+SENDER_NAME=CSOL KZ 地图管理平台
+
+# SMTP服务器地址（可选，默认使用QQ邮箱）
+SMTP_SERVER=smtp.qq.com
+
+# SMTP端口（可选，默认587）
+SMTP_PORT=587
+
+# 其他邮箱服务商配置示例：
+
+# 163邮箱
+# SENDER_EMAIL=your_email@163.com
+# SENDER_PASSWORD=your_authorization_code
+# SMTP_SERVER=smtp.163.com
+# SMTP_PORT=587
+
+# Gmail邮箱
+# SENDER_EMAIL=your_email@gmail.com
+# SENDER_PASSWORD=your_app_password
+# SMTP_SERVER=smtp.gmail.com
+# SMTP_PORT=587
+
+# 126邮箱
+# SENDER_EMAIL=your_email@126.com
+# SENDER_PASSWORD=your_authorization_code
+# SMTP_SERVER=smtp.126.com
+# SMTP_PORT=587
+
+# 注意事项：
+# 1. 不要使用邮箱登录密码，必须使用授权码
+# 2. 授权码是16位字符串，包含字母和数字
+# 3. 如果使用Gmail，需要开启两步验证并生成应用专用密码
+# 4. 确保邮箱服务商开启了SMTP服务
+# 5. 如果发送失败，请检查防火墙和网络连接 

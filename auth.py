@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from models import SessionLocal, User
 from functools import wraps
+import re
 
 # 创建认证蓝图
 auth_bp = Blueprint('auth', __name__)
@@ -35,6 +36,83 @@ def admin_required(f):
         flash('请先登录管理员账户', 'error')
         return redirect(url_for('admin.admin_login'))
     return decorated_function
+
+@auth_bp.route('/register', methods=['GET', 'POST'])
+def register():
+    """用户注册"""
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        email = request.form.get('email', '').strip()
+        password = request.form.get('password', '')
+        confirm_password = request.form.get('confirm_password', '')
+        agree_terms = request.form.get('agree_terms')
+        
+        # 表单验证
+        errors = []
+        
+        # 用户名验证
+        if not username or len(username) < 3:
+            errors.append('用户名至少需要3个字符')
+        elif len(username) > 20:
+            errors.append('用户名不能超过20个字符')
+        elif not re.match(r'^[a-zA-Z0-9_\u4e00-\u9fa5]+$', username):
+            errors.append('用户名只能包含字母、数字、下划线和中文')
+        
+        # 邮箱验证
+        if not email or not re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email):
+            errors.append('请输入有效的邮箱地址')
+        
+        # 密码验证
+        if not password or len(password) < 6:
+            errors.append('密码至少需要6个字符')
+        elif password != confirm_password:
+            errors.append('两次输入的密码不一致')
+        
+        # 协议同意验证
+        if not agree_terms:
+            errors.append('请同意用户协议和隐私政策')
+        
+        if errors:
+            for error in errors:
+                flash(error, 'error')
+            return render_template('register.html')
+        
+        session_db = SessionLocal()
+        try:
+            # 检查用户名是否已存在
+            existing_user = session_db.query(User).filter_by(username=username).first()
+            if existing_user:
+                flash('用户名已存在', 'error')
+                return render_template('register.html')
+            
+            # 检查邮箱是否已存在
+            existing_email = session_db.query(User).filter_by(email=email).first()
+            if existing_email:
+                flash('邮箱已被注册', 'error')
+                return render_template('register.html')
+            
+            # 创建新用户
+            new_user = User(
+                username=username,
+                email=email,
+                role='user'
+            )
+            new_user.set_password(password)
+            
+            session_db.add(new_user)
+            session_db.commit()
+            
+            flash('注册成功！请使用新账号登录', 'success')
+            return redirect(url_for('auth.login'))
+            
+        except Exception as e:
+            session_db.rollback()
+            flash('注册失败，请稍后重试', 'error')
+            print(f"注册错误: {e}")
+        finally:
+            session_db.close()
+    
+    return render_template('register.html')
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
