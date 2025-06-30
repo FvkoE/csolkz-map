@@ -26,6 +26,8 @@ class EmailVerification:
         
         # 验证码存储（实际项目中应该使用Redis或数据库）
         self.verification_codes = {}
+        # 记录每个邮箱上次发送时间
+        self.last_send_time = {}
         
     def generate_verification_code(self, length=6):
         """生成验证码"""
@@ -33,6 +35,12 @@ class EmailVerification:
     
     def send_verification_email(self, to_email, username):
         """发送验证码邮件"""
+        # 60秒冷却检查
+        now = datetime.now()
+        last_time = self.last_send_time.get(to_email)
+        if last_time and (now - last_time).total_seconds() < 60:
+            return False, "发送过于频繁，请60秒后再试"
+        self.last_send_time[to_email] = now
         try:
             # 生成验证码
             verification_code = self.generate_verification_code()
@@ -44,8 +52,7 @@ class EmailVerification:
             self.verification_codes[to_email] = {
                 'code': verification_code,
                 'username': username,
-                'expire_time': expire_time,
-                'attempts': 0  # 验证尝试次数
+                'expire_time': expire_time
             }
             
             # 创建邮件内容
@@ -162,6 +169,10 @@ class EmailVerification:
             return True, "验证码已发送到您的邮箱"
             
         except Exception as e:
+            # 针对云服务器等环境下的特殊SMTP响应，实际已发送但抛出(-1, b'\x00\x00\x00')异常
+            if str(e) == "(-1, b'\\x00\\x00\\x00')":
+                print("⚠️ 邮件已发送，但服务器返回异常响应，可忽略。")
+                return True, "验证码已发送到您的邮箱"
             print(f"❌ 发送邮件失败: {e}")
             return False, f"发送邮件失败: {str(e)}"
     
@@ -177,20 +188,13 @@ class EmailVerification:
             del self.verification_codes[email]
             return False, "验证码已过期，请重新获取"
         
-        # 检查尝试次数
-        if verification_data['attempts'] >= 5:
-            del self.verification_codes[email]
-            return False, "验证失败次数过多，请重新获取验证码"
-        
         # 验证码匹配检查
         if verification_data['code'] == code:
             # 验证成功，删除验证码
             del self.verification_codes[email]
             return True, "验证成功"
         else:
-            # 验证失败，增加尝试次数
-            verification_data['attempts'] += 1
-            return False, f"验证码错误，还剩 {5 - verification_data['attempts']} 次尝试机会"
+            return False, "验证码错误"
     
     def is_email_verified(self, email):
         """检查邮箱是否已验证"""

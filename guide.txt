@@ -12,3 +12,4 @@
 
      ##删除申请表数据
      python delete_apply.py show <ID>
+     http://60.205.144.139
