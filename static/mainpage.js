@@ -1099,18 +1099,15 @@ document.addEventListener('DOMContentLoaded', function() {
         bindMapDetailLinks();
     };
 
-    // 用户下拉菜单交互（悬停触发，所有页面共用）
+    // 用户下拉菜单交互（主页面统一为点击跳转）
     function setupUserDropdown() {
-        const dropdown = document.querySelector('.user-dropdown');
-        if (!dropdown) return;
-        dropdown.addEventListener('mouseenter', function() {
-            dropdown.classList.add('open');
-        });
-        dropdown.addEventListener('mouseleave', function() {
-            dropdown.classList.remove('open');
+        const toggle = document.getElementById('userDropdownToggle');
+        if (!toggle) return;
+        // 直接跳转到个人信息页面
+        toggle.addEventListener('click', function(e) {
+            window.location.href = '/profile';
         });
     }
-    // 页面加载后初始化
     window.addEventListener('DOMContentLoaded', setupUserDropdown);
 });
 

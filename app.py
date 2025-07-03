@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, redirect, url_for, session
 from dotenv import load_dotenv
 import os
+from flask import render_template
 
 # 加载环境变量
 load_dotenv()
@@ -71,6 +72,10 @@ def create_app(config_name='default'):
             return jsonify({'success': False, 'msg': str(e)})
         finally:
             session.close()
+    
+    @app.route('/profile')
+    def profile():
+        return render_template('profile.html')
     
     # 全局中间件：会话验证
     @app.before_request

@@ -11,7 +11,7 @@
     </div>
     <div class="nav-actions">
         <div class="user-dropdown">
-            <div class="user-info" id="userDropdownToggle">
+            <div class="user-info" id="userDropdownToggle" style="cursor: pointer">
                 <img src="{{ session.avatar_url or url_for('static', filename='default_avatar.png') }}" class="user-avatar" alt="头像">
                 <span class="username">{{ session.username }}</span>
             </div>

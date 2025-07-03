@@ -30,20 +30,11 @@
 
 // 用户下拉菜单交互
 function setupUserDropdown() {
-    const dropdown = document.querySelector('.user-dropdown');
     const toggle = document.getElementById('userDropdownToggle');
-    const menu = document.getElementById('userDropdownMenu');
-    if (!dropdown || !toggle || !menu) return;
-    // 切换下拉
+    if (!toggle) return;
+    // 直接跳转到个人信息页面
     toggle.addEventListener('click', function(e) {
-        e.stopPropagation();
-        dropdown.classList.toggle('open');
-    });
-    // 点击外部关闭
-    document.addEventListener('click', function(e) {
-        if (!dropdown.contains(e.target)) {
-            dropdown.classList.remove('open');
-        }
+        window.location.href = '/profile';
     });
 }
 window.addEventListener('DOMContentLoaded', setupUserDropdown); 

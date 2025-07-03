@@ -29,38 +29,9 @@
         </div>
     </div>
     <!-- #endregion -->
-    
-    <!-- #region 导航栏 -->
-    <nav class="nav-bar">
-        <div class="nav-logo">
-            <img src="{{ url_for('static', filename='logo.png') }}" alt="" class="logo-img">
-            <span class="logo-text">csolkz地图</span>
-        </div>
-        <div class="nav-links">
-            <a href="#" class="nav-link">暂定</a>
-            <a href="#" class="nav-link">暂定</a>
-            <a href="#" class="nav-link">暂定</a>
-            <a href="#" class="nav-link">暂定</a>
-        </div>
-        <div class="nav-actions">
-            <div class="user-dropdown">
-                <div class="user-info" id="userDropdownToggle">
-                    <img src="{{ session.avatar_url or url_for('static', filename='default_avatar.png') }}" class="user-avatar" alt="头像">
-                    <span class="username">{{ session.username }}</span>
-                </div>
-                <div class="dropdown-menu" id="userDropdownMenu">
-                    {% if session.user_role == 'admin' %}
-                    <a href="{{ url_for('admin.admin_home') }}" class="dropdown-item" target="_blank">管理后台</a>
-                    {% endif %}
-                    <a href="{{ url_for('auth.logout') }}" class="dropdown-item">退出</a>
-                </div>
-            </div>
-        </div>
-    </nav>
-
     <!-- 主内容卡片区域开始 -->
-    <div class="main-content-card">
-        <div class="main-title">地图列表</div>
+    <div class="">
+        <div class="main-title"></div>
         <!-- 筛选地图 -->
         <form id="filter-box" class="filter-section" method="get" action="{{ url_for('maplist.mainpage') }}#filter-box">
             <input type="hidden" name="view" id="viewModeInput" value="{{ request.args.get('view', 'card') }}">
@@ -127,7 +98,7 @@
         </form>
 
         <!-- 视图切换与申请按钮容器 -->
-        <div class="view-switcher-container">
+        <div class="mainpage-glass-info" >
             <div class="view-switcher">
                 <button id="listViewBtn" class="view-btn" title="列表视图" type="button">
                     <svg width="22" height="22" viewBox="0 0 22 22"><rect x="4" y="6" width="14" height="2" rx="1" fill="#fff"/><rect x="4" y="10" width="14" height="2" rx="1" fill="#fff"/><rect x="4" y="14" width="14" height="2" rx="1" fill="#fff"/></svg>
@@ -135,11 +106,11 @@
                 <button id="cardViewBtn" class="view-btn active" title="卡片视图" type="button">
                     <svg width="22" height="22" viewBox="0 0 22 22"><rect x="4" y="4" width="6" height="6" rx="1" fill="#fff"/><rect x="12" y="4" width="6" height="6" rx="1" fill="#fff"/><rect x="4" y="12" width="6" height="6" rx="1" fill="#fff"/><rect x="12" y="12" width="6" height="6" rx="1" fill="#fff"/></svg>
                 </button>
-                <a href="javascript:void(0);" class="add-map-btn-main" onclick="openAddModal()">申请添加地图</a>
             </div>
+            <a href="javascript:void(0);" class="add-map-btn-main" onclick="openAddModal()">申请添加地图</a>
         </div>
 
-        <div id="map-list-container">
+        <div id="map-list-container" class="map-list-container">
             {% include '_map_list_partial.html' %}
         </div>
     </div>
@@ -355,5 +326,6 @@
     </button>
 
     <script src="{{ static_url(filename='mainpage.js') }}"></script>
+    
 </body>
 </html>

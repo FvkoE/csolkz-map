@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Microsoft YaHei', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #232526 0%, #414345 100%); /* 高级黑渐变 */
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -21,10 +21,10 @@
         }
 
         .login-container {
-            background: white;
+            background: #18191a; /* 深黑灰 */
             padding: 40px;
             border-radius: 15px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
             width: 100%;
             max-width: 400px;
             text-align: center;
@@ -35,13 +35,13 @@
         }
 
         .logo h1 {
-            color: #333;
+            color: #fff;
             font-size: 28px;
             margin-bottom: 10px;
         }
 
         .logo p {
-            color: #666;
+            color: #aaa;
             font-size: 14px;
         }
 
@@ -53,38 +53,42 @@
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            color: #333;
+            color: #eee;
             font-weight: 500;
         }
 
         .form-group input {
             width: 100%;
             padding: 12px 15px;
-            border: 2px solid #e1e5e9;
+            border: 2px solid #333;
+            background: #232526;
+            color: #fff;
             border-radius: 8px;
             font-size: 16px;
-            transition: border-color 0.3s ease;
+            transition: border-color 0.3s ease, background 0.3s;
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #888;
+            background: #26282b;
         }
 
         .login-btn {
             width: 100%;
             padding: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(135deg, #232526 0%, #414345 100%);
+            color: #fff;
             border: none;
             border-radius: 8px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s ease;
+            transition: transform 0.2s ease, background 0.3s;
         }
 
         .login-btn:hover {
+            background: linear-gradient(135deg, #414345 0%, #232526 100%);
             transform: translateY(-2px);
         }
 
@@ -104,35 +108,35 @@
         }
 
         .flash-message.error {
-            background-color: #fee;
-            color: #c33;
-            border: 1px solid #fcc;
+            background-color: #2d1a1a;
+            color: #ff6b6b;
+            border: 1px solid #c0392b;
         }
 
         .flash-message.success {
-            background-color: #efe;
-            color: #3c3;
-            border: 1px solid #cfc;
+            background-color: #1a2d1a;
+            color: #27ae60;
+            border: 1px solid #27ae60;
         }
 
         .flash-message.info {
-            background-color: #eef;
-            color: #33c;
-            border: 1px solid #ccf;
+            background-color: #1a1a2d;
+            color: #3498db;
+            border: 1px solid #2980b9;
         }
 
         .test-accounts {
             margin-top: 20px;
             padding: 15px;
-            background: #f8f9fa;
+            background: #232526;
             border-radius: 8px;
             font-size: 12px;
-            color: #666;
+            color: #aaa;
         }
 
         .test-accounts h4 {
             margin-bottom: 10px;
-            color: #333;
+            color: #eee;
         }
 
         .test-accounts p {
@@ -140,7 +144,7 @@
         }
 
         .highlight-blue {
-            color: #0d6efd; /* 鲜明的蓝色 */
+            color: #00bfff; /* 鲜明的蓝色 */
             font-weight: 600;
         }
 

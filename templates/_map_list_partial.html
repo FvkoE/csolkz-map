@@ -28,16 +28,6 @@
     <!-- 列表视图 -->
     <div class="map-list-table-wrapper" id="infinite-table-wrapper" {% if request.args.get('view', 'card') != 'list' %}style="display:none;"{% endif %}>
         <table class="map-list-table">
-            <thead>
-                <tr>
-                    <th>封面</th>
-                    <th>图名</th>
-                    <th>作者</th>
-                    <th>大区</th>
-                    <th id="level-sort-th" style="cursor:pointer;user-select:none;">难度 <span id="level-sort-arrow">⇅</span></th>
-                    <th>类型</th>
-                </tr>
-            </thead>
             <tbody>
             {% if maps|length == 0 and current_page == 1 %}
                 <tr><td colspan="6" style="color:#888;text-align:center;padding:40px 0;">暂无地图信息</td></tr>
