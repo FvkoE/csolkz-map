@@ -51,7 +51,7 @@ body.night-mode::before {
     font-weight: bold;
     box-shadow: 0 2px 8px #e3e3e3;
     margin-top: 56px; /* 为导航栏留出空间 */
-    margin-bottom: -20px;
+    margin-bottom: -10px;
     border-bottom-left-radius: 22px;
     border-bottom-right-radius: 22px;
     transition: box-shadow 0.3s, transform 0.3s;
@@ -132,7 +132,7 @@ body.night-mode::before {
     color: #1976d2;
 }
 
-/* 主内容卡片区域样式 */
+主内容卡片区域样式
 .main-content-card {
     background: rgb(255, 255, 255);      /* 背景为半透明白色 */
     border-radius: 16px;                     /* 圆角半径16px */
@@ -157,10 +157,21 @@ body.night-mode::before {
 /* 筛选区整体内边距和分隔线 */
 .filter-section {
     padding: 0 0 0 0;
-    margin-bottom: 18px;
+    margin-bottom: 5px !important;
+    margin-top:15px !important;
     border: none;
-    background: none;
+    border-radius: 5px;
+    background: rgba(255,255,255,0.9) !important;
+    /* background: none; */
     box-shadow: none;
+    background: white;
+    padding: 22px;
+    margin: 22px auto 2px auto;
+    
+    max-width: 1200px;
+    border-radius: 5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 77px;
 }
 
 /* 筛选区每行下分隔线 */
