@@ -14,8 +14,8 @@
         <!-- 已登录用户显示用户信息 -->
         <div class="user-dropdown">
             <div class="user-info" id="userDropdownToggle" style="cursor: pointer">
-                <img src="{{ session.avatar_url or url_for('static', filename='default_avatar.png') }}" class="user-avatar" alt="头像">
-                <span class="username">{{ session.username }}</span>
+                <img src="{{ (session.avatar_url or url_for('static', filename='default_avatar.svg')) ~ '?t=' ~ session.user_id if session.avatar_url else url_for('static', filename='default_avatar.svg') }}" class="user-avatar" alt="头像">
+                <span class="username">{{ session.nickname or session.username }}</span>
             </div>
             <div class="dropdown-menu" id="userDropdownMenu">
                 {% if session.user_role == 'admin' %}

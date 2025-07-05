@@ -1481,10 +1481,12 @@ body.night-mode::before {
     width: 100%;
     padding: 12px 15px;
     border: 2px solid #333;
-    background: #fff;
-    color: #222;
-    border-radius: 8px;
-    font-size: 16px;
+    background: white !important;
+    color: #333 !important;
+    border-radius: 12px !important;
+    font-size: 1.1em !important;
+    text-align: center !important;
+    font-weight: 500 !important;
     transition: border-color 0.3s, background 0.3s;
 }
 .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
@@ -1562,4 +1564,533 @@ body.night-mode::before {
     .register-container { margin: 20px; padding: 30px 20px; }
     .verification-group { flex-direction: column; gap: 10px; }
     .send-code-btn { width: 100%; min-width: unset; }
+}
+
+/* 个人信息完善弹窗样式 */
+.profile-completion-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    pointer-events: auto;
+}
+
+.profile-completion-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    padding: 40px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.3s ease-out;
+    border: 1px solid #e0e0e0;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -60%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+.profile-completion-title {
+    text-align: center;
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 30px;
+    letter-spacing: 1px;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 15px;
+}
+
+.profile-completion-form {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.profile-avatar-section {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.profile-avatar-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.profile-avatar-placeholder {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px dashed #bbb;
+    background: #f5f5f5;
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.08);
+}
+.profile-avatar-placeholder:hover {
+    border-color: #1976d2;
+    background: #e8e8e8;
+}
+.profile-avatar-placeholder::before {
+    content: '+';
+    font-size: 2.5em;
+    color: #aaa;
+    font-weight: 300;
+}
+.profile-avatar-text {
+    color: #888;
+    font-size: 1em;
+    position: absolute;
+    left: 0; right: 0; bottom: 18px;
+    text-align: center;
+    pointer-events: none;
+}
+
+.profile-avatar-preview {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid #eee;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.profile-avatar-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+
+
+/* 昵称输入框 */
+.profile-nickname-input {
+    width: 80%;
+    max-width: 400px;
+    margin: 0 auto 8px auto;
+    padding: 14px 20px;
+    border: 2px solid #bbb;
+    border-radius: 12px;
+    background: #fff;
+    color: #333;
+    font-size: 1.1em;
+    text-align: center;
+    font-weight: 500;
+    box-sizing: border-box;
+    display: block;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.profile-nickname-input:focus {
+    border-color: #1976d2;
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.12);
+    outline: none;
+}
+.profile-nickname-input::placeholder {
+    color: #bbb;
+    opacity: 1;
+}
+
+.profile-nickname-hint {
+    color: #888;
+    font-size: 0.85em;
+    margin-top: 8px;
+    font-style: italic;
+    text-align: center;
+}
+
+.profile-completion-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.profile-completion-btn {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 120px;
+}
+
+.profile-completion-submit {
+    background: #1976d2;
+    color: white;
+    border: none;
+    box-shadow: 0 2px 4px rgba(25, 118, 210, 0.2);
+}
+
+.profile-completion-submit:hover {
+    background: #1565c0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+}
+
+.profile-completion-submit:active {
+    transform: translateY(0);
+}
+
+.profile-completion-cancel {
+    background: #f5f5f5;
+    color: #666;
+    border: 1px solid #ddd;
+}
+
+.profile-completion-cancel:hover {
+    background: #e0e0e0;
+    color: #333;
+}
+
+.profile-completion-cancel:active {
+    transform: translateY(0);
+}
+
+/* 错误提示样式 */
+.profile-completion-error {
+    color: #d32f2f;
+    font-size: 0.9em;
+    text-align: center;
+    margin-top: 15px;
+    padding: 12px;
+    background: #ffebee;
+    border: 1px solid #ffcdd2;
+    border-radius: 8px;
+    display: none;
+    animation: errorShake 0.5s ease-in-out;
+    font-weight: 500;
+}
+
+@keyframes errorShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* 强制填写提示 */
+.profile-completion-modal.force-complete {
+    pointer-events: auto;
+}
+
+.profile-completion-modal.force-complete .profile-completion-content {
+    pointer-events: auto;
+}
+
+/* 阻止背景交互 */
+.profile-completion-modal {
+    pointer-events: auto;
+}
+
+.profile-completion-modal * {
+    pointer-events: auto;
+}
+
+/* 弹窗显示时阻止背景交互 */
+body.modal-open {
+    overflow: hidden;
+    pointer-events: none;
+}
+
+body.modal-open #profileModal {
+    pointer-events: auto;
+}
+
+body.modal-open #profileModal * {
+    pointer-events: auto;
+}
+
+/* 响应式设计 */
+@media (max-width: 600px) {
+    .profile-completion-content {
+        width: 95%;
+        padding: 30px 20px;
+    }
+    
+    .profile-completion-title {
+        font-size: 1.5em;
+        margin-bottom: 25px;
+    }
+    
+    .profile-avatar-preview,
+    .profile-avatar-placeholder {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .profile-completion-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .profile-completion-btn {
+        width: 100%;
+    }
+}
+
+
+/* 头像裁剪弹窗样式 */
+.avatar-crop-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 20000;
+    backdrop-filter: blur(4px);
+    pointer-events: auto;
+}
+
+.avatar-crop-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #2c3e50;
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: hidden;
+    pointer-events: auto;
+}
+
+.avatar-crop-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #34495e;
+    background: #34495e;
+}
+
+.avatar-crop-title {
+    margin: 0;
+    color: #ecf0f1;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.avatar-crop-close {
+    background: none;
+    border: none;
+    color: #bdc3c7;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s;
+    pointer-events: auto;
+    position: relative;
+    z-index: 1;
+}
+
+.avatar-crop-close:hover {
+    background: #e74c3c;
+    color: white;
+}
+
+.avatar-crop-body {
+    padding: 24px;
+}
+
+.avatar-crop-container {
+    position: relative;
+    width: 400px;
+    height: 400px;
+    margin: 0 auto 24px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #34495e;
+    border: 2px solid #3498db;
+}
+
+.avatar-crop-frame {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-crop-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    cursor: move;
+    user-select: none;
+    transition: transform 0.1s ease;
+    pointer-events: auto;
+    position: relative;
+    z-index: 1;
+}
+
+.avatar-crop-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.avatar-crop-zoom-control {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #ecf0f1;
+}
+
+.avatar-crop-zoom-control label {
+    font-weight: 500;
+    min-width: 60px;
+}
+
+.avatar-crop-zoom-control input[type="range"] {
+    flex: 1;
+    height: 6px;
+    background: #34495e;
+    border-radius: 3px;
+    outline: none;
+    -webkit-appearance: none;
+    pointer-events: auto;
+    position: relative;
+    z-index: 1;
+}
+
+.avatar-crop-zoom-control input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    background: #3498db;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.avatar-crop-zoom-control input[type="range"]::-webkit-slider-thumb:hover {
+    background: #2980b9;
+}
+
+.avatar-crop-zoom-control input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    background: #3498db;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    transition: background 0.2s;
+}
+
+.avatar-crop-zoom-control input[type="range"]::-moz-range-thumb:hover {
+    background: #2980b9;
+}
+
+.avatar-crop-zoom-control span {
+    min-width: 50px;
+    text-align: right;
+    font-weight: 500;
+}
+
+.avatar-crop-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.avatar-crop-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 100px;
+    pointer-events: auto;
+    position: relative;
+    z-index: 1;
+}
+
+.avatar-crop-reset {
+    background: #95a5a6;
+    color: white;
+}
+
+.avatar-crop-reset:hover {
+    background: #7f8c8d;
+}
+
+.avatar-crop-apply {
+    background: #27ae60;
+    color: white;
+}
+
+.avatar-crop-apply:hover {
+    background: #229954;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+    .avatar-crop-content {
+        max-width: 95vw;
+        max-height: 95vh;
+    }
+    
+    .avatar-crop-container {
+        width: 300px;
+        height: 300px;
+    }
+    
+    .avatar-crop-body {
+        padding: 16px;
+    }
+    
+    .avatar-crop-header {
+        padding: 16px 20px;
+    }
+    
+    .avatar-crop-actions {
+        flex-direction: column;
+    }
+    
+    .avatar-crop-btn {
+        width: 100%;
+    }
 }

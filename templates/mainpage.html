@@ -280,6 +280,79 @@
         </div>
     </div>
 
+    <!-- 个人信息完善弹窗 -->
+    <div class="profile-completion-modal" id="profileModal">
+        <div class="profile-completion-content">
+            <h2 class="profile-completion-title">完善个人信息</h2>
+            
+            <form id="profileForm" class="profile-completion-form" onsubmit="submitProfile(event)" enctype="multipart/form-data">
+                <!-- 头像上传区域 -->
+                <div class="profile-avatar-section">
+                    <div class="profile-avatar-container">
+                        <!-- <input type="file" id="profileAvatar" name="avatar" accept="image/*" class="profile-avatar-input" required> -->
+                        <div class="profile-avatar-placeholder" id="profileAvatarPlaceholder">
+                            <div class="profile-avatar-text">点击上传头像</div>
+                        </div>
+                        <div class="profile-avatar-preview" id="profileAvatarPreview" style="display:none;"></div>
+                    </div>
+                </div>
+                
+                <!-- 昵称输入区域 -->
+                <div class="profile-nickname-section">
+                    <input type="text" id="profileNickname" name="nickname" required 
+                           placeholder="请输入您的游戏昵称" 
+                           class="profile-nickname-input">
+                    <div class="profile-nickname-hint">1个月只能修改3次</div>
+                </div>
+                
+                <!-- 按钮区域 -->
+                <div class="profile-completion-actions">
+                    <button type="submit" class="profile-completion-btn profile-completion-submit">保存信息</button>
+                </div>
+            </form>
+            
+            <!-- 错误提示区域 -->
+            <div id="profileErrorMsg" class="profile-completion-error">
+                请完善所有必填信息！
+            </div>
+            
+            <div id="profileSuccessMsg" style="display:none; text-align:center; color:#27ae60; font-size:1.1em; margin-top:20px;">
+                个人信息保存成功！
+            </div>
+        </div>
+    </div>
+
+    <!-- 头像裁剪弹窗 -->
+    <div class="avatar-crop-modal" id="avatarCropModal">
+        <div class="avatar-crop-content">
+            <div class="avatar-crop-header">
+                <h3 class="avatar-crop-title">裁剪头像</h3>
+                <button type="button" class="avatar-crop-close" onclick="console.log('关闭按钮点击'); closeAvatarCropModal();">&times;</button>
+            </div>
+            
+            <div class="avatar-crop-body">
+                <div class="avatar-crop-container">
+                    <div class="avatar-crop-frame">
+                        <img id="avatarCropImage" class="avatar-crop-image" alt="裁剪图片">
+                    </div>
+                </div>
+                
+                <div class="avatar-crop-controls">
+                    <div class="avatar-crop-zoom-control">
+                        <label for="avatarCropZoom">缩放：</label>
+                        <input type="range" id="avatarCropZoom" min="0.5" max="3" step="0.1" value="1">
+                        <span id="avatarCropZoomValue">100%</span>
+                    </div>
+                    
+                    <div class="avatar-crop-actions">
+                        <button type="button" class="avatar-crop-btn avatar-crop-reset" onclick="console.log('重置按钮点击'); resetAvatarCrop();">重置</button>
+                        <button type="button" class="avatar-crop-btn avatar-crop-apply" onclick="console.log('应用按钮点击'); applyAvatarCrop();">应用裁剪</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 网站建议弹窗 -->
     <div class="modal" id="adviceModal" style="display:none;">
         <div class="modal-content" style="max-width:420px;">

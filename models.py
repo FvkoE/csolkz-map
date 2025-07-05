@@ -30,11 +30,13 @@ class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(50), unique=True, nullable=False)
-    email = Column(String(100), unique=True, nullable=False)
+    nickname = Column(String(255), nullable=True)  # 昵称
     password_hash = Column(String(255), nullable=False)
     role = Column(String(20), nullable=False, default='user')  # 'user', 'admin', 'temp_user'
     create_time = Column(DateTime, default=datetime.now)
     is_active = Column(Boolean, default=True)
+    email = Column(String(255), nullable=False)  # 邮箱，必填
+    avatar = Column(String(255), nullable=True)  # 头像
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

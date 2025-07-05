@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSOL KZ - 完善个人信息</title>
+    <link rel="stylesheet" href="{{ static_url(filename='style.css') }}">
+</head>
+<body>
+    <div class="complete-profile-container">
+        <div class="logo">
+            <h1>CSOL KZ</h1>
+            <p>地图管理平台 - 完善个人信息</p>
+        </div>
+        
+        <!-- 消息提示 -->
+        <div class="flash-messages">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+        
+        <div class="welcome-text">欢迎加入！</div>
+        <div class="subtitle">请完善您的个人信息</div>
+        
+        <!-- 完善个人信息表单 -->
+        <form method="POST" action="{{ url_for('auth.complete_profile') }}" id="completeProfileForm">
+            <!-- 头像选择 -->
+            <div class="avatar-section">
+                <label class="form-group">
+                    <span style="color: #eee; font-weight: 500; display: block; margin-bottom: 8px; text-align: left;">选择头像</span>
+                    <div class="avatar-grid">
+                        <div class="avatar-option" data-avatar="avatar1.png" style="background-image: url('{{ url_for('static', filename='avatars/avatar1.png') }}')"></div>
+                        <div class="avatar-option" data-avatar="avatar2.png" style="background-image: url('{{ url_for('static', filename='avatars/avatar2.png') }}')"></div>
+                        <div class="avatar-option" data-avatar="avatar3.png" style="background-image: url('{{ url_for('static', filename='avatars/avatar3.png') }}')"></div>
+                        <div class="avatar-option" data-avatar="avatar4.png" style="background-image: url('{{ url_for('static', filename='avatars/avatar4.png') }}')"></div>
+                        <div class="avatar-option" data-avatar="avatar5.png" style="background-image: url('{{ url_for('static', filename='avatars/avatar5.png') }}')"></div>
+                        <div class="avatar-option" data-avatar="avatar6.png" style="background-image: url('{{ url_for('static', filename='avatars/avatar6.png') }}')"></div>
+                        <div class="avatar-option" data-avatar="avatar7.png" style="background-image: url('{{ url_for('static', filename='avatars/avatar7.png') }}')"></div>
+                        <div class="avatar-option" data-avatar="avatar8.png" style="background-image: url('{{ url_for('static', filename='avatars/avatar8.png') }}')"></div>
+                    </div>
+                    <input type="hidden" name="avatar" id="selectedAvatar" value="avatar1.png">
+                </label>
+            </div>
+            
+            <!-- 游戏昵称 -->
+            <div class="form-group">
+                <label for="nickname">游戏昵称</label>
+                <input type="text" id="nickname" name="nickname" required placeholder="请输入您的游戏昵称">
+                <div class="nickname-tip">💡 提示：1个月只能修改3次</div>
+                <div class="error-message" id="nickname-error"></div>
+            </div>
+            
+            <button type="submit" class="register-btn" id="completeBtn">完成设置</button>
+        </form>
+    </div>
+    
+    <script>
+        // 头像选择逻辑
+        const avatarOptions = document.querySelectorAll('.avatar-option');
+        const selectedAvatarInput = document.getElementById('selectedAvatar');
+        
+        avatarOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                // 移除其他选中状态
+                avatarOptions.forEach(opt => opt.classList.remove('selected'));
+                // 添加当前选中状态
+                this.classList.add('selected');
+                // 更新隐藏输入框的值
+                selectedAvatarInput.value = this.dataset.avatar;
+            });
+        });
+        
+        // 默认选中第一个头像
+        avatarOptions[0].classList.add('selected');
+        
+        // 昵称验证
+        const nickname = document.getElementById('nickname');
+        const nicknameError = document.getElementById('nickname-error');
+        const completeBtn = document.getElementById('completeBtn');
+        
+        nickname.addEventListener('input', function() {
+            const value = this.value.trim();
+            
+            if (!value) {
+                this.classList.add('error');
+                this.classList.remove('success');
+                nicknameError.textContent = '请输入游戏昵称';
+                nicknameError.style.display = 'block';
+            } else if (value.length > 50) {
+                this.classList.add('error');
+                this.classList.remove('success');
+                nicknameError.textContent = '昵称不能超过50个字符';
+                nicknameError.style.display = 'block';
+            } else {
+                this.classList.remove('error');
+                this.classList.add('success');
+                nicknameError.style.display = 'none';
+            }
+            
+            validateForm();
+        });
+        
+        function validateForm() {
+            const nicknameValid = nickname.classList.contains('success');
+            if (nicknameValid) {
+                completeBtn.disabled = false;
+            } else {
+                completeBtn.disabled = true;
+            }
+        }
+        
+        // 表单提交验证
+        document.getElementById('completeProfileForm').addEventListener('submit', function(e) {
+            if (completeBtn.disabled) {
+                e.preventDefault();
+                alert('请完善所有必填项');
+            }
+        });
+        
+        // 页面加载时聚焦到昵称输入框
+        window.addEventListener('load', function() {
+            nickname.focus();
+        });
+    </script>
+</body>
+</html> 
