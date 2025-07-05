@@ -107,7 +107,11 @@
                     <svg width="22" height="22" viewBox="0 0 22 22"><rect x="4" y="4" width="6" height="6" rx="1" fill="#fff"/><rect x="12" y="4" width="6" height="6" rx="1" fill="#fff"/><rect x="4" y="12" width="6" height="6" rx="1" fill="#fff"/><rect x="12" y="12" width="6" height="6" rx="1" fill="#fff"/></svg>
                 </button>
             </div>
+            {% if session.user_logged_in %}
             <a href="javascript:void(0);" class="add-map-btn-main" onclick="openAddModal()">申请添加地图</a>
+            {% else %}
+            <a href="{{ url_for('auth.login') }}" class="add-map-btn-main">登录后申请添加地图</a>
+            {% endif %}
         </div>
 
         <div id="map-list-container" class="map-list-container">

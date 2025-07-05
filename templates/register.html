@@ -5,265 +5,122 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CSOL KZ - 注册</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Microsoft YaHei', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #232526 0%, #414345 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-
         .register-container {
-            background: white;
+            background: #18191a;
             padding: 40px;
             border-radius: 15px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
             width: 100%;
-            max-width: 450px;
+            max-width: 400px;
             text-align: center;
         }
-
         .logo {
             margin-bottom: 30px;
         }
-
         .logo h1 {
-            color: #333;
+            color: #fff;
             font-size: 28px;
             margin-bottom: 10px;
         }
-
         .logo p {
-            color: #666;
+            color: #aaa;
             font-size: 14px;
         }
-
-        .form-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-        }
-
-        .form-group input {
+        .form-group { margin-bottom: 20px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 8px; color: #eee; font-weight: 500; }
+        .form-group input, .form-group select, .form-group textarea {
             width: 100%;
             padding: 12px 15px;
-            border: 2px solid #e1e5e9;
+            border: 2px solid #333;
+            background: #fff;
+            color: #222;
             border-radius: 8px;
             font-size: 16px;
-            transition: border-color 0.3s ease;
+            transition: border-color 0.3s, background 0.3s;
         }
-
-        .form-group input:focus {
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #888;
+            background: #f5f5f5;
         }
-
-        .form-group input.error {
-            border-color: #e74c3c;
-        }
-
-        .form-group input.success {
-            border-color: #27ae60;
-        }
-
-        .error-message {
-            color: #e74c3c;
-            font-size: 12px;
-            margin-top: 5px;
-            display: none;
-        }
-
-        .password-strength {
-            margin-top: 5px;
-            font-size: 12px;
-        }
-
-        .password-strength.weak {
-            color: #e74c3c;
-        }
-
-        .password-strength.medium {
-            color: #f39c12;
-        }
-
-        .password-strength.strong {
-            color: #27ae60;
-        }
-
-        .verification-group {
-            display: flex;
-            gap: 10px;
-            align-items: flex-end;
-        }
-
-        .verification-group .form-group {
-            flex: 1;
-            margin-bottom: 0;
-        }
-
-        .send-code-btn {
-            padding: 12px 20px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-            min-width: 120px;
-        }
-
-        .send-code-btn:hover:not(:disabled) {
-            background: #5a6fd8;
-            transform: translateY(-1px);
-        }
-
-        .send-code-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .countdown {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-        }
-
         .register-btn {
             width: 100%;
             padding: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(135deg, #232526 0%, #414345 100%);
+            color: #fff;
             border: none;
             border-radius: 8px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s ease;
-            margin-bottom: 20px;
+            transition: transform 0.2s, background 0.3s;
         }
-
-        .register-btn:hover {
+        .register-btn:hover, .send-code-btn:hover {
+            background: linear-gradient(135deg, #414345 0%, #232526 100%);
             transform: translateY(-2px);
         }
-
-        .register-btn:active {
-            transform: translateY(0);
-        }
-
-        .register-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .flash-messages {
-            margin-bottom: 20px;
-        }
-
+        .register-btn:active, .send-code-btn:active { transform: translateY(0); }
+        .flash-messages { margin-bottom: 20px; }
         .flash-message {
             padding: 10px 15px;
             border-radius: 5px;
             margin-bottom: 10px;
             font-size: 14px;
         }
-
-        .flash-message.error {
-            background-color: #fee;
-            color: #c33;
-            border: 1px solid #fcc;
-        }
-
-        .flash-message.success {
-            background-color: #efe;
-            color: #3c3;
-            border: 1px solid #cfc;
-        }
-
-        .flash-message.info {
-            background-color: #eef;
-            color: #33c;
-            border: 1px solid #ccf;
-        }
-
-        .login-link {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            font-size: 14px;
-            color: #666;
-        }
-
-        .login-link a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .login-link a:hover {
-            text-decoration: underline;
-        }
-
-        .terms-checkbox {
+        .flash-message.error { background-color: #2d1a1a; color: #ff6b6b; border: 1px solid #c0392b; }
+        .flash-message.success { background-color: #1a2d1a; color: #27ae60; border: 1px solid #27ae60; }
+        .flash-message.info { background-color: #1a1a2d; color: #3498db; border: 1px solid #2980b9; }
+        .terms-checkbox { text-align: left; margin-bottom: 18px; }
+        .terms-checkbox label { color: #aaa; font-size: 14px; }
+        .terms-checkbox input[type="checkbox"] { width: auto; margin-right: 8px; }
+        .login-link { margin-top: 18px; color: #aaa; font-size: 14px; }
+        .login-link a { color: #00bfff; text-decoration: none; margin-left: 4px; }
+        .login-link a:hover { text-decoration: underline; }
+        .error-message { color: #ff6b6b; font-size: 13px; margin-top: 4px; display: none; }
+        .password-strength { font-size: 13px; margin-top: 4px; }
+        .password-strength.weak { color: #ff6b6b; }
+        .password-strength.medium { color: #ffd700; }
+        .password-strength.strong { color: #27ae60; }
+        .verification-group {
             display: flex;
-            align-items: flex-start;
-            margin-bottom: 20px;
-            text-align: left;
+            align-items: stretch;
+            gap: 10px;
         }
-
-        .terms-checkbox input[type="checkbox"] {
-            width: auto;
-            margin-right: 10px;
-            margin-top: 2px;
-        }
-
-        .terms-checkbox label {
+        .verification-group .form-group {
+            flex: 1;
             margin-bottom: 0;
-            font-size: 14px;
-            color: #666;
-            line-height: 1.4;
         }
-
-        .terms-checkbox label a {
-            color: #667eea;
-            text-decoration: none;
+        .send-code-btn {
+            width: auto;
+            min-width: 120px;
+            padding: 12px;
+            background: linear-gradient(135deg, #232526 0%, #414345 100%);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-
-        .terms-checkbox label a:hover {
-            text-decoration: underline;
-        }
-
+        .send-code-btn:disabled { background: #444; color: #aaa; cursor: not-allowed; }
+        .countdown { color: #aaa; font-size: 13px; margin-left: 10px; align-self: center; }
         @media (max-width: 480px) {
-            .register-container {
-                margin: 20px;
-                padding: 30px 20px;
-            }
-            
-            .verification-group {
-                flex-direction: column;
-                gap: 10px;
-            }
-            
-            .send-code-btn {
-                width: 100%;
-            }
+            .register-container { margin: 20px; padding: 30px 20px; }
+            .verification-group { flex-direction: column; gap: 10px; }
+            .send-code-btn { width: 100%; min-width: unset; }
         }
     </style>
 </head>
@@ -271,9 +128,8 @@
     <div class="register-container">
         <div class="logo">
             <h1>CSOL KZ</h1>
-            <p>地图管理平台 - 用户注册</p>
+            <p>地图管理平台 - 内测版本</p>
         </div>
-
         <!-- 消息提示 -->
         <div class="flash-messages">
             {% with messages = get_flashed_messages(with_categories=true) %}
@@ -284,23 +140,20 @@
                 {% endif %}
             {% endwith %}
         </div>
-
         <!-- 注册表单 -->
-        <form method="POST" action="{{ url_for('register') }}" id="registerForm">
+        <form method="POST" action="{{ url_for('auth.register') }}" id="registerForm">
             <div class="form-group">
                 <label for="username">用户名</label>
                 <input type="text" id="username" name="username" required placeholder="请输入用户名（3-20个字符）">
                 <div class="error-message" id="username-error"></div>
             </div>
-            
             <div class="form-group">
                 <label for="email">邮箱</label>
                 <input type="email" id="email" name="email" required placeholder="请输入邮箱地址">
                 <div class="error-message" id="email-error"></div>
             </div>
-            
             <div class="verification-group">
-                <div class="form-group">
+                <div class="form-group" style="margin-bottom:0;">
                     <label for="verification_code">验证码</label>
                     <input type="text" id="verification_code" name="verification_code" required placeholder="请输入验证码" maxlength="6">
                     <div class="error-message" id="verification-code-error"></div>
@@ -308,36 +161,30 @@
                 <button type="button" class="send-code-btn" id="sendCodeBtn">发送验证码</button>
             </div>
             <div class="countdown" id="countdown" style="display: none;"></div>
-            
             <div class="form-group">
                 <label for="password">密码</label>
                 <input type="password" id="password" name="password" required placeholder="请输入密码（至少6位）">
                 <div class="password-strength" id="password-strength"></div>
                 <div class="error-message" id="password-error"></div>
             </div>
-            
             <div class="form-group">
                 <label for="confirm_password">确认密码</label>
                 <input type="password" id="confirm_password" name="confirm_password" required placeholder="请再次输入密码">
                 <div class="error-message" id="confirm-password-error"></div>
             </div>
-            
             <div class="terms-checkbox">
                 <input type="checkbox" id="agree_terms" name="agree_terms" required>
                 <label for="agree_terms">
                     我已阅读并同意 <a href="#" target="_blank">用户协议</a> 和 <a href="#" target="_blank">隐私政策</a>
                 </label>
             </div>
-            
             <button type="submit" class="register-btn" id="registerBtn">注册</button>
         </form>
-
         <!-- 登录链接 -->
         <div class="login-link">
-            已有账号？<a href="http://localhost:5000/login">立即登录</a>
+            已有账号？<a href="{{ url_for('auth.login') }}" target="_blank">立即登录</a>
         </div>
     </div>
-
     <script>
         // 表单验证
         const form = document.getElementById('registerForm');

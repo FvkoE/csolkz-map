@@ -45,7 +45,6 @@ def get_paginated_maps(page, per_page=PER_PAGE):
 # 路由：主页面（带分页）
 # =====================
 @maplist_bp.route('/mainpage', methods=['GET'])
-@login_required
 def mainpage():
     """主页面，展示地图列表，支持分页和筛选"""
     page = request.args.get('page', 1, type=int)
@@ -216,7 +215,6 @@ def map_add():
 # 路由：网站建议
 # =====================
 @maplist_bp.route('/advice/add', methods=['POST'])
-@login_required
 def add_advice():
     """接收网站建议"""
     data = request.get_json()
@@ -241,7 +239,6 @@ def map_apply():
 # 路由：测试ImgBB连接
 # =====================
 @maplist_bp.route('/test/imgbb')
-@login_required
 def test_imgbb():
     """测试ImgBB API连接"""
     import requests
@@ -289,7 +286,6 @@ def test_imgbb():
 # 路由：地图详情页
 # =====================
 @maplist_bp.route('/map/<int:map_id>', methods=['GET'])
-@login_required
 def map_detail(map_id):
     """地图详情页，展示地图详细信息和记录"""
     session = SessionLocal()

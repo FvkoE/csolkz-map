@@ -47,8 +47,8 @@ def create_app(config_name='default'):
     
     @app.route('/')
     def index():
-        """根路由重定向到登录页面"""
-        return redirect(url_for('auth.login'))
+        """根路由重定向到主页面"""
+        return redirect(url_for('maplist.mainpage'))
     
     @app.route('/health')
     def health_check():

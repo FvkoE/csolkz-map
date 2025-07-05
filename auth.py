@@ -167,7 +167,7 @@ def logout():
     session.clear()
     
     # 设置响应头，防止浏览器缓存
-    response = redirect(url_for('auth.login'))
+    response = redirect(url_for('maplist.mainpage'))
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '0'
