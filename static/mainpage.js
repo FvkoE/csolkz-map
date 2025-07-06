@@ -802,6 +802,9 @@ document.addEventListener('DOMContentLoaded', function() {
         cardBtn.onclick = function() { setView('card'); };
         setView(view);
     }
+    // 获取加载动画元素（提前定义，避免作用域问题）
+    const infiniteLoadingDiv = document.getElementById('infinite-loading');
+    
     // 实现AJAX加载第一页并重置下拉
     window.loadListFirstPage = async function(url) {
         if (!url) return;
@@ -879,7 +882,6 @@ document.addEventListener('DOMContentLoaded', function() {
     let infinitePage = 1;
     let infiniteLoading = false;
     let infiniteNoMore = false;
-    const infiniteLoadingDiv = document.getElementById('infinite-loading');
     function getCurrentListUrl(page) {
         const urlParams = new URLSearchParams(window.location.search);
         urlParams.set('page', page);
@@ -1355,7 +1357,13 @@ function checkProfileCompletion() {
 
 // 打开个人信息完善弹窗
 function openProfileModal() {
+    console.log('openProfileModal 被调用');
     const modal = document.getElementById('profileModal');
+    if (!modal) {
+        console.error('未找到个人信息弹窗元素');
+        return;
+    }
+    
     modal.style.display = 'flex';
     modal.classList.add('force-complete');
     
@@ -1364,21 +1372,31 @@ function openProfileModal() {
     
     // 初始化头像上传预览
     const avatarInput = document.getElementById('profileAvatar');
+    console.log('查找头像输入框:', avatarInput);
     if (avatarInput) {
         // 移除之前的事件监听器，避免重复绑定
         avatarInput.removeEventListener('change', handleProfileImageChange);
         avatarInput.addEventListener('change', handleProfileImageChange);
+        console.log('头像上传事件已绑定');
         
         // 绑定头像点击事件
         const placeholder = document.getElementById('profileAvatarPlaceholder');
         const preview = document.getElementById('profileAvatarPreview');
         
         if (placeholder) {
-            placeholder.onclick = () => avatarInput.click();
+            placeholder.onclick = () => {
+                console.log('头像占位符被点击');
+                avatarInput.click();
+            };
         }
         if (preview) {
-            preview.onclick = () => avatarInput.click();
+            preview.onclick = () => {
+                console.log('头像预览被点击');
+                avatarInput.click();
+            };
         }
+    } else {
+        console.error('未找到头像输入框');
     }
     
     // 绑定点击外侧事件
@@ -1386,6 +1404,8 @@ function openProfileModal() {
     
     // 阻止键盘事件传播
     modal.addEventListener('keydown', handleModalKeydown);
+    
+    console.log('个人信息弹窗已打开');
 }
 
 // 处理点击弹窗外侧
@@ -1486,11 +1506,15 @@ function closeProfileModal() {
 
 // 处理头像图片变化
 function handleProfileImageChange(event) {
+    console.log('handleProfileImageChange 被调用');
     const file = event.target.files[0];
     const preview = document.getElementById('profileAvatarPreview');
     const placeholder = document.getElementById('profileAvatarPlaceholder');
 
+    console.log('文件信息:', file);
+
     if (!file) {
+        console.log('没有选择文件');
         preview.style.display = 'none';
         placeholder.style.display = 'flex';
         return;
@@ -1498,12 +1522,14 @@ function handleProfileImageChange(event) {
 
     // 验证图片文件
     if (!validateImageFile(file)) {
+        console.log('文件验证失败');
         event.target.value = '';
         preview.style.display = 'none';
         placeholder.style.display = 'flex';
         return;
     }
 
+    console.log('文件验证通过，准备打开裁剪弹窗');
     // 打开裁剪弹窗
     openAvatarCropModal(file);
 }
@@ -1602,18 +1628,30 @@ let avatarCropData = {
     originalOffsetY: 0
 };
 
+// 主流头像裁剪模式核心参数
+let cropCircleDiameter = 0;
+let cropCircleRadius = 0;
+let minScale = 1;
+let maxScale = 3;
+
 // 打开头像裁剪弹窗
 function openAvatarCropModal(imageFile) {
+    console.log('openAvatarCropModal 被调用，文件:', imageFile);
     const modal = document.getElementById('avatarCropModal');
     const cropImage = document.getElementById('avatarCropImage');
     
+    console.log('查找元素:', { modal: modal, cropImage: cropImage });
+    
     if (!modal || !cropImage) {
         console.error('头像裁剪弹窗元素不存在');
+        console.log('modal存在:', !!modal);
+        console.log('cropImage存在:', !!cropImage);
         return;
     }
     
     // 创建图片URL
     const imageUrl = URL.createObjectURL(imageFile);
+    console.log('创建图片URL:', imageUrl);
     cropImage.src = imageUrl;
     
     // 重置裁剪数据
@@ -1630,10 +1668,12 @@ function openAvatarCropModal(imageFile) {
     };
     
     // 显示弹窗并确保在最顶层
+    console.log('显示弹窗');
     modal.style.display = 'block';
     modal.style.zIndex = '20000';
     
     // 绑定事件
+    console.log('绑定事件');
     bindAvatarCropEvents();
     
     // 绑定弹窗点击事件，防止事件传播
@@ -1658,8 +1698,11 @@ function openAvatarCropModal(imageFile) {
     
     // 图片加载完成后初始化
     cropImage.onload = function() {
+        console.log('图片加载完成，初始化裁剪');
         initializeAvatarCrop();
     };
+    
+    console.log('openAvatarCropModal 执行完成');
 }
 
 // 关闭头像裁剪弹窗
@@ -1695,53 +1738,296 @@ function closeAvatarCropModal() {
     }
 }
 
+// 处理头像裁剪弹窗点击事件
+function handleAvatarCropModalClick(e) {
+    // 如果点击的是按钮，不阻止事件
+    if (e.target.classList.contains('avatar-crop-btn') || 
+        e.target.classList.contains('avatar-crop-close') ||
+        e.target.closest('.avatar-crop-btn') ||
+        e.target.closest('.avatar-crop-close')) {
+        return;
+    }
+    
+    // 阻止事件传播到底层
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    
+    // 如果点击的是弹窗背景，不关闭弹窗
+    if (e.target.classList.contains('avatar-crop-modal')) {
+        return false;
+    }
+}
+
+// 更新头像裁剪变换
+function updateAvatarCropTransform() {
+    const cropImage = document.getElementById('avatarCropImage');
+    if (!cropImage) return;
+    // 偏移量基于中心
+    const transform = `translate(-50%, -50%) scale(${avatarCropData.scale}) translate(${avatarCropData.offsetX}px, ${avatarCropData.offsetY}px)`;
+    cropImage.style.transform = transform;
+    
+    // 更新实时预览
+    updateAvatarCropPreview();
+}
+
+// 更新实时预览
+function updateAvatarCropPreview() {
+    const cropImage = document.getElementById('avatarCropImage');
+    const previewImage = document.getElementById('avatarCropPreview');
+    const previewSize = document.getElementById('avatarCropPreviewSize');
+    
+    if (!cropImage || !previewImage || !previewSize) return;
+    
+    // 创建canvas来生成预览
+    const canvasSize = cropCircleDiameter;
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = canvasSize;
+    canvas.height = canvasSize;
+    
+    // 计算缩放和偏移
+    const scale = avatarCropData.scale;
+    const offsetX = avatarCropData.offsetX;
+    const offsetY = avatarCropData.offsetY;
+    const imgW = cropImage.naturalWidth;
+    const imgH = cropImage.naturalHeight;
+    
+    // 计算图片原始像素下，圆心在图片上的坐标
+    const centerX = imgW / 2 - offsetX / scale;
+    const centerY = imgH / 2 - offsetY / scale;
+    
+    // 计算采样区域（正方形，边长=canvasSize/scale）
+    const sourceSize = canvasSize / scale;
+    const sourceX = centerX - sourceSize / 2;
+    const sourceY = centerY - sourceSize / 2;
+    
+    // 在canvas中心画圆形
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(canvasSize / 2, canvasSize / 2, canvasSize / 2, 0, 2 * Math.PI);
+    ctx.closePath();
+    ctx.clip();
+    ctx.drawImage(
+        cropImage,
+        sourceX, sourceY, sourceSize, sourceSize,
+        0, 0, canvasSize, canvasSize
+    );
+    ctx.restore();
+    
+    // 更新预览图片
+    const dataURL = canvas.toDataURL('image/png', 0.9);
+    previewImage.src = dataURL;
+    
+    // 更新尺寸信息
+    previewSize.textContent = `${canvasSize}×${canvasSize}`;
+}
+
+// 开始拖拽
+function startAvatarCropDrag(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    
+    const isTouch = e.type === 'touchstart';
+    const clientX = isTouch ? e.touches[0].clientX : e.clientX;
+    const clientY = isTouch ? e.touches[0].clientY : e.clientY;
+    
+    avatarCropData.isDragging = true;
+    avatarCropData.startX = clientX;
+    avatarCropData.startY = clientY;
+    avatarCropData.originalOffsetX = avatarCropData.offsetX;
+    avatarCropData.originalOffsetY = avatarCropData.offsetY;
+}
+
+// 停止拖拽
+function stopAvatarCropDrag(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    avatarCropData.isDragging = false;
+    
+    // 立即更新预览
+    if (avatarCropData.previewUpdateTimer) {
+        clearTimeout(avatarCropData.previewUpdateTimer);
+        avatarCropData.previewUpdateTimer = null;
+    }
+    updateAvatarCropPreview();
+}
+
+// 解绑头像裁剪事件
+function unbindAvatarCropEvents() {
+    const cropImage = document.getElementById('avatarCropImage');
+    const zoomSlider = document.getElementById('avatarCropZoom');
+    
+    if (!cropImage || !zoomSlider) return;
+    
+    // 移除缩放事件监听器
+    if (zoomSlider._zoomHandler) {
+        zoomSlider.removeEventListener('input', zoomSlider._zoomHandler);
+        delete zoomSlider._zoomHandler;
+    }
+    
+    // 移除鼠标事件监听器 - 使用捕获阶段
+    cropImage.removeEventListener('mousedown', startAvatarCropDrag, true);
+    document.removeEventListener('mousemove', updateAvatarCropDrag, true);
+    document.removeEventListener('mouseup', stopAvatarCropDrag, true);
+    
+    // 移除触摸事件监听器 - 使用捕获阶段
+    cropImage.removeEventListener('touchstart', startAvatarCropDrag, { capture: true, passive: false });
+    document.removeEventListener('touchmove', updateAvatarCropDrag, { capture: true, passive: false });
+    document.removeEventListener('touchend', stopAvatarCropDrag, { capture: true, passive: false });
+    
+    // 移除按钮事件监听器
+    const resetBtn = document.querySelector('.avatar-crop-reset');
+    const applyBtn = document.querySelector('.avatar-crop-apply');
+    const closeBtn = document.querySelector('.avatar-crop-close');
+    
+    if (resetBtn && resetBtn._resetHandler) {
+        resetBtn.removeEventListener('click', resetBtn._resetHandler, true);
+        delete resetBtn._resetHandler;
+    }
+    
+    if (applyBtn && applyBtn._applyHandler) {
+        applyBtn.removeEventListener('click', applyBtn._applyHandler, true);
+        delete applyBtn._applyHandler;
+    }
+    
+    if (closeBtn && closeBtn._closeHandler) {
+        closeBtn.removeEventListener('click', closeBtn._closeHandler, true);
+        delete closeBtn._closeHandler;
+    }
+}
+
+// 重置头像裁剪
+function resetAvatarCrop() {
+    console.log('执行重置头像裁剪');
+    initializeAvatarCrop();
+}
+
+// 更新遮罩，裁剪圆以容器为基准
+function updateCropMask() {
+    const mask = document.querySelector('.avatar-crop-mask');
+    const frame = document.querySelector('.avatar-crop-frame');
+    if (mask && frame) {
+        const size = Math.min(frame.offsetWidth, frame.offsetHeight);
+        cropCircleDiameter = size * 0.8;
+        cropCircleRadius = cropCircleDiameter / 2;
+        mask.style.background = `radial-gradient(circle at 50% 50%, transparent ${cropCircleRadius}px, rgba(0,0,0,0.6) ${cropCircleRadius+1}px)`;
+    }
+}
+
 // 初始化头像裁剪
 function initializeAvatarCrop() {
     const cropImage = document.getElementById('avatarCropImage');
     const zoomSlider = document.getElementById('avatarCropZoom');
     const zoomValue = document.getElementById('avatarCropZoomValue');
-    
     if (!cropImage || !zoomSlider || !zoomValue) return;
+    updateCropMask();
     
-    // 重置缩放
-    zoomSlider.value = 1;
-    zoomValue.textContent = '100%';
+    // 修正的最小缩放计算：确保图片的短边至少等于裁剪圆直径
+    // 这样可以保证圆形裁剪区域始终在图片范围内
+    const shortSide = Math.min(cropImage.naturalWidth, cropImage.naturalHeight);
+    minScale = cropCircleDiameter / shortSide;
     
-    // 重置位置
-    avatarCropData.scale = 1;
+    // 最大缩放：基于最小缩放的倍数，但不超过合理范围
+    maxScale = Math.max(2, minScale * 3);
+    
+    // 设置滑块范围
+    zoomSlider.min = minScale;
+    zoomSlider.max = maxScale;
+    zoomSlider.value = minScale;
+    zoomValue.textContent = Math.round(minScale * 100) + '%';
+    
+    // 初始化裁剪数据
+    avatarCropData.scale = minScale;
     avatarCropData.offsetX = 0;
     avatarCropData.offsetY = 0;
     
+    // 应用初始变换
     updateAvatarCropTransform();
+    
+    // 初始化预览
+    setTimeout(() => {
+        updateAvatarCropPreview();
+    }, 100);
+    
+    console.log('initializeAvatarCrop 完成:', {
+        naturalWidth: cropImage.naturalWidth,
+        naturalHeight: cropImage.naturalHeight,
+        shortSide,
+        cropCircleDiameter,
+        minScale,
+        maxScale
+    });
 }
 
-// 绑定头像裁剪事件
+// 拖动和缩放时的边界限制，保证圆形区域始终被图片内容覆盖
+function clampAvatarCropOffset(offsetX, offsetY, scale) {
+    const cropImage = document.getElementById('avatarCropImage');
+    if (!cropImage) return {offsetX, offsetY};
+    const imgW = cropImage.naturalWidth;
+    const imgH = cropImage.naturalHeight;
+    const diameter = cropCircleDiameter;
+    // 以图片中心为锚点，偏移量单位为像素（未缩放前）
+    let maxOffsetX = 0, maxOffsetY = 0;
+    if (imgW * scale > diameter) {
+        maxOffsetX = ((imgW * scale - diameter) / 2) / scale;
+    }
+    if (imgH * scale > diameter) {
+        maxOffsetY = ((imgH * scale - diameter) / 2) / scale;
+    }
+    // 严格锁死短边，长边可拖动
+    if (imgW * scale <= diameter) maxOffsetX = 0;
+    if (imgH * scale <= diameter) maxOffsetY = 0;
+    return {
+        offsetX: Math.max(-maxOffsetX, Math.min(maxOffsetX, offsetX)),
+        offsetY: Math.max(-maxOffsetY, Math.min(maxOffsetY, offsetY))
+    };
+}
+
+// 缩放事件
 function bindAvatarCropEvents() {
     const cropImage = document.getElementById('avatarCropImage');
     const zoomSlider = document.getElementById('avatarCropZoom');
     const zoomValue = document.getElementById('avatarCropZoomValue');
-    
     if (!cropImage || !zoomSlider || !zoomValue) return;
-    
-    // 缩放事件
+    // 解绑旧事件
+    if (zoomSlider._zoomHandler) {
+        zoomSlider.removeEventListener('input', zoomSlider._zoomHandler);
+    }
     const zoomHandler = function() {
-        avatarCropData.scale = parseFloat(this.value);
-        zoomValue.textContent = Math.round(avatarCropData.scale * 100) + '%';
+        let scale = parseFloat(this.value);
+        if (scale < minScale) scale = minScale;
+        if (scale > maxScale) scale = maxScale;
+        avatarCropData.scale = scale;
+        zoomSlider.value = scale;
+        zoomValue.textContent = Math.round(scale * 100) + '%';
+        // 缩放后应用边界限制
+        const clamped = clampAvatarCropOffset(avatarCropData.offsetX, avatarCropData.offsetY, scale);
+        avatarCropData.offsetX = clamped.offsetX;
+        avatarCropData.offsetY = clamped.offsetY;
         updateAvatarCropTransform();
+        
+        // 节流更新预览
+        if (!avatarCropData.previewUpdateTimer) {
+            avatarCropData.previewUpdateTimer = setTimeout(() => {
+                updateAvatarCropPreview();
+                avatarCropData.previewUpdateTimer = null;
+            }, 100);
+        }
     };
-    
     zoomSlider.addEventListener('input', zoomHandler);
-    zoomSlider._zoomHandler = zoomHandler; // 保存引用以便移除
-    
-    // 鼠标事件 - 使用捕获阶段确保事件优先处理
+    zoomSlider._zoomHandler = zoomHandler;
+    // 拖动事件绑定（保持原有逻辑）
     cropImage.addEventListener('mousedown', startAvatarCropDrag, true);
     document.addEventListener('mousemove', updateAvatarCropDrag, true);
     document.addEventListener('mouseup', stopAvatarCropDrag, true);
-    
-    // 触摸事件（移动端）- 使用捕获阶段确保事件优先处理
-    cropImage.addEventListener('touchstart', startAvatarCropDrag, true);
-    document.addEventListener('touchmove', updateAvatarCropDrag, true);
-    document.addEventListener('touchend', stopAvatarCropDrag, true);
+    cropImage.addEventListener('touchstart', startAvatarCropDrag, { capture: true, passive: false });
+    document.addEventListener('touchmove', updateAvatarCropDrag, { capture: true, passive: false });
+    document.addEventListener('touchend', stopAvatarCropDrag, { capture: true, passive: false });
+    // 遮罩自适应窗口变化
+    window.addEventListener('resize', updateCropMask);
     
     // 为按钮添加点击事件处理
     const resetBtn = document.querySelector('.avatar-crop-reset');
@@ -1798,185 +2084,98 @@ function bindAvatarCropEvents() {
     }
 }
 
-// 解绑头像裁剪事件
-function unbindAvatarCropEvents() {
-    const cropImage = document.getElementById('avatarCropImage');
-    const zoomSlider = document.getElementById('avatarCropZoom');
-    
-    if (!cropImage || !zoomSlider) return;
-    
-    // 移除缩放事件监听器
-    if (zoomSlider._zoomHandler) {
-        zoomSlider.removeEventListener('input', zoomSlider._zoomHandler);
-        delete zoomSlider._zoomHandler;
-    }
-    
-    // 移除鼠标事件监听器 - 使用捕获阶段
-    cropImage.removeEventListener('mousedown', startAvatarCropDrag, true);
-    document.removeEventListener('mousemove', updateAvatarCropDrag, true);
-    document.removeEventListener('mouseup', stopAvatarCropDrag, true);
-    
-    // 移除触摸事件监听器 - 使用捕获阶段
-    cropImage.removeEventListener('touchstart', startAvatarCropDrag, true);
-    document.removeEventListener('touchmove', updateAvatarCropDrag, true);
-    document.removeEventListener('touchend', stopAvatarCropDrag, true);
-    
-    // 移除按钮事件监听器
-    const resetBtn = document.querySelector('.avatar-crop-reset');
-    const applyBtn = document.querySelector('.avatar-crop-apply');
-    const closeBtn = document.querySelector('.avatar-crop-close');
-    
-    if (resetBtn && resetBtn._resetHandler) {
-        resetBtn.removeEventListener('click', resetBtn._resetHandler, true);
-        delete resetBtn._resetHandler;
-    }
-    
-    if (applyBtn && applyBtn._applyHandler) {
-        applyBtn.removeEventListener('click', applyBtn._applyHandler, true);
-        delete applyBtn._applyHandler;
-    }
-    
-    if (closeBtn && closeBtn._closeHandler) {
-        closeBtn.removeEventListener('click', closeBtn._closeHandler, true);
-        delete closeBtn._closeHandler;
-    }
-}
-
-// 开始拖拽
-function startAvatarCropDrag(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
-    
-    const isTouch = e.type === 'touchstart';
-    const clientX = isTouch ? e.touches[0].clientX : e.clientX;
-    const clientY = isTouch ? e.touches[0].clientY : e.clientY;
-    
-    avatarCropData.isDragging = true;
-    avatarCropData.startX = clientX;
-    avatarCropData.startY = clientY;
-    avatarCropData.originalOffsetX = avatarCropData.offsetX;
-    avatarCropData.originalOffsetY = avatarCropData.offsetY;
-}
-
-// 更新拖拽
+// 拖动时边界限制
 function updateAvatarCropDrag(e) {
     if (!avatarCropData.isDragging) return;
-    
     e.preventDefault();
     e.stopPropagation();
     e.stopImmediatePropagation();
-    
     const isTouch = e.type === 'touchmove';
     const clientX = isTouch ? e.touches[0].clientX : e.clientX;
     const clientY = isTouch ? e.touches[0].clientY : e.clientY;
-    
     const deltaX = clientX - avatarCropData.startX;
     const deltaY = clientY - avatarCropData.startY;
-    
-    avatarCropData.offsetX = avatarCropData.originalOffsetX + deltaX;
-    avatarCropData.offsetY = avatarCropData.originalOffsetY + deltaY;
-    
+    let newOffsetX = avatarCropData.originalOffsetX + deltaX;
+    let newOffsetY = avatarCropData.originalOffsetY + deltaY;
+    const clamped = clampAvatarCropOffset(newOffsetX, newOffsetY, avatarCropData.scale);
+    avatarCropData.offsetX = clamped.offsetX;
+    avatarCropData.offsetY = clamped.offsetY;
     updateAvatarCropTransform();
-}
-
-// 停止拖拽
-function stopAvatarCropDrag(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
-    avatarCropData.isDragging = false;
-}
-
-// 处理头像裁剪弹窗点击事件
-function handleAvatarCropModalClick(e) {
-    // 如果点击的是按钮，不阻止事件
-    if (e.target.classList.contains('avatar-crop-btn') || 
-        e.target.classList.contains('avatar-crop-close') ||
-        e.target.closest('.avatar-crop-btn') ||
-        e.target.closest('.avatar-crop-close')) {
-        return;
-    }
     
-    // 阻止事件传播到底层
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
-    
-    // 如果点击的是弹窗背景，不关闭弹窗
-    if (e.target.classList.contains('avatar-crop-modal')) {
-        return false;
+    // 节流更新预览，避免频繁重绘
+    if (!avatarCropData.previewUpdateTimer) {
+        avatarCropData.previewUpdateTimer = setTimeout(() => {
+            updateAvatarCropPreview();
+            avatarCropData.previewUpdateTimer = null;
+        }, 100);
     }
 }
 
-// 更新头像裁剪变换
-function updateAvatarCropTransform() {
+// 裁剪输出，严格与clamp算法一致
+function applyAvatarCrop() {
     const cropImage = document.getElementById('avatarCropImage');
     if (!cropImage) return;
-    
-    const transform = `translate(-50%, -50%) scale(${avatarCropData.scale}) translate(${avatarCropData.offsetX}px, ${avatarCropData.offsetY}px)`;
-    cropImage.style.transform = transform;
-}
-
-// 重置头像裁剪
-function resetAvatarCrop() {
-    console.log('执行重置头像裁剪');
-    initializeAvatarCrop();
-}
-
-// 应用头像裁剪
-function applyAvatarCrop() {
-    console.log('执行应用头像裁剪');
-    const cropImage = document.getElementById('avatarCropImage');
-    if (!cropImage) {
-        console.log('未找到裁剪图片元素');
-        return;
-    }
-    
+    const canvasSize = cropCircleDiameter;
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-    
-    // 设置画布大小为最终头像尺寸
-    canvas.width = 140;
-    canvas.height = 140;
-    
-    // 计算裁剪区域
-    const cropSize = 200; // 裁剪框大小
-    const imageSize = cropImage.naturalWidth;
+    canvas.width = canvasSize;
+    canvas.height = canvasSize;
+    // 重新clamp一遍，保证和视觉区域一致
     const scale = avatarCropData.scale;
-    
-    // 计算源图像中的裁剪区域
-    const sourceX = (imageSize / 2) - (cropSize / 2 / scale) + (avatarCropData.offsetX / scale);
-    const sourceY = (imageSize / 2) - (cropSize / 2 / scale) + (avatarCropData.offsetY / scale);
-    const sourceSize = cropSize / scale;
-    
-    // 绘制裁剪后的图像
+    const offsetX = avatarCropData.offsetX;
+    const offsetY = avatarCropData.offsetY;
+    const imgW = cropImage.naturalWidth;
+    const imgH = cropImage.naturalHeight;
+    const clamped = clampAvatarCropOffset(offsetX, offsetY, scale);
+    const realOffsetX = clamped.offsetX;
+    const realOffsetY = clamped.offsetY;
+    // 以图片中心为锚点，方向取反
+    const centerX = imgW / 2 - realOffsetX / scale;
+    const centerY = imgH / 2 - realOffsetY / scale;
+    let sourceSize = canvasSize / scale;
+    let sourceX = centerX - sourceSize / 2;
+    let sourceY = centerY - sourceSize / 2;
+
+    // 边界修正，防止超出图片范围
+    if (sourceX < 0) {
+        sourceSize += sourceX; // 减少size
+        sourceX = 0;
+    }
+    if (sourceY < 0) {
+        sourceSize += sourceY;
+        sourceY = 0;
+    }
+    if (sourceX + sourceSize > imgW) {
+        sourceSize = imgW - sourceX;
+    }
+    if (sourceY + sourceSize > imgH) {
+        sourceSize = imgH - sourceY;
+    }
+    // 防止负数
+    sourceSize = Math.max(1, sourceSize);
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(canvasSize / 2, canvasSize / 2, canvasSize / 2, 0, 2 * Math.PI);
+    ctx.closePath();
+    ctx.clip();
     ctx.drawImage(
         cropImage,
         sourceX, sourceY, sourceSize, sourceSize,
-        0, 0, 140, 140
+        0, 0, canvasSize, canvasSize
     );
-    
-    // 将画布转换为Blob
+    ctx.restore();
     canvas.toBlob(function(blob) {
-        // 获取原文件名
-        let originalFileName = 'avatar_cropped.png'; // 默认文件名
+        let originalFileName = 'avatar_cropped.png';
         if (avatarCropData.image && avatarCropData.image.name) {
-            // 保持原文件名，但确保扩展名为.png
             const originalName = avatarCropData.image.name;
             const nameWithoutExt = originalName.substring(0, originalName.lastIndexOf('.'));
             originalFileName = nameWithoutExt + '.png';
         }
-        
-        // 创建新的File对象，保持原文件名
         const croppedFile = new File([blob], originalFileName, {
             type: 'image/png'
         });
-        
-        // 更新头像预览
         updateAvatarPreview(croppedFile);
-        
-        // 关闭裁剪弹窗
         closeAvatarCropModal();
     }, 'image/png', 0.95);
 }

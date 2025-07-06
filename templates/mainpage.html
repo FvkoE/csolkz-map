@@ -289,7 +289,7 @@
                 <!-- 头像上传区域 -->
                 <div class="profile-avatar-section">
                     <div class="profile-avatar-container">
-                        <!-- <input type="file" id="profileAvatar" name="avatar" accept="image/*" class="profile-avatar-input" required> -->
+                        <input type="file" id="profileAvatar" name="avatar" accept="image/*" class="profile-avatar-input" required style="display: none;">
                         <div class="profile-avatar-placeholder" id="profileAvatarPlaceholder">
                             <div class="profile-avatar-text">点击上传头像</div>
                         </div>
@@ -331,22 +331,38 @@
             </div>
             
             <div class="avatar-crop-body">
-                <div class="avatar-crop-container">
-                    <div class="avatar-crop-frame">
-                        <img id="avatarCropImage" class="avatar-crop-image" alt="裁剪图片">
+                <div class="avatar-crop-main">
+                    <div class="avatar-crop-container">
+                        <div class="avatar-crop-frame">
+                            <img id="avatarCropImage" class="avatar-crop-image" alt="裁剪图片">
+                            <div class="avatar-crop-mask"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="avatar-crop-controls">
+                        <div class="avatar-crop-zoom-control">
+                            <label for="avatarCropZoom">缩放：</label>
+                            <input type="range" id="avatarCropZoom" min="0.5" max="3" step="0.1" value="1">
+                            <span id="avatarCropZoomValue">100%</span>
+                        </div>
+                        
+                        <div class="avatar-crop-actions">
+                            <button type="button" class="avatar-crop-btn avatar-crop-reset" onclick="console.log('重置按钮点击'); resetAvatarCrop();">重置</button>
+                            <button type="button" class="avatar-crop-btn avatar-crop-apply" onclick="console.log('应用按钮点击'); applyAvatarCrop();">应用裁剪</button>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="avatar-crop-controls">
-                    <div class="avatar-crop-zoom-control">
-                        <label for="avatarCropZoom">缩放：</label>
-                        <input type="range" id="avatarCropZoom" min="0.5" max="3" step="0.1" value="1">
-                        <span id="avatarCropZoomValue">100%</span>
+                <div class="avatar-crop-preview">
+                    <div class="avatar-crop-preview-title">实时预览</div>
+                    <div class="avatar-crop-preview-container">
+                        <div class="avatar-crop-preview-frame">
+                            <img id="avatarCropPreview" class="avatar-crop-preview-image" alt="头像预览">
+                        </div>
                     </div>
-                    
-                    <div class="avatar-crop-actions">
-                        <button type="button" class="avatar-crop-btn avatar-crop-reset" onclick="console.log('重置按钮点击'); resetAvatarCrop();">重置</button>
-                        <button type="button" class="avatar-crop-btn avatar-crop-apply" onclick="console.log('应用按钮点击'); applyAvatarCrop();">应用裁剪</button>
+                    <div class="avatar-crop-preview-info">
+                        <div class="avatar-crop-preview-size">尺寸: <span id="avatarCropPreviewSize">200×200</span></div>
+                        <div class="avatar-crop-preview-format">格式: PNG</div>
                     </div>
                 </div>
             </div>

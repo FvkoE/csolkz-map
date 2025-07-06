@@ -1930,14 +1930,24 @@ body.modal-open #profileModal * {
 
 .avatar-crop-body {
     padding: 24px;
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+.avatar-crop-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
 }
 
 .avatar-crop-container {
     position: relative;
     width: 400px;
     height: 400px;
-    margin: 0 auto 24px;
-    border-radius: 8px;
+    margin: 0 auto;
+    border-radius: 0; /* 取消圆角，遮罩控制圆形 */
     overflow: hidden;
     background: #34495e;
     border: 2px solid #3498db;
@@ -1950,18 +1960,33 @@ body.modal-open #profileModal * {
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
 }
 
 .avatar-crop-image {
-    max-width: 100%;
-    max-height: 100%;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: auto;
+    height: auto;
     object-fit: contain;
+    transform: translate(-50%, -50%) scale(1);
     cursor: move;
     user-select: none;
     transition: transform 0.1s ease;
     pointer-events: auto;
-    position: relative;
     z-index: 1;
+}
+
+/* 圆形遮罩，圆内透明，外部半透明黑色 */
+.avatar-crop-mask {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+    background: radial-gradient(circle at 50% 50%, transparent 140px, rgba(0,0,0,0.6) 141px);
 }
 
 .avatar-crop-controls {
@@ -2066,6 +2091,67 @@ body.modal-open #profileModal * {
     background: #229954;
 }
 
+/* 实时预览区域样式 */
+.avatar-crop-preview {
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: #34495e;
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid #3498db;
+}
+
+.avatar-crop-preview-title {
+    color: #ecf0f1;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.avatar-crop-preview-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.avatar-crop-preview-frame {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #2c3e50;
+    border: 3px solid #3498db;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.avatar-crop-preview-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.avatar-crop-preview-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    color: #bdc3c7;
+    font-size: 12px;
+    text-align: center;
+}
+
+.avatar-crop-preview-size,
+.avatar-crop-preview-format {
+    color: #ecf0f1;
+    font-weight: 500;
+}
+
 /* 移动端适配 */
 @media (max-width: 768px) {
     .avatar-crop-content {
@@ -2073,9 +2159,31 @@ body.modal-open #profileModal * {
         max-height: 95vh;
     }
     
+    .avatar-crop-body {
+        flex-direction: column;
+        gap: 16px;
+    }
+    
     .avatar-crop-container {
         width: 300px;
         height: 300px;
+    }
+    
+    .avatar-crop-preview {
+        width: 100%;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .avatar-crop-preview-frame {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .avatar-crop-preview-info {
+        flex-direction: row;
+        gap: 16px;
     }
     
     .avatar-crop-body {
