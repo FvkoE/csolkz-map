@@ -1879,9 +1879,9 @@ body.modal-open #profileModal * {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: #2c3e50;
+    background: #fff;
     border-radius: 12px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
     max-width: 90vw;
     max-height: 90vh;
     overflow: hidden;
@@ -1893,13 +1893,13 @@ body.modal-open #profileModal * {
     justify-content: space-between;
     align-items: center;
     padding: 20px 24px;
-    border-bottom: 1px solid #34495e;
-    background: #34495e;
+    border-bottom: 1px solid #e5e6eb;
+    background: #f7f8fa;
 }
 
 .avatar-crop-title {
     margin: 0;
-    color: #ecf0f1;
+    color: #222;
     font-size: 18px;
     font-weight: 600;
 }
@@ -1907,7 +1907,7 @@ body.modal-open #profileModal * {
 .avatar-crop-close {
     background: none;
     border: none;
-    color: #bdc3c7;
+    color: #888;
     font-size: 24px;
     cursor: pointer;
     padding: 0;
@@ -1924,8 +1924,8 @@ body.modal-open #profileModal * {
 }
 
 .avatar-crop-close:hover {
-    background: #e74c3c;
-    color: white;
+    background: #f44336;
+    color: #fff;
 }
 
 .avatar-crop-body {
@@ -1933,6 +1933,7 @@ body.modal-open #profileModal * {
     display: flex;
     gap: 24px;
     align-items: flex-start;
+    background: #fff;
 }
 
 .avatar-crop-main {
@@ -1942,40 +1943,37 @@ body.modal-open #profileModal * {
     gap: 24px;
 }
 
-.avatar-crop-container {
+/*.avatar-crop-container {
     position: relative;
     width: 400px;
     height: 400px;
     margin: 0 auto;
-    border-radius: 0; /* 取消圆角，遮罩控制圆形 */
+    border-radius: 0; 
     overflow: hidden;
     background: #34495e;
     border: 2px solid #3498db;
-}
+}*/
 
 .avatar-crop-frame {
     position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 320px;   /* cropCircleDiameter */
+    height: 320px;  /* cropCircleDiameter */
     overflow: hidden;
+    background: transparent;
 }
 
 .avatar-crop-image {
     position: absolute;
-    left: 50%;
     top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    will-change: transform;
+    user-select: none;
+    pointer-events: auto;
     width: auto;
     height: auto;
-    object-fit: contain;
-    transform: translate(-50%, -50%) scale(1);
-    cursor: move;
-    user-select: none;
-    transition: transform 0.1s ease;
-    pointer-events: auto;
-    z-index: 1;
+    max-width: none;
+    max-height: none;
 }
 
 /* 圆形遮罩，圆内透明，外部半透明黑色 */
@@ -1999,7 +1997,7 @@ body.modal-open #profileModal * {
     display: flex;
     align-items: center;
     gap: 12px;
-    color: #ecf0f1;
+    color: #333;
 }
 
 .avatar-crop-zoom-control label {
@@ -2010,7 +2008,7 @@ body.modal-open #profileModal * {
 .avatar-crop-zoom-control input[type="range"] {
     flex: 1;
     height: 6px;
-    background: #34495e;
+    background: #e5e6eb;
     border-radius: 3px;
     outline: none;
     -webkit-appearance: none;
@@ -2023,20 +2021,20 @@ body.modal-open #profileModal * {
     -webkit-appearance: none;
     width: 18px;
     height: 18px;
-    background: #3498db;
+    background: #1976d2;
     border-radius: 50%;
     cursor: pointer;
     transition: background 0.2s;
 }
 
 .avatar-crop-zoom-control input[type="range"]::-webkit-slider-thumb:hover {
-    background: #2980b9;
+    background: #1565c0;
 }
 
 .avatar-crop-zoom-control input[type="range"]::-moz-range-thumb {
     width: 18px;
     height: 18px;
-    background: #3498db;
+    background: #1976d2;
     border-radius: 50%;
     cursor: pointer;
     border: none;
@@ -2044,7 +2042,7 @@ body.modal-open #profileModal * {
 }
 
 .avatar-crop-zoom-control input[type="range"]::-moz-range-thumb:hover {
-    background: #2980b9;
+    background: #1565c0;
 }
 
 .avatar-crop-zoom-control span {
@@ -2061,7 +2059,7 @@ body.modal-open #profileModal * {
 
 .avatar-crop-btn {
     padding: 10px 20px;
-    border: none;
+    border: 1px solid #e5e6eb;
     border-radius: 6px;
     font-size: 14px;
     font-weight: 500;
@@ -2071,24 +2069,29 @@ body.modal-open #profileModal * {
     pointer-events: auto;
     position: relative;
     z-index: 1;
+    background: #f5f6fa;
+    color: #222;
 }
 
 .avatar-crop-reset {
-    background: #95a5a6;
-    color: white;
+    background: #f5f6fa;
+    color: #666;
+    border: 1px solid #e5e6eb;
 }
 
 .avatar-crop-reset:hover {
-    background: #7f8c8d;
+    background: #e0e0e0;
+    color: #222;
 }
 
 .avatar-crop-apply {
-    background: #27ae60;
-    color: white;
+    background: #1976d2;
+    color: #fff;
+    border: none;
 }
 
 .avatar-crop-apply:hover {
-    background: #229954;
+    background: #1565c0;
 }
 
 /* 实时预览区域样式 */
@@ -2097,14 +2100,14 @@ body.modal-open #profileModal * {
     display: flex;
     flex-direction: column;
     gap: 16px;
-    background: #34495e;
+    background: #f7f8fa;
     border-radius: 8px;
     padding: 16px;
-    border: 1px solid #3498db;
+    border: 1px solid #e5e6eb;
 }
 
 .avatar-crop-preview-title {
-    color: #ecf0f1;
+    color: #333;
     font-size: 14px;
     font-weight: 600;
     text-align: center;
@@ -2141,14 +2144,14 @@ body.modal-open #profileModal * {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    color: #bdc3c7;
+    color: #888;
     font-size: 12px;
     text-align: center;
 }
 
 .avatar-crop-preview-size,
 .avatar-crop-preview-format {
-    color: #ecf0f1;
+    color: #333;
     font-weight: 500;
 }
 

@@ -1763,12 +1763,8 @@ function handleAvatarCropModalClick(e) {
 function updateAvatarCropTransform() {
     const cropImage = document.getElementById('avatarCropImage');
     if (!cropImage) return;
-    // 偏移量基于中心
-    const transform = `translate(-50%, -50%) scale(${avatarCropData.scale}) translate(${avatarCropData.offsetX}px, ${avatarCropData.offsetY}px)`;
-    cropImage.style.transform = transform;
-    
-    // 更新实时预览
-    updateAvatarCropPreview();
+    // 以遮罩中心为锚点，scale和offset与采样逻辑一致
+    cropImage.style.transform = `translate(-50%, -50%) translate(${avatarCropData.offsetX}px, ${avatarCropData.offsetY}px) scale(${avatarCropData.scale})`;
 }
 
 // 更新实时预览
@@ -1924,34 +1920,26 @@ function initializeAvatarCrop() {
     const zoomValue = document.getElementById('avatarCropZoomValue');
     if (!cropImage || !zoomSlider || !zoomValue) return;
     updateCropMask();
-    
-    // 修正的最小缩放计算：确保图片的短边至少等于裁剪圆直径
-    // 这样可以保证圆形裁剪区域始终在图片范围内
+    // 最小缩放：图片短边正好等于裁剪圆直径，保证遮罩区域始终被图片内容填满
     const shortSide = Math.min(cropImage.naturalWidth, cropImage.naturalHeight);
     minScale = cropCircleDiameter / shortSide;
-    
     // 最大缩放：基于最小缩放的倍数，但不超过合理范围
     maxScale = Math.max(2, minScale * 3);
-    
     // 设置滑块范围
     zoomSlider.min = minScale;
     zoomSlider.max = maxScale;
     zoomSlider.value = minScale;
     zoomValue.textContent = Math.round(minScale * 100) + '%';
-    
     // 初始化裁剪数据
     avatarCropData.scale = minScale;
     avatarCropData.offsetX = 0;
     avatarCropData.offsetY = 0;
-    
     // 应用初始变换
     updateAvatarCropTransform();
-    
     // 初始化预览
     setTimeout(() => {
         updateAvatarCropPreview();
     }, 100);
-    
     console.log('initializeAvatarCrop 完成:', {
         naturalWidth: cropImage.naturalWidth,
         naturalHeight: cropImage.naturalHeight,
@@ -1962,28 +1950,22 @@ function initializeAvatarCrop() {
     });
 }
 
-// 拖动和缩放时的边界限制，保证圆形区域始终被图片内容覆盖
+// 拖动和缩放时的边界限制，保证正方形采样区域始终被图片内容覆盖
 function clampAvatarCropOffset(offsetX, offsetY, scale) {
     const cropImage = document.getElementById('avatarCropImage');
     if (!cropImage) return {offsetX, offsetY};
     const imgW = cropImage.naturalWidth;
     const imgH = cropImage.naturalHeight;
     const diameter = cropCircleDiameter;
-    // 以图片中心为锚点，偏移量单位为像素（未缩放前）
-    let maxOffsetX = 0, maxOffsetY = 0;
-    if (imgW * scale > diameter) {
-        maxOffsetX = ((imgW * scale - diameter) / 2) / scale;
-    }
-    if (imgH * scale > diameter) {
-        maxOffsetY = ((imgH * scale - diameter) / 2) / scale;
-    }
-    // 严格锁死短边，长边可拖动
-    if (imgW * scale <= diameter) maxOffsetX = 0;
-    if (imgH * scale <= diameter) maxOffsetY = 0;
-    return {
-        offsetX: Math.max(-maxOffsetX, Math.min(maxOffsetX, offsetX)),
-        offsetY: Math.max(-maxOffsetY, Math.min(maxOffsetY, offsetY))
-    };
+    // 采样区域的边长（未缩放前）
+    const sampleSize = diameter / scale;
+    // 允许的最大偏移量（以图片中心为锚点，正负方向）
+    const maxOffsetX = (imgW - sampleSize) / 2 * scale;
+    const maxOffsetY = (imgH - sampleSize) / 2 * scale;
+    // 限制offsetX/offsetY在[-maxOffset, +maxOffset]之间
+    offsetX = Math.max(-maxOffsetX, Math.min(maxOffsetX, offsetX));
+    offsetY = Math.max(-maxOffsetY, Math.min(maxOffsetY, offsetY));
+    return {offsetX, offsetY};
 }
 
 // 缩放事件
@@ -2008,7 +1990,6 @@ function bindAvatarCropEvents() {
         avatarCropData.offsetX = clamped.offsetX;
         avatarCropData.offsetY = clamped.offsetY;
         updateAvatarCropTransform();
-        
         // 节流更新预览
         if (!avatarCropData.previewUpdateTimer) {
             avatarCropData.previewUpdateTimer = setTimeout(() => {
@@ -2028,13 +2009,42 @@ function bindAvatarCropEvents() {
     document.addEventListener('touchend', stopAvatarCropDrag, { capture: true, passive: false });
     // 遮罩自适应窗口变化
     window.addEventListener('resize', updateCropMask);
-    
+
+    // 新增：滚轮缩放
+    cropImage.addEventListener('wheel', function(e) {
+        e.preventDefault();
+        let scale = avatarCropData.scale;
+        const delta = e.deltaY || e.detail || e.wheelDelta;
+        // 一次滚动缩放比例
+        const step = (maxScale - minScale) / 50;
+        if (delta > 0) {
+            scale -= step;
+        } else {
+            scale += step;
+        }
+        scale = Math.max(minScale, Math.min(maxScale, scale));
+        avatarCropData.scale = scale;
+        zoomSlider.value = scale;
+        zoomValue.textContent = Math.round(scale * 100) + '%';
+        // 缩放后应用边界限制
+        const clamped = clampAvatarCropOffset(avatarCropData.offsetX, avatarCropData.offsetY, scale);
+        avatarCropData.offsetX = clamped.offsetX;
+        avatarCropData.offsetY = clamped.offsetY;
+        updateAvatarCropTransform();
+        // 节流更新预览
+        if (!avatarCropData.previewUpdateTimer) {
+            avatarCropData.previewUpdateTimer = setTimeout(() => {
+                updateAvatarCropPreview();
+                avatarCropData.previewUpdateTimer = null;
+            }, 100);
+        }
+    }, { passive: false });
+
     // 为按钮添加点击事件处理
     const resetBtn = document.querySelector('.avatar-crop-reset');
     const applyBtn = document.querySelector('.avatar-crop-apply');
     const closeBtn = document.querySelector('.avatar-crop-close');
     
-    // 创建按钮事件处理函数
     const resetHandler = function(e) {
         console.log('重置按钮被点击');
         e.preventDefault();
