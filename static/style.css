@@ -117,7 +117,7 @@ body.night-mode::before {
 
 .nav-actions .username {
     color: #333;
-    font-weight: 500;
+    font-weight: bold;
 }
 
 .nav-link {
@@ -2204,4 +2204,12 @@ body.modal-open #profileModal * {
     .avatar-crop-btn {
         width: 100%;
     }
+}
+
+.profile-completion-error.fadeout {
+    animation: fadeOutError 0.6s forwards;
+}
+@keyframes fadeOutError {
+    from { opacity: 1; }
+    to { opacity: 0; }
 }

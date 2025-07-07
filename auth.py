@@ -303,27 +303,27 @@ def complete_profile():
         
         # 验证昵称
         if not nickname:
-            if request.headers.get('Content-Type', '').startswith('application/json'):
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.headers.get('Content-Type', '').startswith('multipart/form-data'):
                 return jsonify({'success': False, 'message': '请输入游戏昵称'})
             flash('请输入游戏昵称', 'error')
             return render_template('complete_profile.html')
         
         if len(nickname) > 50:
-            if request.headers.get('Content-Type', '').startswith('application/json'):
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.headers.get('Content-Type', '').startswith('multipart/form-data'):
                 return jsonify({'success': False, 'message': '昵称不能超过50个字符'})
             flash('昵称不能超过50个字符', 'error')
             return render_template('complete_profile.html')
         
         # 验证头像文件
         if not avatar_file:
-            if request.headers.get('Content-Type', '').startswith('application/json'):
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.headers.get('Content-Type', '').startswith('multipart/form-data'):
                 return jsonify({'success': False, 'message': '请选择头像图片'})
             flash('请选择头像图片', 'error')
             return render_template('complete_profile.html')
         
         # 检查文件类型
         if avatar_file.filename and not avatar_file.filename.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp')):
-            if request.headers.get('Content-Type', '').startswith('application/json'):
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.headers.get('Content-Type', '').startswith('multipart/form-data'):
                 return jsonify({'success': False, 'message': '头像格式不支持，请选择PNG、JPG、JPEG、GIF或WEBP格式'})
             flash('头像格式不支持，请选择PNG、JPG、JPEG、GIF或WEBP格式', 'error')
             return render_template('complete_profile.html')
@@ -355,26 +355,26 @@ def complete_profile():
                 avatar_file.save(avatar_path)
                 
                 # 更新用户信息
-                user.nickname = str(nickname)
-                user.avatar = str(f"avatars/{avatar_filename}")
+                user.nickname = nickname
+                user.avatar = f"avatars/{avatar_filename}"
                 session_db.commit()
                 
                 # 更新session中的用户信息
                 session['avatar_url'] = url_for('static', filename=f"avatars/{avatar_filename}")
                 session['nickname'] = nickname
                 
-                if request.headers.get('Content-Type', '').startswith('application/json'):
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.headers.get('Content-Type', '').startswith('multipart/form-data'):
                     return jsonify({'success': True, 'message': '个人信息完善成功！'})
                 flash('个人信息完善成功！', 'success')
                 return redirect(url_for('maplist.mainpage'))
             else:
-                if request.headers.get('Content-Type', '').startswith('application/json'):
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.headers.get('Content-Type', '').startswith('multipart/form-data'):
                     return jsonify({'success': False, 'message': '用户信息不存在'})
                 flash('用户信息不存在', 'error')
         except Exception as e:
             session_db.rollback()
             error_msg = f'保存失败，请重试: {str(e)}'
-            if request.headers.get('Content-Type', '').startswith('application/json'):
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.headers.get('Content-Type', '').startswith('multipart/form-data'):
                 return jsonify({'success': False, 'message': error_msg})
             flash('保存失败，请重试', 'error')
             print(f"完善个人信息错误: {e}")

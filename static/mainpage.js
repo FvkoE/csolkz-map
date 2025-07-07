@@ -179,16 +179,25 @@ function showErrorModal(msg) {
         modal.className = 'modal';
         modal.id = 'errorModal';
         modal.innerHTML = `<div class="modal-content" style="max-width:340px;text-align:center;">
-            <div style="font-size:1.1em;margin:30px 0 24px 0;color:#e53935;">${msg}</div>
+            <div class="error-modal-msg" style="font-size:1.1em;margin:30px 0 24px 0;color:#e53935;">${msg}</div>
             <div style="display:flex;justify-content:center;gap:18px;">
                 <button class="submit-btn" onclick="document.getElementById('errorModal').style.display='none'">确定</button>
             </div>
         </div>`;
+        modal.style.zIndex = 9999; // 保证在最顶层
         document.body.appendChild(modal);
     } else {
-        modal.querySelector('div.modal-content>div').innerText = msg;
+        // 只更新消息内容
+        const msgDiv = modal.querySelector('.error-modal-msg');
+        if(msgDiv) msgDiv.innerText = msg;
+        else modal.querySelector('div.modal-content>div').innerText = msg;
+        modal.style.zIndex = 9999;
     }
     modal.style.display = 'flex';
+    // 支持点击遮罩关闭
+    modal.onclick = function(e) {
+        if (e.target === modal) modal.style.display = 'none';
+    };
 }
 
 // 新增：成功弹窗
@@ -1245,13 +1254,13 @@ function compressImage(file, maxWidth, maxHeight, quality, callback) {
 
 function validateImageFile(file) {
     const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'];
-    const maxSize = 2 * 1024 * 1024; // 2MB
+    const maxSize = 5 * 1024 * 1024; // 2MB
     if (!allowedTypes.includes(file.type)) {
-        showErrorModal('仅支持PNG、JPG、JPEG、GIF、WEBP格式的图片');
+        // showErrorModal('仅支持PNG、JPG、JPEG、GIF、WEBP格式的图片');
         return false;
     }
     if (file.size > maxSize) {
-        showErrorModal('图片大小不能超过2MB');
+        // showErrorModal('图片大小不能超过2MB');
         return false;
     }
     return true;
@@ -1414,7 +1423,15 @@ function handleModalOutsideClick(event) {
     if (event.target.closest('.avatar-crop-modal')) {
         return;
     }
-    
+    // 如果已提交成功，允许关闭弹窗
+    const successMsg = document.getElementById('profileSuccessMsg');
+    if (successMsg && successMsg.style.display !== 'none') {
+        const modal = document.getElementById('profileModal');
+        modal.style.display = 'none';
+        modal.classList.remove('force-complete');
+        document.body.classList.remove('modal-open');
+        return;
+    }
     if (event.target.classList.contains('profile-completion-modal')) {
         showProfileError('请完善所有必填信息！');
     }
@@ -1440,7 +1457,15 @@ function handleModalKeydown(event) {
     if (event.target.closest('.avatar-crop-modal')) {
         return;
     }
-    
+    // 如果已提交成功，允许ESC关闭弹窗
+    const successMsg = document.getElementById('profileSuccessMsg');
+    if (successMsg && successMsg.style.display !== 'none' && event.key === 'Escape') {
+        const modal = document.getElementById('profileModal');
+        modal.style.display = 'none';
+        modal.classList.remove('force-complete');
+        document.body.classList.remove('modal-open');
+        return;
+    }
     // 阻止ESC键关闭弹窗
     if (event.key === 'Escape') {
         event.preventDefault();
@@ -1526,6 +1551,7 @@ function handleProfileImageChange(event) {
         event.target.value = '';
         preview.style.display = 'none';
         placeholder.style.display = 'flex';
+        showProfileErrorAuto('图片大小不能超过5MB，且仅支持PNG、JPG、JPEG、GIF、WEBP格式');
         return;
     }
 
@@ -1558,7 +1584,8 @@ async function submitProfile(event) {
     try {
         const response = await fetch('/profile/complete', {
             method: 'POST',
-            body: formData
+            body: formData,
+            headers: {'X-Requested-With': 'XMLHttpRequest'}
         });
         
         const result = await response.json();
@@ -1567,6 +1594,10 @@ async function submitProfile(event) {
             // 显示成功消息
             document.getElementById('profileSuccessMsg').style.display = 'block';
             document.getElementById('profileForm').style.display = 'none';
+            
+            // 允许关闭弹窗
+            const modal = document.getElementById('profileModal');
+            modal.classList.remove('force-complete');
             
             // 3秒后关闭弹窗并刷新页面
             setTimeout(() => {
@@ -1702,6 +1733,12 @@ function openAvatarCropModal(imageFile) {
         initializeAvatarCrop();
     };
     
+    // 新增图片加载失败处理
+    cropImage.onerror = function() {
+        closeAvatarCropModal();
+        showProfileErrorAuto('图片加载失败，可能格式不被支持或图片已损坏，请更换图片');
+    };
+    
     console.log('openAvatarCropModal 执行完成');
 }
 
@@ -1772,8 +1809,8 @@ function updateAvatarCropPreview() {
     const cropImage = document.getElementById('avatarCropImage');
     const previewImage = document.getElementById('avatarCropPreview');
     const previewSize = document.getElementById('avatarCropPreviewSize');
-    
-    if (!cropImage || !previewImage || !previewSize) return;
+    // 新增：图片未加载成功时不绘制
+    if (!cropImage || !previewImage || !previewSize || !cropImage.complete || cropImage.naturalWidth === 0) return;
     
     // 创建canvas来生成预览
     const canvasSize = cropCircleDiameter;
@@ -2212,5 +2249,23 @@ function updateAvatarPreview(file) {
         }
     };
     reader.readAsDataURL(file);
+}
+
+// 替换图片校验失败时的弹窗为红字提醒
+function showProfileErrorAuto(message) {
+    const errorMsg = document.getElementById('profileErrorMsg');
+    if (errorMsg) {
+        errorMsg.textContent = message;
+        errorMsg.style.display = 'block';
+        errorMsg.classList.remove('fadeout');
+        // 自动消失
+        setTimeout(() => {
+            errorMsg.classList.add('fadeout');
+            setTimeout(() => {
+                errorMsg.style.display = 'none';
+                errorMsg.classList.remove('fadeout');
+            }, 600);
+        }, 2000);
+    }
 }
 
