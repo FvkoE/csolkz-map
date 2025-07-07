@@ -193,10 +193,16 @@
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="mapNote">备注：</label>
-                    <textarea id="mapNote" name="note" class="form-textarea" placeholder="请输入备注信息，例如：地图特点、注意事项等，这些信息将帮助管理员更好地理解您的申请"></textarea>
+                <div class="form-group map-note-group">
+                    <label for="mapNote" class="map-note-label">备注：</label>
+                    <textarea id="mapNote" name="note" class="form-textarea map-note-textarea" placeholder="请输入备注信息，例如：地图特点、注意事项等，这些信息将帮助管理员更好地理解您的申请"></textarea>
                 </div>
+                <style>
+                    .map-note-group {
+                        margin-left: 24px;
+                    }
+
+                </style>
                 
                 <div class="form-actions">
                     <button type="submit" class="submit-btn">提交申请</button>
@@ -376,7 +382,7 @@
             <h3 class="modal-title">建议</h3>
             <form id="adviceForm" onsubmit="submitAdvice(event)">
                 <div class="form-group">
-                    <label for="adviceContent">
+                    <label for="adviceContent" style="color:#000000;">
                         网站还处于初期阶段，需要您宝贵的意见，目前网站的主要功能是收录csolkz地图。<br>
                         根据使用人数以及反馈，有可能会更新更多功能，比如刷记录、rank等。<br>
                         有关目前功能的建议，或者未来功能的建议，包括但不限于使用的体验，地图上传规则，地图收录条件等等，<br>
