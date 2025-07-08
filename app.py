@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, redirect, url_for, session
+from flask import Flask, request, jsonify, redirect, url_for, session, abort
 from dotenv import load_dotenv
 import os
 from flask import render_template
@@ -7,7 +7,7 @@ from flask import render_template
 load_dotenv()
 
 from config import config
-from models import SessionLocal, Advice
+from models import SessionLocal, Advice, DetailProfile, User
 
 def create_app(config_name='default'):
     """应用工厂函数"""
@@ -73,9 +73,41 @@ def create_app(config_name='default'):
         finally:
             session.close()
     
-    @app.route('/profile')
-    def profile():
-        return render_template('profile.html', avatar_url=session.get('avatar_url'))
+    @app.route('/profile/<int:user_id>')
+    def profile(user_id):
+        db = SessionLocal()
+        profile = db.query(DetailProfile).filter_by(user_id=user_id).first()
+        user = db.query(User).filter_by(id=user_id).first()
+        if not profile or not user:
+            db.close()
+            return abort(404, description='用户详细信息不存在')
+        # 构造 profileStats 字典
+        profile_stats = {
+            'score': profile.scores,
+            'rank': profile.user_rank,
+            'wrcounts': profile.wrcounts,
+            'first_clear': profile.first_clear,
+            'highest_level': profile.highest_level,
+            'pro': profile.pro,
+            'nub': profile.nub
+        }
+        avatar_value = getattr(user, 'avatar', None)
+        avatar_url = url_for('static', filename=avatar_value) if avatar_value else url_for('static', filename='default_avatar.svg')
+        nickname_raw = getattr(user, 'nickname', None)
+        username_raw = getattr(user, 'username', None)
+        nickname = str(nickname_raw) if nickname_raw else ''
+        username = str(username_raw) if username_raw else ''
+        print('nickname:', repr(nickname), 'username:', repr(username))
+        is_self = (session.get('user_id') == user_id)
+        db.close()
+        return render_template('profile.html',
+            avatar_url=avatar_url,
+            profile=profile,
+            profileStats=profile_stats,
+            nickname=nickname,
+            username=username,
+            is_self=is_self
+        )
     
     @app.route('/profile/update_nickname', methods=['POST'])
     def update_nickname():
@@ -103,6 +135,13 @@ def create_app(config_name='default'):
             
         except Exception as e:
             return jsonify({'success': False, 'message': f'更新失败：{str(e)}'})
+    
+    @app.route('/profile')
+    def my_profile():
+        user_id = session.get('user_id')
+        if not user_id:
+            return redirect(url_for('login'))
+        return redirect(url_for('profile', user_id=user_id))
     
     # 全局中间件：会话验证
     @app.before_request

@@ -7,3 +7,40 @@ CREATE TABLE `advice` ( `id` int NOT NULL AUTO_INCREMENT, `content` varchar(500)
     CREATE TABLE `maplist` ( `id` int NOT NULL AUTO_INCREMENT, `name` varchar(50) NOT NULL, `region` varchar(50) NOT NULL, `mapper` varchar(50) DEFAULT NULL, `level` varchar(50) NOT NULL, `image` varchar(255) DEFAULT NULL, `type` enum('连跳','攀岩','连跳/攀岩','长跳','滑坡','其它') NOT NULL COMMENT '地图类型', PRIMARY KEY (`id`) ) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
 
 CREATE TABLE `users` ( `id` int NOT NULL AUTO_INCREMENT, `username` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL, `password_hash` varchar(255) NOT NULL, `role` varchar(20) NOT NULL DEFAULT 'user', `create_time` datetime DEFAULT CURRENT_TIMESTAMP, `is_active` tinyint(1) DEFAULT '1', PRIMARY KEY (`id`), UNIQUE KEY `username` (`username`), KEY `idx_users_role` (`role`) ) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+
+
+##上传记录表
+CREATE TABLE map_upload (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    maplist_id INT NOT NULL,           -- 外键，关联maplist
+    user_id INT NOT NULL,              -- 外键，关联user
+    finish_time FLOAT NOT NULL,        -- 完成所用时间
+    user_rank INT NOT NULL,                 -- 名次
+    upload_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 上传时间
+    score INT NOT NULL,                -- 完成积分
+    first_clear_score INT NOT NULL,    -- 首通积分
+    mode VARCHAR(16) NOT NULL,         -- 完成模式（pro/nub）
+    is_first_clear BOOLEAN NOT NULL DEFAULT 0, -- 是否首通
+    status VARCHAR(32) NOT NULL DEFAULT 'pending', -- 审核状态
+    FOREIGN KEY (maplist_id) REFERENCES maplist(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+CREATE INDEX idx_map_upload_maplist_id ON map_upload(maplist_id);
+CREATE INDEX idx_map_upload_user_id ON map_upload(user_id);
+
+
+##详细信息表
+CREATE TABLE detail_profile (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,                        -- 外键，关联users表
+    uploads INT NOT NULL DEFAULT 0,        -- 上传/通关记录数
+    wrcounts INT NOT NULL DEFAULT 0,      
+    scores INT NOT NULL DEFAULT 0,          -- 总积分
+    first_clear INT NOT NULL DEFAULT 0,    -- 首通次数
+    user_rank INT DEFAULT NULL,               -- 最高名次
+    highest_level varchar(255) NOT NULL DEFAULT '',
+    -- 可根据需要添加更多统计字段
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    UNIQUE KEY uniq_user_id (user_id)            -- 保证一对一关系
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+

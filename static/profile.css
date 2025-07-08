@@ -13,7 +13,7 @@
 .avatar-profile {
     width: 100%;
     max-width: 1400px;
-    margin: 90px auto -180px auto;
+    margin: 50px auto -180px auto;
     border-radius: 16px 16px 18px 18px;
     box-shadow: 0 4px 24px rgba(0,0,0,0.08);
     background: rgba(255, 255, 255, 0.9);
@@ -36,7 +36,6 @@
 /*左侧样式*/
 .profile-side-box {
     flex: 0 0 320px;
-    background: rgba(255, 255, 255, 0.96);
     border-radius: 18px;
     box-shadow: 0 4px 24px rgba(0,0,0,0.08);
     padding: 36px 28px 32px 28px;
@@ -344,3 +343,31 @@
     border-color: #1565c0;
     box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
 }
+
+
+
+
+
+.profile-stats-area {
+    padding-bottom: 12px;
+}
+.profile-stats-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+.profile-stats-label {
+    color: #888;
+    font-size: 15px;
+}
+.profile-stats-value {
+    color: #222;
+    font-weight: bold;
+    font-size: 16px;
+}
+.profile-stats-divider {
+    border: none;
+    border-top: 2px solid #bbb;
+    margin: 0 0 18px 0;
+}
+

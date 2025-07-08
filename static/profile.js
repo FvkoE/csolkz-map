@@ -288,3 +288,14 @@ function updateNicknameToServer(newNickname) {
         showProfileModal('更新失败，请检查网络', 'error');
     });
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.profileStats) {
+        if (typeof window.profileStats.score !== 'undefined') {
+            document.getElementById('profile-score').textContent = window.profileStats.score;
+        }
+        if (typeof window.profileStats.rank !== 'undefined') {
+            document.getElementById('profile-rank').textContent = window.profileStats.rank;
+        }
+    }
+});

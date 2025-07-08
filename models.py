@@ -83,3 +83,16 @@ class Advice(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     content = Column(String(500), nullable=False)
     create_time = Column(DateTime, default=datetime.now)
+
+class DetailProfile(Base):
+    __tablename__ = 'detail_profile'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False, unique=True)
+    wrcounts = Column(Integer, default=0, nullable=False)
+    scores = Column(Integer, default=0, nullable=False)
+    first_clear = Column(Integer, default=0, nullable=False)
+    user_rank = Column(Integer)
+    highest_level = Column(String(255), default='', nullable=False)
+    pro = Column(Integer, default=0, nullable=False)
+    nub = Column(Integer, default=0, nullable=False)
+    # 可根据表结构继续补充其它字段

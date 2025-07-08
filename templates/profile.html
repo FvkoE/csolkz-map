@@ -5,12 +5,19 @@
     <title>个人信息 - csolkz</title>
     <link rel="stylesheet" href="{{ static_url(filename='profile.css') }}">
     <link rel="stylesheet" href="{{ static_url(filename='style.css') }}">
+    <!-- 确保前端JS能读取后端传递的profileStats -->
+    <script>
+    window.profileStats = {{ profileStats | tojson | safe }};
+    </script>
 </head>
 <body>
+    <!-- 调试输出：显示后端传递的nickname和username -->
+    <div style="color:red;">nickname: {{ nickname }} | username: {{ username }}</div>
     {% include 'navbar.html' %}
 
         <div class="avatar-profile" style="position:relative;">
             <!-- 右上角相机icon按钮 -->
+            {% if is_self %}
             <span class="profile-avatar-edit-btn" id="avatarEditBtn" title="修改头像">
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="12" cy="12" r="10" fill="#fff"/>
@@ -18,6 +25,7 @@
                 </svg>
                 <input type="file" id="avatarFileInput" accept="image/*" style="display:none;">
             </span>
+            {% endif %}
             <!-- 头像、昵称、VIP、基础信息等，后续填充 -->
             <div class="profile-profile-avatar-section">
                 <div class="profile-profile-avatar-container">
@@ -31,27 +39,44 @@
                             <img id="avatarModalImg" src="{{ avatar_url or url_for('static', filename='default_avatar.svg') }}" alt="大图预览">
                         </div>
                     </div>
-                    <div class="profile-nickname-display" style="margin-right: -15px;" id="nicknameDisplay">
-                        <span id="nicknameText">{{ session.nickname or session.username }}</span>
+                    <div class="profile-nickname-display"
+                         id="nicknameDisplay"
+                         {% if not is_self %}style="margin-right:0;text-align:left;"{% else %}style="margin-right: -15px;"{% endif %}>
+                        <span id="nicknameText">{{ nickname or username }}</span>
+                        {% if is_self %}
                         <span class="profile-nickname-logo" id="editLogoBtn" style="margin-left: -5px; cursor:pointer;">
                             <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;">
                                 <path d="M14.7 3.29a1 1 0 0 1 1.42 0l.59.59a1 1 0 0 1 0 1.42l-9.3 9.3-2.12.7.7-2.12 9.3-9.3zM3 17h14v-2H3v2z" fill="#1976d2"/>
                             </svg>
                         </span>
+                        {% endif %}
                     </div>
                     <!-- 昵称编辑状态 -->
                     <div class="profile-nickname-edit" id="nicknameEdit" style="display: none;">
-                        <input type="text" id="nicknameInput" class="profile-nickname-input" value="{{ session.nickname or session.username }}" maxlength="20">
+                        <input type="text" id="nicknameInput" class="profile-nickname-input" value="{{ nickname or username }}" maxlength="20">
                     </div>
+                    {% if is_self %}
                     <div class="profile-username-display">
-                        @{{ session.username }}
+                        @{{ username }}
                     </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
         <!-- 这里可放置全局提示、欢迎语、账号状态等横向内容 -->
     <div class="profile-layout">
         <div class="profile-side-box">
+            <div class="profile-stats-area">
+                <div class="profile-stats-row">
+                    <span class="profile-stats-label">积分：</span>
+                    <span class="profile-stats-value" id="profile-score">0</span>
+                </div>
+                <div class="profile-stats-row">
+                    <span class="profile-stats-label">排名：</span>
+                    <span class="profile-stats-value" id="profile-rank">-</span>
+                </div>
+            </div>
+            <hr class="profile-stats-divider">
             <!-- 账号侧边栏内容 -->
         </div>
         <div class="profile-main-box">
