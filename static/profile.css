@@ -172,6 +172,7 @@
     margin-top: 5px;
     font-size: 1.30em;
     font-weight: bold;
+    margin-bottom: 2px;
     color: #222;
     display: flex;
     align-items: center;
@@ -311,4 +312,35 @@
 
 .profile-modal-button.success:hover {
     background: #1b5e20;
+}
+
+/* 昵称编辑样式 */
+.profile-nickname-edit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.profile-nickname-input {
+    width: 200px;
+    height: 32px;              /* 使输入框高度与昵称一致 */
+    padding: 0 12px;           /* 上下内边距为0，左右为12px */
+    border: 2px solid #1976d2;
+    border-radius: 6px;
+    font-size: 1.3em;          /* 与昵称显示一致 */
+    font-weight: 500;
+    text-align: center;
+    background: #fff;
+    color: #333;
+    transition: border-color 0.2s;
+    box-sizing: border-box;    /* 保证height包含边框 */
+    line-height: 1;            /* 避免多余竖向空间 */
+}
+
+.profile-nickname-input:focus {
+    outline: none;
+    border-color: #1565c0;
+    box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
 }

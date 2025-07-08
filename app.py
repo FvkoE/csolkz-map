@@ -77,6 +77,33 @@ def create_app(config_name='default'):
     def profile():
         return render_template('profile.html', avatar_url=session.get('avatar_url'))
     
+    @app.route('/profile/update_nickname', methods=['POST'])
+    def update_nickname():
+        """更新用户昵称"""
+        if not session.get('user_logged_in'):
+            return jsonify({'success': False, 'message': '请先登录'})
+        
+        try:
+            data = request.get_json()
+            new_nickname = data.get('nickname', '').strip()
+            
+            if not new_nickname:
+                return jsonify({'success': False, 'message': '昵称不能为空'})
+            
+            if len(new_nickname) > 20:
+                return jsonify({'success': False, 'message': '昵称长度不能超过20个字符'})
+            
+            # 更新session中的昵称
+            session['nickname'] = new_nickname
+            
+            # 这里可以添加数据库更新逻辑，如果需要的话
+            # 例如：更新用户表中的nickname字段
+            
+            return jsonify({'success': True, 'message': '昵称更新成功'})
+            
+        except Exception as e:
+            return jsonify({'success': False, 'message': f'更新失败：{str(e)}'})
+    
     # 全局中间件：会话验证
     @app.before_request
     def validate_session():
