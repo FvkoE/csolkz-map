@@ -207,10 +207,10 @@ function showSuccessModal(msg) {
         modal = document.createElement('div');
         modal.className = 'modal';
         modal.id = 'successModal';
-        modal.innerHTML = `<div class="modal-content" style="max-width:340px;text-align:center;">
-            <div style="font-size:1.1em;margin:30px 0 24px 0;color:#43a047;">${msg}</div>
-            <div style="display:flex;justify-content:center;gap:18px;">
-                <button class="submit-btn" onclick="document.getElementById('successModal').style.display='none'">确定</button>
+        modal.innerHTML = `<div class="modal-content" style="max-width:220px;text-align:center;padding:32px 24px;">
+            <div style="font-size:1.1em;margin:0 0 24px 0;color:#333;line-height:1.5;">${msg}</div>
+            <div style="display:flex;justify-content:center;">
+                <button class="submit-btn" onclick="document.getElementById('successModal').style.display='none'" style="background:#f5f5f5;color:#333;border:1px solid #ddd;padding:8px 24px;border-radius:4px;cursor:pointer;font-size:0.95em;">确定</button>
             </div>
         </div>`;
         document.body.appendChild(modal);
@@ -1120,6 +1120,41 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     window.addEventListener('DOMContentLoaded', setupUserDropdown);
+
+    // 全局夜间模式切换按钮逻辑，主页和个人信息页都可用
+    function setupNightModeToggle() {
+        const btn = document.getElementById('nightModeToggle');
+        if (!btn) return;
+        const iconWrap = document.getElementById('nightModeIconWrap');
+        const sun = document.getElementById('nightModeIconSun');
+        const moon = document.getElementById('nightModeIconMoon');
+        // 读取本地存储，决定初始模式
+        let isNight = localStorage.getItem('nightMode') === 'true';
+        function applyMode() {
+            if (isNight) {
+                sun.style.display = 'none';
+                moon.style.display = 'block';
+                iconWrap.style.transform = 'rotate(-180deg) scale(1.1)';
+                document.body.classList.add('night-mode');
+            } else {
+                sun.style.display = 'block';
+                moon.style.display = 'none';
+                iconWrap.style.transform = 'rotate(0deg) scale(1)';
+                document.body.classList.remove('night-mode');
+            }
+        }
+        btn.onclick = function() {
+            isNight = !isNight;
+            localStorage.setItem('nightMode', isNight);
+            applyMode();
+        };
+        applyMode();
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupNightModeToggle);
+    } else {
+        setupNightModeToggle();
+    }
 });
 
 // 检查登录状态的函数
@@ -2222,7 +2257,26 @@ function applyAvatarCrop() {
         const croppedFile = new File([blob], originalFileName, {
             type: 'image/png'
         });
-        updateAvatarPreview(croppedFile);
+        
+        // 检测当前页面类型并调用相应的处理函数
+        const profileAvatarImg = document.getElementById('profileAvatarImg');
+        if (profileAvatarImg) {
+            // 个人信息页面：直接调用profile.js中的上传函数
+            if (typeof uploadAvatarViaComplete === 'function') {
+                uploadAvatarViaComplete(croppedFile);
+            } else {
+                // 如果函数不存在，直接更新头像显示
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    profileAvatarImg.src = e.target.result;
+                };
+                reader.readAsDataURL(croppedFile);
+            }
+        } else {
+            // 完善信息页面：使用原有的updateAvatarPreview
+            updateAvatarPreview(croppedFile);
+        }
+        
         closeAvatarCropModal();
     }, 'image/png', 0.95);
 }

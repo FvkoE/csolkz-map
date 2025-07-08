@@ -75,7 +75,7 @@ def create_app(config_name='default'):
     
     @app.route('/profile')
     def profile():
-        return render_template('profile.html')
+        return render_template('profile.html', avatar_url=session.get('avatar_url'))
     
     # 全局中间件：会话验证
     @app.before_request

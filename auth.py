@@ -416,4 +416,48 @@ def send_verification_code():
         
     except Exception as e:
         print(f"发送验证码错误: {e}")
-        return jsonify({'success': False, 'message': '发送失败，请重试'}) 
+        return jsonify({'success': False, 'message': '发送失败，请重试'})
+
+# 新增：独立头像上传接口
+@auth_bp.route('/profile/upload_avatar', methods=['POST'])
+def upload_avatar_only():
+    if not session.get('user_logged_in'):
+        return jsonify({'success': False, 'message': '未登录'})
+
+    avatar_file = request.files.get('avatar')
+    if not avatar_file:
+        return jsonify({'success': False, 'message': '请选择头像图片'})
+
+    # 检查文件类型
+    if avatar_file.filename and not avatar_file.filename.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp')):
+        return jsonify({'success': False, 'message': '头像格式不支持，请选择PNG、JPG、JPEG、GIF或WEBP格式'})
+
+    # 保存头像
+    avatar_dir = os.path.join('static', 'avatars')
+    if not os.path.exists(avatar_dir):
+        os.makedirs(avatar_dir)
+    user_id = str(session.get('user_id'))
+    filename = secure_filename(str(avatar_file.filename))
+    file_ext = os.path.splitext(filename)[1]
+    avatar_filename = f"user_{user_id}{file_ext}"
+    avatar_path = os.path.join(avatar_dir, avatar_filename)
+    avatar_file.save(avatar_path)
+
+    # 更新数据库和session
+    from models import SessionLocal, User
+    session_db = SessionLocal()
+    try:
+        user = session_db.query(User).filter_by(id=user_id).first()
+        if user:
+            # 兼容Column[str]类型
+            user.avatar = f"avatars/{avatar_filename}"
+            session_db.commit()
+            session['avatar_url'] = url_for('static', filename=f"avatars/{avatar_filename}")
+            return jsonify({'success': True, 'redirect_url': '/profile_crop'})
+        else:
+            return jsonify({'success': False, 'message': '用户不存在'})
+    except Exception as e:
+        session_db.rollback()
+        return jsonify({'success': False, 'message': f'保存失败: {str(e)}'})
+    finally:
+        session_db.close() 
