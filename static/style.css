@@ -1150,9 +1150,10 @@ body.night-mode::before {
     backdrop-filter: blur(3px);
     -webkit-backdrop-filter: blur(12px);
     border-radius: 5px;
-    box-shadow: 0 2px 0px #e3e3e3;
+    box-shadow: 0 0px 0px #e3e3e3;
     padding: 0 0 10px 0;
     overflow-x: auto;
+    margin-bottom: 30px !important;
 }
 .map-list-container {
     max-width:73vw;
