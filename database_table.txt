@@ -30,17 +30,15 @@ CREATE INDEX idx_map_upload_user_id ON map_upload(user_id);
 
 
 ##详细信息表
-CREATE TABLE detail_profile (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT NOT NULL,                        -- 外键，关联users表
-    uploads INT NOT NULL DEFAULT 0,        -- 上传/通关记录数
-    wrcounts INT NOT NULL DEFAULT 0,      
-    scores INT NOT NULL DEFAULT 0,          -- 总积分
-    first_clear INT NOT NULL DEFAULT 0,    -- 首通次数
-    user_rank INT DEFAULT NULL,               -- 最高名次
-    highest_level varchar(255) NOT NULL DEFAULT '',
-    -- 可根据需要添加更多统计字段
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    UNIQUE KEY uniq_user_id (user_id)            -- 保证一对一关系
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
+CREATE TABLE `detail_profile` 
+( `id` int NOT NULL AUTO_INCREMENT, 
+`user_id` int NOT NULL, `wrcounts` int NOT NULL DEFAULT '0',
+ `scores` int NOT NULL DEFAULT '0', 
+ `first_clear` int NOT NULL DEFAULT '0', 
+ `user_rank` int DEFAULT NULL,
+  `highest_level` varchar(255) NOT NULL DEFAULT '',
+  `pro` int DEFAULT '0', `nub` int DEFAULT '0', 
+  `nubrecord` int DEFAULT '0', 
+  `first_clear_score` float DEFAULT '0', 
+  `score` float DEFAULT '0', PRIMARY KEY (`id`),
+   UNIQUE KEY `uniq_user_id` (`user_id`), UNIQUE KEY `unique_user_rank` (`user_rank`), CONSTRAINT `detail_profile_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci

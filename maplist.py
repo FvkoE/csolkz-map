@@ -159,14 +159,30 @@ def map_add():
     note = request.form.get('note')
     image_file = request.files.get('image')
     image_url = ""
-    
+
+    # 新增：region 必填校验
+    if not region:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'success': False, 'msg': '请选择地图大区'})
+        flash('请选择地图大区')
+        return redirect(url_for('maplist.mainpage'))
+
     session = SessionLocal()
     try:
-        exist = session.query(MapList).filter_by(name=name, region=region, mapper=mapper).first()
-        if exist:
+        # 新增：检测地图是否重复（图名+作者+大区）
+        exist_map = session.query(MapList).filter_by(name=name, region=region, mapper=mapper).first()
+        if exist_map:
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return jsonify({'success': False, 'msg': '该地图（名称+大区+作者）已存在，不能重复申请！'})
             flash('该地图（名称+大区+作者）已存在，不能重复申请！')
+            return redirect(url_for('maplist.mainpage'))
+        
+        # 新增：检测申请表中是否有待审核的重复申请
+        exist_apply = session.query(MapApply).filter_by(name=name, region=region, mapper=mapper, status='待审核').first()
+        if exist_apply:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({'success': False, 'msg': '您已提交过相同的申请，请勿重复提交！'})
+            flash('您已提交过相同的申请，请勿重复提交！')
             return redirect(url_for('maplist.mainpage'))
         
         # 处理图片上传

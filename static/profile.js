@@ -294,8 +294,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (typeof window.profileStats.score !== 'undefined') {
             document.getElementById('profile-score').textContent = window.profileStats.score;
         }
-        if (typeof window.profileStats.rank !== 'undefined') {
-            document.getElementById('profile-rank').textContent = window.profileStats.rank;
+        document.getElementById('profile-rank').textContent = (window.profileStats.rank === undefined || window.profileStats.rank === null || window.profileStats.rank === '') ? '-' : window.profileStats.rank;
+        if (typeof window.profileStats.first_clear_score !== 'undefined') {
+            document.getElementById('profile-first-clear-score').textContent =window.profileStats.first_clear_score;
+        }
+        if (typeof window.profileStats.score_float !== 'undefined') {
+            document.getElementById('profile-score-float').textContent =window.profileStats.score_float;
         }
     }
 });

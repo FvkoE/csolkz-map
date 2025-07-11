@@ -346,7 +346,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // AJAX提交
         addMapForm.addEventListener('submit', function(e) {
-            e.preventDefault();
+            e.preventDefault(); // 必须最前面，彻底阻止默认提交
+            const region = document.getElementById('addMapRegionInput').value;
+            if (!region) {
+                showErrorModal('请选择地图大区');
+                return;
+            }
             if(loadingMask) loadingMask.style.display = 'flex';
             
             const formData = new FormData(this);

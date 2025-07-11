@@ -64,7 +64,7 @@
     backdrop-filter: blur(0px) saturate(1.2);
     -webkit-backdrop-filter: blur(18px) saturate(1.2);
     box-shadow: 0 8px 10px 0 rgba(255, 255, 255, 0);
-    margin-left: 0;
+    margin-left: -13px;
 }
 @media (max-width: 900px) {
     .profile-layout {
@@ -358,16 +358,87 @@
 }
 .profile-stats-label {
     color: #888;
-    font-size: 15px;
+    font-size: 30px;
+    margin-left: -20px;
 }
-.profile-stats-value {
-    color: #222;
+.profile-rank {
+    color: #ffdd00;
     font-weight: bold;
-    font-size: 16px;
+    font-size: 30px;
+    /* 增加字体描边效果 */
+    text-shadow:
+        -1px -1px 0 #333,
+         1px -1px 0 #333,
+        -1px  1px 0 #333,
+         1px  1px 0 #333;
+}
+.profile-point {
+    color: #000000;
+    font-weight: bold;
+    font-size: 40px;
 }
 .profile-stats-divider {
     border: none;
     border-top: 2px solid #bbb;
     margin: 0 0 18px 0;
 }
-
+.profile-point-firstclear{
+    color: #ff0000e7;
+    font-size: 15px;
+    font-weight: bold;
+}
+.profile-point-rankscore{
+    color: #004cff;
+    font-size: 15px;
+    font-weight: bold;
+}   
+.profile-side-box, .profile-stats-area {
+    width: 140px;
+    min-width: 140px;
+    margin: 0 auto;
+}
+.profile-stats-row {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.profile-stats-row-partscore {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 6px;
+    margin-bottom: 0;
+    padding: 0 8px;
+}   
+.profile-stats-row-single {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 2px;
+    margin-bottom: 0;
+}   
+.profile-stats-divider-strong {
+    border: none;
+    border-top: 0.5px solid #bbbbbb61;
+    margin: 30px 0 18px 0;
+    width: calc(100% + 225px);
+    align-self: stretch;
+    margin-left: -112px;
+    margin-right: -40px;
+}   
+.profile-extra-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 10px 0 0 -100px;
+    padding: 0 4px;
+}
+.profile-extra-item {
+    font-size: 15px;
+    color: #333;
+    letter-spacing: 1px;
+    line-height: 1.7;
+}   

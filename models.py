@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, Enum, ForeignKey, Date
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, Enum, ForeignKey, Date, Float
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -95,4 +95,7 @@ class DetailProfile(Base):
     highest_level = Column(String(255), default='', nullable=False)
     pro = Column(Integer, default=0, nullable=False)
     nub = Column(Integer, default=0, nullable=False)
+    first_clear_score = Column(Float, default=0, nullable=False)
+    score = Column(Float, default=0, nullable=False)
+    nubrecord = Column(Integer, default=0, nullable=False)
     # 可根据表结构继续补充其它字段

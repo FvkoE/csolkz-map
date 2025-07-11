@@ -63,17 +63,32 @@
                 </div>
             </div>
         </div>
-        <!-- 这里可放置全局提示、欢迎语、账号状态等横向内容 -->
+ <!--左侧详细信息界面-->
     <div class="profile-layout">
         <div class="profile-side-box">
+             <!--上方积分和排名显示信息界面-->
             <div class="profile-stats-area">
                 <div class="profile-stats-row">
-                    <span class="profile-stats-label">积分：</span>
-                    <span class="profile-stats-value" id="profile-score">0</span>
+                    <span class="profile-stats-label">#</span>
+                    <span class="profile-rank" title='排名' id="profile-rank"></span>
                 </div>
                 <div class="profile-stats-row">
-                    <span class="profile-stats-label">排名：</span>
-                    <span class="profile-stats-value" id="profile-rank">-</span>
+                    <span class="profile-point" title='总积分' id="profile-score"></span>
+                </div>
+                <div class="profile-stats-row-single">
+                    <span class="profile-point-firstclear" title='首通积分' id="profile-first-clear-score"></span>
+                </div>
+                <div class="profile-stats-row-single">
+                    <span class="profile-point-rankscore"  title='排名积分' id="profile-score-float"></span>
+                </div>
+                <hr class="profile-stats-divider-strong">
+                 <!--下方地图成绩信息界面-->
+                <div class="profile-extra-stats">
+                    <div class="profile-extra-item">WR数量：</div>
+                    <div class="profile-extra-item">首通数量：</div>
+                    <div class="profile-extra-item">总记录数：</div>
+                    <div class="profile-extra-item">裸跳记录：</div>
+                    <div class="profile-extra-item">存点记录：</div>
                 </div>
             </div>
             <hr class="profile-stats-divider">
