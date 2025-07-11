@@ -7,7 +7,8 @@ from flask import render_template
 load_dotenv()
 
 from config import config
-from models import SessionLocal, Advice, DetailProfile, User
+from models import SessionLocal, Advice, DetailProfile, User, MapList
+from auth import login_required
 
 def create_app(config_name='default'):
     """应用工厂函数"""
@@ -145,6 +146,46 @@ def create_app(config_name='default'):
         if not user_id:
             return redirect(url_for('login'))
         return redirect(url_for('profile', user_id=user_id))
+    
+    @app.route('/upload')
+    @login_required
+    def upload():
+        return render_template('upload.html')
+    
+    @app.route('/api/map_search')
+    def api_map_search():
+        query = request.args.get('query', '').strip()
+        if not query:
+            return jsonify(success=False, msg='请输入地图ID或名称')
+        session = SessionLocal()
+        map_obj = None
+        # 先按ID查找
+        if query.isdigit():
+            map_obj = session.query(MapList).filter_by(id=int(query)).first()
+        # 再按名称模糊查找
+        if not map_obj:
+            map_obj = session.query(MapList).filter(MapList.name.like(f'%{query}%')).first()
+        if not map_obj:
+            session.close()
+            return jsonify(success=False, msg='未找到地图')
+        # 构造图片路径
+        image_url = map_obj.image or ''
+        if bool(image_url) and not str(image_url).startswith('/static/'):
+            image_url = '/static/uploads/' + str(image_url)
+        elif not bool(image_url):
+            image_url = '/static/default_avatar.svg'
+        data = {
+            'id': map_obj.id,
+            'name': map_obj.name,
+            'region': map_obj.region,
+            'level': map_obj.level,
+            'mapper': map_obj.mapper,
+            'type': map_obj.type,
+            'image_url': image_url,
+            'description': getattr(map_obj, 'note', '')
+        }
+        session.close()
+        return jsonify(success=True, data=data)
     
     # 全局中间件：会话验证
     @app.before_request

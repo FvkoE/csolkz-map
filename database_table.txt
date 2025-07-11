@@ -10,23 +10,8 @@ CREATE TABLE `users` ( `id` int NOT NULL AUTO_INCREMENT, `username` varchar(50) 
 
 
 ##上传记录表
-CREATE TABLE map_upload (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    maplist_id INT NOT NULL,           -- 外键，关联maplist
-    user_id INT NOT NULL,              -- 外键，关联user
-    finish_time FLOAT NOT NULL,        -- 完成所用时间
-    user_rank INT NOT NULL,                 -- 名次
-    upload_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- 上传时间
-    score INT NOT NULL,                -- 完成积分
-    first_clear_score INT NOT NULL,    -- 首通积分
-    mode VARCHAR(16) NOT NULL,         -- 完成模式（pro/nub）
-    is_first_clear BOOLEAN NOT NULL DEFAULT 0, -- 是否首通
-    status VARCHAR(32) NOT NULL DEFAULT 'pending', -- 审核状态
-    FOREIGN KEY (maplist_id) REFERENCES maplist(id),
-    FOREIGN KEY (user_id) REFERENCES users(id)
-);
-CREATE INDEX idx_map_upload_maplist_id ON map_upload(maplist_id);
-CREATE INDEX idx_map_upload_user_id ON map_upload(user_id);
+CREATE TABLE `map_upload` ( `id` int NOT NULL AUTO_INCREMENT, `maplist_id` int NOT NULL, `user_id` int NOT NULL, `finish_time` float NOT NULL, `user_rank` int NOT NULL, `upload_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, `score` int NOT NULL, `first_clear_score` int NOT NULL, `mode` varchar(16) NOT NULL, `is_first_clear` tinyint(1) NOT NULL DEFAULT '0', `video_url` varchar(255) NOT NULL, `status` enum('approve','refuse','pending') DEFAULT 'pending', PRIMARY KEY (`id`), KEY `idx_map_upload_maplist_id` (`maplist_id`), KEY `idx_map_upload_user_id` (`user_id`), CONSTRAINT `map_upload_ibfk_1` FOREIGN KEY (`maplist_id`) REFERENCES `maplist` (`id`), CONSTRAINT `map_upload_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+
 
 
 ##详细信息表
