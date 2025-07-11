@@ -442,3 +442,22 @@
     letter-spacing: 1px;
     line-height: 1.7;
 }   
+.profile-extra-item1{
+    font-size: 18px;
+    color: #333;
+    letter-spacing: 1px;
+    line-height: 2;
+    font-weight: bold;
+}
+.profile-extra-part1{
+    margin-bottom: -20px;
+}
+.profile-stats-divider-strong2{
+    border: none;
+    border-top: 0.5px solid #bbbbbb61;
+    margin: 30px 0 18px 0;
+    width: calc(100% + 140px);
+    align-self: stretch;
+    margin-left: -20px;
+    margin-right: -0px;
+}   

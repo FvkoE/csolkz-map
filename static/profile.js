@@ -301,5 +301,29 @@ document.addEventListener('DOMContentLoaded', function() {
         if (typeof window.profileStats.score_float !== 'undefined') {
             document.getElementById('profile-score-float').textContent =window.profileStats.score_float;
         }
+        // 新增：填充WR数量、首通数量、总记录数、裸跳记录、存点记录
+        if (typeof window.profileStats.wrcounts !== 'undefined') {
+            document.getElementById('profile-wr-count').textContent = 'WR数量：' + window.profileStats.wrcounts;
+        }
+        if (typeof window.profileStats.first_clear !== 'undefined') {
+            document.getElementById('profile-first-clear-count').textContent = '首通数量：' + window.profileStats.first_clear;
+        }
+        // 总记录数 = 裸跳记录(pro) + 存点记录(nub)
+        if (typeof window.profileStats.pro !== 'undefined' && typeof window.profileStats.nub !== 'undefined') {
+            var total = Number(window.profileStats.pro) + Number(window.profileStats.nub);
+            document.getElementById('profile-total-record-count').textContent = '总记录数：' + total;
+        }
+        if (typeof window.profileStats.pro !== 'undefined') {
+            document.getElementById('profile-pro-count').textContent = '裸跳记录：' + window.profileStats.pro;
+        }
+        if (typeof window.profileStats.nub !== 'undefined') {
+            document.getElementById('profile-nub-count').textContent = '存点记录：' + window.profileStats.nub;
+        }
+        // 最高通关难度显示逻辑
+        if (typeof window.profileStats.highest_level === 'undefined' || window.profileStats.highest_level === null || window.profileStats.highest_level === '') {
+            document.getElementById('profile-highest-level').textContent = '最高通关难度：' + '-';
+        } else {
+            document.getElementById('profile-highest-level').textContent = '最高通关难度：' + window.profileStats.highest_level;
+        }
     }
-});
+}); 

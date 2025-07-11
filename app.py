@@ -92,7 +92,7 @@ def create_app(config_name='default'):
             'nub': profile.nub,
             'first_clear_score': getattr(profile, 'first_clear_score', 0),
             'score_float': getattr(profile, 'score', 0),
-            'nubrecord': getattr(profile, 'nubrecord', 0)
+            'nubrecord': getattr(profile, 'nubrecord', 0),
         }
         avatar_value = getattr(user, 'avatar', None)
         avatar_url = url_for('static', filename=avatar_value) if avatar_value else url_for('static', filename='default_avatar.svg')
