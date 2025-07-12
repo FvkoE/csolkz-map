@@ -27,7 +27,34 @@
                 <button type="button" class="upload-map-search-btn" id="map-search-btn">搜索</button>
                 <button type="button" class="upload-map-confirm-btn" id="map-confirm-btn" style="display:none;">确定</button>
                 <button type="button" class="upload-map-reset-btn" id="map-reset-btn" style="display:none;">更改</button>
+            </div>  
+        </div>
+        <div class="upload-demo-profile">
+            <div class="upload-demo-row">
+                <label for="demo-video-url" class="upload-demo-label"></label>
+                <input type="text" id="demo-video-url" class="upload-demo-input" placeholder="请输入视频链接地址">
             </div>
+            <div class="upload-demo-row">
+                <span class="upload-demo-label">类型：</span>
+                <label class="upload-demo-checkbox-label">
+                    <input type="radio" name="demo-type" value="裸跳" class="upload-demo-radio"> 裸跳
+                </label>
+                <label class="upload-demo-checkbox-label">
+                    <input type="radio" name="demo-type" value="存点" class="upload-demo-radio"> 存点
+                </label>
+            </div>
+            <div class="upload-demo-row">
+                <span class="upload-demo-label">难度：</span>
+                <label class="upload-demo-checkbox-label">
+                    <input type="radio" name="demo-difficulty" value="是" class="upload-demo-radio"> 合理
+                </label>
+                <label class="upload-demo-checkbox-label">
+                    <input type="radio" name="demo-difficulty" value="否" class="upload-demo-radio"> 不合理
+                </label>
+            </div>
+        </div>
+        <div class="upload-video-player">
+            <!-- 视频播放区域，后续可插入video或iframe等 -->
         </div>
 
 
