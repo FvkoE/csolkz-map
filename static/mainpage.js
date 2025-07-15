@@ -37,13 +37,30 @@ window.imagePreview = {
         if (addImageInput) {
             addImageInput.addEventListener('change', (e) => {
                 const file = e.target.files[0];
-                if (file && !validateImageFile(file)) {
+                if (file) {
+                    // 检查文件类型
+                    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'];
+                    if (!allowedTypes.includes(file.type)) {
                     e.target.value = '';
                     const userForm = document.querySelector('.add-map-form:not(.admin-add-map-form)');
                     if (userForm) {
                         userForm.querySelector('.file-preview').innerHTML = '';
                     }
+                        showErrorModal('仅支持PNG、JPG、JPEG、GIF、WEBP格式的图片');
                     return;
+                    }
+                    
+                    // 检查文件大小（2MB）
+                    const maxSize = 2 * 1024 * 1024;
+                    if (file.size > maxSize) {
+                        e.target.value = '';
+                        const userForm = document.querySelector('.add-map-form:not(.admin-add-map-form)');
+                        if (userForm) {
+                            userForm.querySelector('.file-preview').innerHTML = '';
+                        }
+                        showErrorModal('图片大小不能超过2MB');
+                        return;
+                    }
                 }
                 window.imagePreview.handleImageChange(e, '.file-preview');
             });
@@ -54,10 +71,24 @@ window.imagePreview = {
         if (editImageInput) {
             editImageInput.addEventListener('change', (e) => {
                 const file = e.target.files[0];
-                if (file && !validateImageFile(file)) {
+                if (file) {
+                    // 检查文件类型
+                    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'];
+                    if (!allowedTypes.includes(file.type)) {
                     e.target.value = '';
                     document.querySelector('.edit-map-form .file-preview').innerHTML = '';
+                        showErrorModal('仅支持PNG、JPG、JPEG、GIF、WEBP格式的图片');
                     return;
+                    }
+                    
+                    // 检查文件大小（2MB）
+                    const maxSize = 2 * 1024 * 1024;
+                    if (file.size > maxSize) {
+                        e.target.value = '';
+                        document.querySelector('.edit-map-form .file-preview').innerHTML = '';
+                        showErrorModal('图片大小不能超过2MB');
+                        return;
+                    }
                 }
                 window.imagePreview.handleImageChange(e, '.file-preview', true);
             });
@@ -360,7 +391,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: formData,
                 headers: {'X-Requested-With': 'XMLHttpRequest'}
             })
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) {
+                    // 处理HTTP错误状态
+                    if (res.status === 413) {
+                        throw new Error('图片大小不能超过2MB');
+                    } else {
+                        throw new Error('网络请求失败');
+                    }
+                }
+                return res.json();
+            })
             .then(data => {
                 if(loadingMask) loadingMask.style.display = 'none';
                 if (data.success) {
@@ -370,9 +411,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     showErrorModal(data.msg || '申请失败');
                 }
             })
-            .catch(() => {
+            .catch((error) => {
                 if(loadingMask) loadingMask.style.display = 'none';
-                showErrorModal('网络错误');
+                showErrorModal(error.message || '网络错误');
             });
         });
     }

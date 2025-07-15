@@ -10,9 +10,7 @@ CREATE TABLE `users` ( `id` int NOT NULL AUTO_INCREMENT, `username` varchar(50) 
 
 
 ##上传记录表
-CREATE TABLE `map_upload` ( `id` int NOT NULL AUTO_INCREMENT, `maplist_id` int NOT NULL, `user_id` int NOT NULL, `finish_time` float NOT NULL, `user_rank` int NOT NULL, `upload_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, `score` int NOT NULL, `first_clear_score` int NOT NULL, `mode` varchar(16) NOT NULL, `is_first_clear` tinyint(1) NOT NULL DEFAULT '0', `video_url` varchar(255) NOT NULL, `status` enum('approve','refuse','pending') DEFAULT 'pending', PRIMARY KEY (`id`), KEY `idx_map_upload_maplist_id` (`maplist_id`), KEY `idx_map_upload_user_id` (`user_id`), CONSTRAINT `map_upload_ibfk_1` FOREIGN KEY (`maplist_id`) REFERENCES `maplist` (`id`), CONSTRAINT `map_upload_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-
-
+CREATE TABLE `map_upload` ( `id` int NOT NULL AUTO_INCREMENT, `maplist_id` int NOT NULL, `user_id` int NOT NULL, `finish_time` float NOT NULL, `user_rank` int NOT NULL, `upload_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, `score` int NOT NULL, `first_clear_score` int NOT NULL, `mode` varchar(16) NOT NULL, `is_first_clear` tinyint(1) NOT NULL DEFAULT '0', `video_url` varchar(255) NOT NULL, `status` enum('approve','refuse','pending') DEFAULT 'pending', `cp` int DEFAULT NULL, `tp` int DEFAULT NULL, `resonable` enum('Y','N') NOT NULL, `SUGGEST_LEVEL` varchar(255) DEFAULT NULL, PRIMARY KEY (`id`), KEY `idx_map_upload_maplist_id` (`maplist_id`), KEY `idx_map_upload_user_id` (`user_id`), CONSTRAINT `map_upload_ibfk_1` FOREIGN KEY (`maplist_id`) REFERENCES `maplist` (`id`), CONSTRAINT `map_upload_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
 
 ##详细信息表
 CREATE TABLE `detail_profile` 
@@ -27,3 +25,7 @@ CREATE TABLE `detail_profile`
   `first_clear_score` float DEFAULT '0', 
   `score` float DEFAULT '0', PRIMARY KEY (`id`),
    UNIQUE KEY `uniq_user_id` (`user_id`), UNIQUE KEY `unique_user_rank` (`user_rank`), CONSTRAINT `detail_profile_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+
+
+##记录审核表
+CREATE TABLE `upload_apply` ( `id` int NOT NULL AUTO_INCREMENT, `maplist_id` int NOT NULL, `user_id` int NOT NULL, `finish_time` float NOT NULL, `user_rank` int NOT NULL, `upload_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, `score` int NOT NULL, `first_clear_score` int NOT NULL, `mode` varchar(16) NOT NULL, `is_first_clear` tinyint(1) NOT NULL DEFAULT '0', `video_url` varchar(255) NOT NULL, `status` enum('pending','approve','refuse') DEFAULT 'pending', `cp` int DEFAULT NULL, `tp` int DEFAULT NULL, `resonable` enum('Y','N') NOT NULL, `SUGGEST_LEVEL` varchar(255) DEFAULT NULL, `reviewer_id` int DEFAULT NULL, `review_time` datetime DEFAULT NULL, `reject_reason` varchar(255) DEFAULT NULL, PRIMARY KEY (`id`), KEY `idx_upload_apply_maplist_id` (`maplist_id`), KEY `idx_upload_apply_user_id` (`user_id`), CONSTRAINT `upload_apply_ibfk_1` FOREIGN KEY (`maplist_id`) REFERENCES `maplist` (`id`), CONSTRAINT `upload_apply_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci

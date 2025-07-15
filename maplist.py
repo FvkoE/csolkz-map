@@ -309,8 +309,29 @@ def map_detail(map_id):
         map_obj = session.query(MapList).filter_by(id=map_id).first()
         if not map_obj:
             return "地图不存在", 404
-        # 记录列表暂时为空
-        records = []
-        return render_template('map_detail.html', map=map_obj, records=records)
+        # 查询所有通过记录
+        from models import MapUpload, User
+        all_records = session.query(MapUpload, User).join(User, MapUpload.user_id == User.id).filter(
+            MapUpload.maplist_id == map_id,
+            MapUpload.status == 'approve'
+        ).all()
+        # 分mode分组，筛选每个用户最快一条
+        pro_dict = {}
+        nub_dict = {}
+        for r, user in all_records:
+            key = r.user_id
+            if r.mode == 'pro':
+                if key not in pro_dict or \
+                   (r.finish_time < pro_dict[key][0].finish_time) or \
+                   (r.finish_time == pro_dict[key][0].finish_time and r.upload_time < pro_dict[key][0].upload_time):
+                    pro_dict[key] = (r, user)
+            elif r.mode == 'nub':
+                if key not in nub_dict or \
+                   (r.finish_time < nub_dict[key][0].finish_time) or \
+                   (r.finish_time == nub_dict[key][0].finish_time and r.upload_time < nub_dict[key][0].upload_time):
+                    nub_dict[key] = (r, user)
+        pro_records = sorted([v for v in pro_dict.values()], key=lambda x: (x[0].finish_time, x[0].upload_time))
+        nub_records = sorted([v for v in nub_dict.values()], key=lambda x: (x[0].finish_time, x[0].upload_time))
+        return render_template('map_detail.html', map=map_obj, pro_records=pro_records, nub_records=nub_records)
     finally:
         session.close()

@@ -7,7 +7,7 @@ from flask import render_template
 load_dotenv()
 
 from config import config
-from models import SessionLocal, Advice, DetailProfile, User, MapList
+from models import SessionLocal, Advice, DetailProfile, User, MapList, MapUpload, UploadApply
 from auth import login_required
 
 def create_app(config_name='default'):
@@ -77,23 +77,82 @@ def create_app(config_name='default'):
     @app.route('/profile/<int:user_id>')
     def profile(user_id):
         db = SessionLocal()
-        profile = db.query(DetailProfile).filter_by(user_id=user_id).first()
         user = db.query(User).filter_by(id=user_id).first()
-        if not profile or not user:
+        if not user:
             db.close()
-            return abort(404, description='用户详细信息不存在')
-        # 构造 profileStats 字典
+            return abort(404, description='用户不存在')
+        # 查询所有已通过的map_upload记录
+        records = db.query(MapUpload).filter_by(user_id=user_id, status='approve').all()
+        # 难度排序规则
+        level_order = [
+            '入门', '初级', '中级', '中级+', '高级', '高级+', '骨灰', '骨灰+', '火星', '火星+',
+            '极限(1)', '极限(2)', '极限(3)', '极限(4)', '死亡(1)', '死亡(2)', '死亡(3)', '死亡(4)'
+        ]
+        level_order_map = {name: i for i, name in enumerate(level_order)}
+        # 只统计每个地图+每种模式下该用户最快（finish_time最小，upload_time最早）的一条记录
+        best_record_dict = {}
+        for r in records:
+            key = (r.maplist_id, r.mode)
+            if key not in best_record_dict:
+                best_record_dict[key] = r
+            else:
+                old = best_record_dict[key]
+                if (r.finish_time < old.finish_time) or (r.finish_time == old.finish_time and r.upload_time < old.upload_time):
+                    best_record_dict[key] = r
+        best_records = list(best_record_dict.values())
+        # 统计
+        total_score = 0
+        total_first_clear_score = 0
+        total_rank_score = 0
+        pro_score = 0
+        nub_score = 0
+        wr_count = 0
+        first_clear_count = 0
+        pro_count = 0
+        nub_count = 0
+        highest_level = ''
+        highest_level_idx = -1
+        # 需要join maplist获取level
+        maplist_dict = {}
+        if best_records:
+            maplist_ids = list(set([r.maplist_id for r in best_records]))
+            maplist_objs = db.query(MapList).filter(MapList.id.in_(maplist_ids)).all()
+            for m in maplist_objs:
+                maplist_dict[m.id] = m
+        for r in best_records:
+            total_score += (r.score or 0) + (r.first_clear_score or 0)
+            total_first_clear_score += (r.first_clear_score or 0)
+            total_rank_score += (r.score or 0)
+            if r.mode == 'pro':
+                pro_score += (r.score or 0)
+                pro_count += 1
+            elif r.mode == 'nub':
+                nub_score += (r.score or 0)
+                nub_count += 1
+            if getattr(r, 'is_wr', 'N') == 'Y':
+                wr_count += 1
+            if int(getattr(r, 'is_first_clear', 0)) == 1:
+                first_clear_count += 1
+            # 最高难度
+            m = maplist_dict.get(r.maplist_id)
+            if m:
+                idx = level_order_map.get(m.level, -1)
+                if idx > highest_level_idx:
+                    highest_level_idx = idx
+                    highest_level = m.level
+        total_count = len(best_records)
         profile_stats = {
-            'score': profile.scores,
-            'rank': profile.user_rank,
-            'wrcounts': profile.wrcounts,
-            'first_clear': profile.first_clear,
-            'highest_level': profile.highest_level,
-            'pro': profile.pro,
-            'nub': profile.nub,
-            'first_clear_score': getattr(profile, 'first_clear_score', 0),
-            'score_float': getattr(profile, 'score', 0),
-            'nubrecord': getattr(profile, 'nubrecord', 0),
+            'score': total_score,
+            'score_float': total_rank_score,
+            'first_clear_score': total_first_clear_score,
+            'pro_score': pro_score,
+            'nub_score': nub_score,
+            'wrcounts': wr_count,
+            'first_clear': first_clear_count,
+            'highest_level': highest_level,
+            'pro': pro_count,
+            'nub': nub_count,
+            'total_count': total_count
         }
         avatar_value = getattr(user, 'avatar', None)
         avatar_url = url_for('static', filename=avatar_value) if avatar_value else url_for('static', filename='default_avatar.svg')
@@ -101,12 +160,11 @@ def create_app(config_name='default'):
         username_raw = getattr(user, 'username', None)
         nickname = str(nickname_raw) if nickname_raw else ''
         username = str(username_raw) if username_raw else ''
-        print('nickname:', repr(nickname), 'username:', repr(username))
         is_self = (session.get('user_id') == user_id)
         db.close()
         return render_template('profile.html',
             avatar_url=avatar_url,
-            profile=profile,
+            profile=None,
             profileStats=profile_stats,
             nickname=nickname,
             username=username,
@@ -150,7 +208,69 @@ def create_app(config_name='default'):
     @app.route('/upload')
     @login_required
     def upload():
-        return render_template('upload.html')
+        user_id = session.get('user_id')
+        return render_template('upload.html', user_id=user_id)
+    
+    @app.route('/upload_record', methods=['POST'])
+    @login_required
+    def upload_record():
+        data = request.get_json()
+        print('DEBUG RAW DATA:', data)
+        print('DEBUG resonable:', data.get('resonable'))
+        user_id = session.get('user_id')
+        if not user_id:
+            return jsonify({'success': False, 'msg': '未登录'})
+        required_fields = ['maplist_id', 'finish_time', 'user_rank', 'score', 'first_clear_score', 'mode', 'is_first_clear', 'video_url']
+        for f in required_fields:
+            if f not in data:
+                return jsonify({'success': False, 'msg': f'缺少参数: {f}'})
+        resonable = data.get('resonable')
+        if resonable not in ('Y', 'N'):
+            return jsonify({'success': False, 'msg': '请选择难度是否合理'})
+        suggest_level = data.get('SUGGEST_LEVEL')
+        db = SessionLocal()
+        try:
+            # 新增：查找该用户在该地图该模式下的最快成绩
+            best = db.query(MapUpload).filter(
+                MapUpload.user_id == user_id,
+                MapUpload.maplist_id == data['maplist_id'],
+                MapUpload.mode == data['mode'],  # 按模式区分
+                MapUpload.status == 'approve'
+            ).order_by(MapUpload.finish_time.asc(), MapUpload.upload_time.asc()).first()
+            if best and data['finish_time'] >= best.finish_time:
+                db.close()
+                return jsonify({'success': False, 'msg': '你已上传过该模式下更快的成绩，无需重复提交！'})
+            # 后端校验：存点模式下cp和tp必填且为非负整数
+            if data['mode'] == 'nub':
+                cp = data.get('cp')
+                tp = data.get('tp')
+                if cp is None or tp is None or str(cp).strip() == '' or str(tp).strip() == '' or int(cp) < 0 or int(tp) < 0:
+                    db.close()
+                    return jsonify({'success': False, 'msg': '存点模式下，存点和读点数量必须填写且为非负整数！'})
+            upload = UploadApply(
+                maplist_id = data['maplist_id'],
+                user_id = user_id,
+                finish_time = data['finish_time'],
+                user_rank = data['user_rank'],
+                score = data['score'],
+                first_clear_score = data['first_clear_score'],
+                mode = data['mode'],
+                is_first_clear = bool(data['is_first_clear']),
+                video_url = data['video_url'],
+                status = 'pending',
+                cp = data.get('cp'),
+                tp = data.get('tp'),
+                resonable = resonable,
+                SUGGEST_LEVEL = suggest_level
+            )
+            db.add(upload)
+            db.commit()
+            return jsonify({'success': True, 'msg': '申请已提交，等待审核'})
+        except Exception as e:
+            db.rollback()
+            return jsonify({'success': False, 'msg': str(e)})
+        finally:
+            db.close()
     
     @app.route('/api/map_search')
     def api_map_search():

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>记录审核</title>
+    <link rel="stylesheet" href="{{ static_url(filename='admin-main.css') }}">
+    <link rel="stylesheet" href="{{ static_url(filename='style.css') }}">
+    <link rel="stylesheet" href="{{ static_url(filename='record_review.css') }}">
+    <script src="{{ static_url(filename='record_review.js') }}"></script>
+</head>
+<body class="admin-bg">
+    <!-- 顶部导航栏 -->
+    <div class="admin-navbar">
+        <div class="site-name">csolkz 管理后台</div>
+        <div style="flex:1;"></div>
+        <div class="welcome">欢迎，{{ username }}！</div>
+        <a href="{{ url_for('maplist.mainpage') }}" class="nav-link">返回用户端</a>
+    </div>
+    <!-- 标签栏 -->
+    <div class="tab-bar">
+        <div class="tab active">记录审核</div>
+    </div>
+    <!-- 主页面区域 -->
+    <div class="admin-main">
+        <div class="tab-content active">
+            <!-- 状态筛选下拉框 -->
+            <div style="margin-bottom:16px;">
+                <label for="statusSelect">筛选状态：</label>
+                <select id="statusSelect" onchange="onStatusChange()">
+                    <option value="pending" {% if current_status=='pending' %}selected{% endif %}>待审核</option>
+                    <option value="approve" {% if current_status=='approve' %}selected{% endif %}>已通过</option>
+                    <option value="refuse" {% if current_status=='refuse' %}selected{% endif %}>已拒绝</option>
+                </select>
+            </div>
+            {% if records and records|length > 0 %}
+            <div class="apply-table-wrapper">
+                <table class="apply-table-admin">
+                    <thead>
+                        <tr>
+                            <th>地图图片</th>
+                            <th>图名</th>
+                            <th>大区</th>
+                            <th>玩家昵称</th>
+                            <th>完成时间</th>
+                            <th>模式</th>
+                            <th>视频</th>
+                            <th>状态</th>
+                            <th>cp</th>
+                            <th>tp</th>
+                            <th>合理</th>
+                            <th>建议难度</th>
+                            {% if current_status == 'pending' %}
+                            <th>操作</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in records %}
+                        <tr>
+                            <td>
+                                {% if record.map_image %}
+                                    <img src="{{ record.map_image if record.map_image.startswith('http') else url_for('static', filename=record.map_image.lstrip('/')) }}" alt="地图图片" class="apply-thumb" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                    <div class="apply-thumb-placeholder" style="display:none;">图片加载失败</div>
+                                {% else %}
+                                    <div class="apply-thumb-placeholder">暂无图片</div>
+                                {% endif %}
+                            </td>
+                            <td style="word-break:break-all;">{{ record.map_name }}</td>
+                            <td>{{ record.map_region }}</td>
+                            <td>{{ record.user_nickname }}</td>
+                            <td>{{ record.finish_time }}</td>
+                            <td>{{ record.mode }}</td>
+                            <td>
+                                {% if record.video_url %}
+                                    <a href="{{ record.video_url }}" target="_blank" class="video-btn" title="播放视频">
+                                        <span class="video-icon">▶</span>
+                                    </a>
+                                {% else %}
+                                    <span class="review-no-video">无</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ record.status }}</td>
+                            <td>{{ record.cp }}</td>
+                            <td>{{ record.tp }}</td>
+                            <td>{{ record.resonable }}</td>
+                            <td>{{ record.SUGGEST_LEVEL }}</td>
+                            {% if current_status == 'pending' %}
+                            <td style="white-space:nowrap;">
+                                <button class="admin-btn admin-btn-approve" title="同意" onclick="reviewUploadApply({{ record.id }}, 'approve', this)">√</button>
+                                <button class="admin-btn admin-btn-reject" title="拒绝" onclick="openRejectModal({{ record.id }}, this)">×</button>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="record-empty">暂无待审核记录</div>
+            {% endif %}
+        </div>
+    </div>
+    <!-- 拒绝理由弹窗（唯一且标准） -->
+    <div class="modal" id="rejectModal">
+        <div class="modal-content reject-modal-content">
+            <div class="reject-modal-title">请输入拒绝理由</div>
+            <textarea id="rejectReasonInput" class="form-textarea"></textarea>
+            <div class="reject-modal-btns">
+                <button class="submit-btn" onclick="confirmRejectReason()">确定</button>
+                <button class="cancel-btn" onclick="closeRejectModal()">取消</button>
+            </div>
+        </div>
+    </div>
+    <!-- 在body结束前引入js -->
+    <script>
+    function onStatusChange() {
+        var status = document.getElementById('statusSelect').value;
+        window.location.href = '?status=' + status;
+    }
+    </script>
+    <script src="{{ static_url(filename='record_review.js') }}"></script>
+</body>
+</html> 

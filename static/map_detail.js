@@ -37,4 +37,27 @@ function setupUserDropdown() {
         window.location.href = '/profile';
     });
 }
-window.addEventListener('DOMContentLoaded', setupUserDropdown); 
+window.addEventListener('DOMContentLoaded', setupUserDropdown);
+
+// 地图详情页排行榜切换
+
+document.addEventListener('DOMContentLoaded', function() {
+    const proBtn = document.getElementById('proViewBtn');
+    const nubBtn = document.getElementById('nubViewBtn');
+    const proTable = document.getElementById('pro-records-table');
+    const nubTable = document.getElementById('nub-records-table');
+    if (proBtn && nubBtn && proTable && nubTable) {
+        proBtn.addEventListener('click', function() {
+            proBtn.classList.add('active');
+            nubBtn.classList.remove('active');
+            proTable.style.display = '';
+            nubTable.style.display = 'none';
+        });
+        nubBtn.addEventListener('click', function() {
+            nubBtn.classList.add('active');
+            proBtn.classList.remove('active');
+            nubTable.style.display = '';
+            proTable.style.display = 'none';
+        });
+    }
+}); 

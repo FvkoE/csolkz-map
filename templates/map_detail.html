@@ -39,21 +39,66 @@
     </div>
     <!-- 下方记录列表区域 -->
     <div class="map-detail-records">
-        <div class="map-detail-records-title">地图记录</div>
-        <table class="map-detail-records-table">
-            <thead>
-                <tr>
-                    <th>排名</th>
-                    <th>玩家</th>
-                    <th>用时</th>
-                    <th>积分</th>
-                    <th>日期</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- 记录表未创建，暂留空 -->
-            </tbody>
-        </table>
+        <!--切换视图按钮-->
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div class="map-detail-records-title">地图记录</div>
+            <div class="view-switcher" style="margin-bottom:0;">
+                <button id="proViewBtn" class="view-btn active" type="button">裸跳</button>
+                <button id="nubViewBtn" class="view-btn" type="button">存点</button>
+            </div>
+        </div>
+        <div id="pro-records-table">
+            <table class="map-detail-records-table">
+                <thead>
+                    <tr>
+                        <th>排名</th>
+                        <th>玩家</th>
+                        <th>用时</th>
+                        <th>积分</th>
+                        <th>日期</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for rec, user in pro_records %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ user.nickname or user.username }}</td>
+                        <td>{% set s = rec.finish_time|float(0) %}{% set m = (s // 60)|int %}{% set sec = s - m*60 %}{{ '%02d' % m }}:{{ '%05.2f' % sec }}</td>
+                        <td>{{ rec.score }}</td>
+                        <td>{{ rec.upload_time.strftime('%Y-%m-%d') }}</td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="5" style="color:#888;text-align:center;">暂无裸跳记录</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div id="nub-records-table" style="display:none;">
+            <table class="map-detail-records-table">
+                <thead>
+                    <tr>
+                        <th>排名</th>
+                        <th>玩家</th>
+                        <th>用时</th>
+                        <th>积分</th>
+                        <th>日期</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for rec, user in nub_records %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ user.nickname or user.username }}</td>
+                        <td>{% set s = rec.finish_time|float(0) %}{% set m = (s // 60)|int %}{% set sec = s - m*60 %}{{ '%02d' % m }}:{{ '%05.2f' % sec }}</td>
+                        <td>{{ rec.score }}</td>
+                        <td>{{ rec.upload_time.strftime('%Y-%m-%d') }}</td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="5" style="color:#888;text-align:center;">暂无存点记录</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
     <!-- 夜间模式切换按钮 -->
     <button id="nightModeToggle" style="position:fixed;right:32px;bottom:32px;z-index:999;background:rgba(255,255,255,0.85);border-radius:50%;width:48px;height:48px;box-shadow:0 2px 8px #e3e3e3;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;transition:background 0.2s;">

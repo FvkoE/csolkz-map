@@ -1,0 +1,159 @@
+/* 顶部导航栏 */
+.admin-navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    width: 100%;
+    background: #124bc6;
+    color: #fff;
+    padding: 0 40px;
+    height: 60px;
+    box-shadow: 0 2px 8px #e3e3e3;
+}
+.admin-navbar .site-name {
+    font-size: 1.5em;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+.admin-navbar .welcome {
+    font-size: 1.1em;
+    max-width: 350px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: right;
+}
+.admin-navbar .nav-link {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: color 0.2s;
+    padding: 8px 16px;
+    border-radius: 4px;
+    margin-left: 10px;
+    background-color: rgba(255,255,255,0.1);
+}
+.admin-navbar .nav-link:hover {
+    color: #ffd700;
+    background: rgba(255,255,255,0.2);
+}
+
+/* 标签栏 */
+.tab-bar {
+    display: flex;
+    background: #fff;
+    border-bottom: 1px solid #e0e0e0;
+}
+.tab-bar .tab {
+    flex: 1;
+    text-align: center;
+    padding: 18px 0 14px 0;
+    font-size: 1.1em;
+    color: #1976d2;
+    cursor: pointer;
+    border-bottom: 3px solid #1976d2;
+    background: #f4f8fb;
+    font-weight: bold;
+}
+
+/* 主页面区域全屏 */
+.admin-main {
+    max-width: 100vw;
+    width: 100vw;
+    margin: 30px auto 0 auto;
+    background: #fff;
+    border-radius: 0;
+    box-shadow: none;
+    min-height: 1000px;
+    padding: 32px 0 32px 0;
+}
+
+.record-review-box {
+    max-width: 1600px;
+    width: 96vw;
+    margin: 40px auto 0 auto;
+    padding: 32px 36px 28px 36px;
+    background: rgba(255,255,255,0.95);
+    border-radius: 18px;
+    box-shadow: 0 4px 24px 0 rgba(0,0,0,0.10);
+}
+.record-review-title {
+    font-size: 1.2em;
+    font-weight: 600;
+    margin-bottom: 18px;
+}
+.review-row {
+    margin-bottom: 12px;
+    font-size: 1em;
+}
+.review-label {
+    color: #1976d2;
+    font-weight: bold;
+    margin-right: 8px;
+}
+.review-no-video {
+    color: #888;
+}
+.review-btn-row {
+    margin-top: 32px;
+    text-align: center;
+}
+.review-btn-row .admin-btn {
+    min-width: 90px;
+    margin-left: 24px;
+}
+.review-btn-row .admin-btn:first-child {
+    margin-left: 0;
+}
+
+/* 空记录提示 */
+.record-empty {
+    text-align: center;
+    color: #888;
+    font-size: 1.2em;
+    padding: 80px 0;
+}
+
+/* 拒绝理由弹窗样式 */
+#rejectModal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    /* background: rgba(0,0,0,0.15); */
+    background: transparent;
+    align-items: center;
+    justify-content: center;
+}
+#rejectModal .reject-modal-content {
+    max-width: 340px;
+    text-align: center;
+    background: #fff;
+    border-radius: 10px;
+    padding: 30px 24px 24px 24px;
+    box-shadow: 0 2px 12px #e3e3e3;
+}
+#rejectModal .reject-modal-title {
+    font-size: 1.2em;
+    margin: 30px 0 24px 0;
+}
+#rejectModal .reject-modal-btns {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+}
+#rejectReasonInput.form-textarea {
+    width: 90%;
+    min-height: 60px;
+    margin: 16px 0;
+    resize: vertical;
+    font-size: 1em;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    padding: 8px;
+    box-sizing: border-box;
+} 

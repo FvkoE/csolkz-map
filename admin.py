@@ -1,8 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
-from models import SessionLocal, User, MapList, MapApply, MapHistory, Advice
+from models import SessionLocal, User, MapList, MapApply, MapHistory, Advice, UploadApply, MapUpload
 from auth import admin_required
 from storage import upload_image
 from sqlalchemy import or_
+from datetime import datetime
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -406,6 +407,192 @@ def check_admin_login():
         })
     else:
         return jsonify({'admin_logged_in': False})
+
+@admin_bp.route('/record/review')
+@admin_required
+def record_review():
+    """记录审核页面，显示upload_apply所有记录，支持状态筛选"""
+    username = session.get('admin_username') or session.get('username', '管理员')
+    status = request.args.get('status', 'pending')  # 默认只显示待审核
+    session_db = SessionLocal()
+    # 查询upload_apply记录，按时间倒序，支持状态筛选
+    query = session_db.query(
+        UploadApply,
+        MapList.name.label('map_name'),
+        MapList.region.label('map_region'),
+        MapList.image.label('map_image'),
+        User.nickname.label('user_nickname'),
+        User.username.label('user_username')
+    ).join(MapList, UploadApply.maplist_id == MapList.id) \
+     .join(User, UploadApply.user_id == User.id)
+    if status:
+        query = query.filter(UploadApply.status == status)
+    records = query.order_by(UploadApply.upload_time.desc()).all()
+    session_db.close()
+    # 组装数据，便于模板渲染
+    record_list = []
+    for r in records:
+        u, map_name, map_region, map_image, user_nickname, user_username = r
+        record_list.append({
+            'id': u.id,
+            'map_name': map_name,
+            'map_region': map_region,
+            'map_image': map_image,
+            'user_nickname': user_nickname or user_username,
+            'finish_time': u.finish_time,
+            'user_rank': u.user_rank,
+            'upload_time': u.upload_time,
+            'score': u.score,
+            'first_clear_score': u.first_clear_score,
+            'mode': u.mode,
+            'is_first_clear': u.is_first_clear,
+            'video_url': u.video_url,
+            'status': u.status,
+            'cp': u.cp,
+            'tp': u.tp,
+            'resonable': u.resonable,
+            'SUGGEST_LEVEL': u.SUGGEST_LEVEL,
+            'reviewer_id': u.reviewer_id,
+            'review_time': u.review_time,
+            'reject_reason': u.reject_reason
+        })
+    return render_template('record_review.html', username=username, records=record_list, all_statuses=['pending','approve','refuse'], current_status=status)
+
+@admin_bp.route('/upload_apply/review/<int:apply_id>', methods=['POST'])
+@admin_required
+def review_upload_apply(apply_id):
+    data = request.get_json()
+    action = data.get('action')
+    reject_reason = data.get('reject_reason', '')
+    session_db = SessionLocal()
+    try:
+        apply = session_db.query(UploadApply).filter(UploadApply.id == apply_id).first()
+        if not apply:
+            return jsonify({'success': False, 'msg': '记录不存在'})
+        if action == 'approve':
+            # 1. 查询该地图所有已通过记录
+            approved_records = session_db.query(MapUpload).filter(
+                MapUpload.maplist_id == apply.maplist_id,
+                MapUpload.status == 'approve'
+            ).all()
+            # 2. 构造临时列表，加入当前审核通过的记录
+            temp_list = [
+                {
+                    'finish_time': r.finish_time,
+                    'upload_time': r.upload_time,
+                    'user_id': r.user_id,
+                    'id': r.id  # 用于唯一标识
+                } for r in approved_records
+            ]
+            # 当前审核通过的记录（未入库，临时加入）
+            temp_list.append({
+                'finish_time': apply.finish_time,
+                'upload_time': apply.upload_time,
+                'user_id': apply.user_id,
+                'id': -1  # 用-1标识
+            })
+            # 3. 排序
+            temp_list_sorted = sorted(temp_list, key=lambda r: (r['finish_time'], r['upload_time']))
+            # 4. 计算排名
+            for idx, r in enumerate(temp_list_sorted):
+                if r['id'] == -1:
+                    user_rank = idx + 1
+                    break
+            # 5. 查找地图难度level
+            map_obj = session_db.query(MapList).filter(MapList.id == apply.maplist_id).first()
+            level = map_obj.level if map_obj else '入门'
+            # 6. 计算积分
+            from score_calc_simple import calc_score_simple, get_k
+            t1 = temp_list_sorted[0]['finish_time']
+            k = get_k(level)
+            score = round(calc_score_simple(apply.finish_time, t1, k, user_rank))
+            # 7. 写入map_upload表
+            new_upload = MapUpload(
+                maplist_id=apply.maplist_id,
+                user_id=apply.user_id,
+                finish_time=apply.finish_time,
+                user_rank=user_rank,  # 自动计算的排名
+                upload_time=apply.upload_time,
+                score=score,  # 用最新积分
+                first_clear_score=apply.first_clear_score,
+                mode=apply.mode,
+                is_first_clear=apply.is_first_clear,
+                video_url=apply.video_url,
+                status='approve',
+                cp=apply.cp,
+                tp=apply.tp,
+                resonable=apply.resonable,
+                SUGGEST_LEVEL=apply.SUGGEST_LEVEL
+            )
+            session_db.add(new_upload)
+            apply.status = 'approve'
+            apply.review_time = datetime.now()
+            apply.reviewer_id = session.get('admin_user_id')
+            session_db.commit()
+
+            # 新增：批量更新该地图该模式所有已通过记录的排名和积分（每用户只保留最快且最早上传的记录）
+            all_records = session_db.query(MapUpload).filter(
+                MapUpload.maplist_id == apply.maplist_id,
+                MapUpload.mode == apply.mode,  # 按模式区分
+                MapUpload.status == 'approve'
+            ).order_by(MapUpload.finish_time, MapUpload.upload_time).all()
+            # 只保留每个用户最快且最早上传的那一条
+            best_records = {}
+            for rec in all_records:
+                key = rec.user_id
+                if key not in best_records:
+                    best_records[key] = rec
+            sorted_records = sorted(best_records.values(), key=lambda r: (r.finish_time, r.upload_time))
+            if sorted_records:
+                t1 = sorted_records[0].finish_time
+                k = get_k(level)
+                for idx, rec in enumerate(sorted_records):
+                    rank = idx + 1
+                    rec.user_rank = rank
+                    rec.score = round(calc_score_simple(rec.finish_time, t1, k, rank))
+                session_db.commit()
+
+            # 新增：自动判定WR（World Record）
+            # 1. 先将该地图所有记录的 is_wr 字段全部设为 'N'
+            session_db.query(MapUpload).filter(
+                MapUpload.maplist_id == apply.maplist_id
+            ).update({MapUpload.is_wr: 'N'})
+            session_db.commit()
+            # 2. 查找该地图下最快的裸跳记录
+            pro_wr = session_db.query(MapUpload).filter(
+                MapUpload.maplist_id == apply.maplist_id,
+                MapUpload.mode == 'pro',
+                MapUpload.status == 'approve'
+            ).order_by(MapUpload.finish_time.asc(), MapUpload.upload_time.asc()).first()
+            if pro_wr:
+                pro_wr.is_wr = 'Y'
+                session_db.commit()
+            else:
+                # 没有裸跳，找最快的存点
+                nub_wr = session_db.query(MapUpload).filter(
+                    MapUpload.maplist_id == apply.maplist_id,
+                    MapUpload.mode == 'nub',
+                    MapUpload.status == 'approve'
+                ).order_by(MapUpload.finish_time.asc(), MapUpload.upload_time.asc()).first()
+                if nub_wr:
+                    nub_wr.is_wr = 'Y'
+                    session_db.commit()
+
+            return jsonify({'success': True})
+        elif action == 'reject':
+            apply.status = 'refuse'
+            apply.reject_reason = reject_reason
+            apply.review_time = datetime.now()
+            apply.reviewer_id = session.get('admin_user_id')
+            session_db.commit()
+            return jsonify({'success': True})
+        else:
+            return jsonify({'success': False, 'msg': '无效操作'})
+    except Exception as e:
+        session_db.rollback()
+        return jsonify({'success': False, 'msg': str(e)})
+    finally:
+        session_db.close()
 
 def _get_admin_home_context():
     # 复用admin_home的上下文参数

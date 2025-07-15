@@ -257,3 +257,50 @@
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
 }
+
+/* 地图详情页排行榜切换按钮样式 */
+.view-switcher {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: -80px;
+}
+.view-btn {
+    background: #f4f8fb6d;
+    border: none;
+    border-radius: 6px 6px 6px 6px;
+    padding: 6px 18px;
+    font-size: 1em;
+    color: #000000;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    outline: none;
+}
+.view-btn.active {
+    background: #ffffff52;
+    color: #000000;
+    font-weight: bold;
+}
+.view-btn:not(.active):hover {
+    background: #ffffff50;
+    color: #000000;
+}
+/* 保证排行榜表格样式不变 */
+.map-detail-records-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+}
+.map-detail-records-table th, .map-detail-records-table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid #f0f0f0;
+    text-align: center;
+}
+.map-detail-records-table th {
+    background: #f4f8fb;
+    color: #1976d2;
+    font-weight: 600;
+}
+.map-detail-records-table tr:last-child td {
+    border-bottom: none;
+}

@@ -5,6 +5,7 @@
     <title>上传地图记录 - csolkz</title>
     <link rel="stylesheet" href="{{ static_url(filename='style.css') }}">
     <link rel="stylesheet" href="{{ static_url(filename='upload.css') }}">
+    <script type="text/javascript">window.user_id = {{ user_id|tojson }};</script>
 </head>
 <body>
     {% include 'navbar.html' %}
@@ -31,7 +32,7 @@
         </div>
         <div class="upload-demo-profile">
             <div class="upload-demo-row">
-                <label for="demo-video-url" class="upload-demo-label"></label>
+                <label for="demo-video-url" class="upload-demo-label">视频链接：</label>
                 <input type="text" id="demo-video-url" class="upload-demo-input" placeholder="请输入视频链接地址">
             </div>
             <div class="upload-demo-row">
@@ -42,6 +43,7 @@
                 <label class="upload-demo-checkbox-label">
                     <input type="radio" name="demo-type" value="存点" class="upload-demo-radio"> 存点
                 </label>
+                <span id="savepoint-extra-inputs" style="display:none;margin-left:16px;"></span>
             </div>
             <div class="upload-demo-row">
                 <span class="upload-demo-label">难度：</span>
@@ -51,10 +53,31 @@
                 <label class="upload-demo-checkbox-label">
                     <input type="radio" name="demo-difficulty" value="否" class="upload-demo-radio"> 不合理
                 </label>
+                <span id="difficulty-suggest-select" style="display:none;margin-left:16px;"></span>
+            </div>
+            <!-- 视频解析提示区域 -->
+            <div class="upload-video-parse-status" id="upload-video-parse-status" style="display:none;">
+                <div class="parse-status-icon" id="parse-status-icon"></div>
+                <div class="parse-status-text" id="parse-status-text"></div>
             </div>
         </div>
         <div class="upload-video-player">
-            <!-- 视频播放区域，后续可插入video或iframe等 -->
+            
+        </div>
+        <div class="upload-demo-row" style="margin-left:90px;margin-top:0px;align-items:center;">
+            <label class="upload-demo-label">完成时间：</label>
+            <span style="border-bottom:1px solid #bbb;padding:0 2px 2px 2px;margin-right:4px;">
+                <input type="text" id="finish-min-input" class="upload-demo-input" style="width:36px;text-align:center;border:none;outline:none;background:transparent;box-shadow:none;" placeholder="">
+            </span>分
+            <span style="border-bottom:1px solid #bbb;padding:0 2px 2px 2px;margin:0 4px 0 12px;">
+                <input type="text" id="finish-sec-input" class="upload-demo-input" style="width:36px;text-align:center;border:none;outline:none;background:transparent;box-shadow:none;" maxlength="2" placeholder="">
+            </span>秒
+            <span style="border-bottom:1px solid #bbb;padding:0 2px 2px 2px;margin:0 4px 0 12px;">
+                <input type="text" id="finish-hs-input" class="upload-demo-input" style="width:40px;text-align:center;border:none;outline:none;background:transparent;box-shadow:none;" maxlength="2" placeholder="">
+            </span>
+        </div>
+        <div style="text-align:center;margin-top:32px;">
+            <button type="button" class="submit-btn">提交</button>
         </div>
 
 
