@@ -5,6 +5,7 @@
     <title>地图详情</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='map_detail.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='color.css') }}">
 </head>
 <body>
     {% include 'navbar.html' %}
@@ -30,7 +31,7 @@
                     <tr><th>图名：</th><td>{{ map.name }}</td></tr>
                     <tr><th>作者：</th><td>{{ map.mapper or '-' }}</td></tr>
                     <tr><th>大区：</th><td>{{ map.region }}</td></tr>
-                    <tr><th>难度：</th><td>{{ map.level }}</td></tr>
+                    <tr><th>难度：</th><td><span class="{{ difficulty_class }}">{{ map.level }}</span></td></tr>
                     <tr><th>类型：</th><td>{{ map.type }}</td></tr>
                     <tr><th>添加时间：</th><td>{{ map.create_date.strftime('%Y-%m-%d') if map.create_date else '-' }}</td></tr>
                 </table>
@@ -56,19 +57,43 @@
                         <th>用时</th>
                         <th>积分</th>
                         <th>日期</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                 {% for rec, user in pro_records %}
-                    <tr>
+                    <tr class="record-row"
+                        data-resonable="{{ rec.resonable }}"
+                        data-suggest-level="{{ rec.SUGGEST_LEVEL }}"
+                        data-map-level="{{ map.level }}">
                         <td>{{ loop.index }}</td>
-                        <td>{{ user.nickname or user.username }}</td>
+                        <td>
+                            <a href="/profile/{{ user.id }}" class="player-link">
+                                {{ user.nickname or user.username }}
+                            </a>
+                        </td>
                         <td>{% set s = rec.finish_time|float(0) %}{% set m = (s // 60)|int %}{% set sec = s - m*60 %}{{ '%02d' % m }}:{{ '%05.2f' % sec }}</td>
-                        <td>{{ rec.score }}</td>
+                        <td>
+                            {% if rec.score == 1000 %}
+                                <span class="gold-score">{{ rec.score }}</span>
+                            {% else %}
+                                {{ rec.score }}
+                            {% endif %}
+                        </td>
                         <td>{{ rec.upload_time.strftime('%Y-%m-%d') }}</td>
+                        <td>
+                            {% if rec.video_url %}
+                            <a href="{{ rec.video_url }}" target="_blank" class="video-play-btn" title="播放视频">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="10" stroke="#fff" stroke-width="2" fill="none"/>
+                                    <polygon points="10,8 16,12 10,16" stroke="#fff" stroke-width="2" fill="none" stroke-linejoin="round"/>
+                                </svg>
+                            </a>
+                            {% else %}-{% endif %}
+                        </td>
                     </tr>
                 {% else %}
-                    <tr><td colspan="5" style="color:#888;text-align:center;">暂无裸跳记录</td></tr>
+                    <tr><td colspan="6" style="color:#888;text-align:center;">暂无裸跳记录</td></tr>
                 {% endfor %}
                 </tbody>
             </table>
@@ -80,21 +105,49 @@
                         <th>排名</th>
                         <th>玩家</th>
                         <th>用时</th>
+                        <th>存点</th>
+                        <th>读点</th>
                         <th>积分</th>
                         <th>日期</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                 {% for rec, user in nub_records %}
-                    <tr>
+                    <tr class="record-row"
+                        data-resonable="{{ rec.resonable }}"
+                        data-suggest-level="{{ rec.SUGGEST_LEVEL }}"
+                        data-map-level="{{ map.level }}">
                         <td>{{ loop.index }}</td>
-                        <td>{{ user.nickname or user.username }}</td>
+                        <td>
+                            <a href="/profile/{{ user.id }}" class="player-link" >
+                                {{ user.nickname or user.username }}
+                            </a>
+                        </td>
                         <td>{% set s = rec.finish_time|float(0) %}{% set m = (s // 60)|int %}{% set sec = s - m*60 %}{{ '%02d' % m }}:{{ '%05.2f' % sec }}</td>
-                        <td>{{ rec.score }}</td>
+                        <td>{{ rec.cp or 0 }}</td>
+                        <td>{{ rec.tp or 0 }}</td>
+                        <td>
+                            {% if rec.score == 1000 %}
+                                <span class="gold-score">{{ rec.score }}</span>
+                            {% else %}
+                                {{ rec.score }}
+                            {% endif %}
+                        </td>
                         <td>{{ rec.upload_time.strftime('%Y-%m-%d') }}</td>
+                        <td>
+                            {% if rec.video_url %}
+                            <a href="{{ rec.video_url }}" target="_blank" class="video-play-btn" title="播放视频">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="10" stroke="#fff" stroke-width="2" fill="none"/>
+                                    <polygon points="10,8 16,12 10,16" stroke="#fff" stroke-width="2" fill="none" stroke-linejoin="round"/>
+                                </svg>
+                            </a>
+                            {% else %}-{% endif %}
+                        </td>
                     </tr>
                 {% else %}
-                    <tr><td colspan="5" style="color:#888;text-align:center;">暂无存点记录</td></tr>
+                    <tr><td colspan="8" style="color:#888;text-align:center;">暂无存点记录</td></tr>
                 {% endfor %}
                 </tbody>
             </table>

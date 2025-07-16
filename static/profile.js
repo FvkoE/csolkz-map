@@ -289,6 +289,17 @@ function updateNicknameToServer(newNickname) {
     });
 }
 
+function getDifficultyClass(level) {
+    if (['入门', '初级'].includes(level)) return 'difficulty-junior';
+    if (['中级', '中级+'].includes(level)) return 'difficulty-middle';
+    if (['高级', '高级+'].includes(level)) return 'difficulty-high';
+    if (['骨灰', '骨灰+'].includes(level)) return 'difficulty-legend';
+    if (['火星', '火星+'].includes(level)) return 'difficulty-mars';
+    if (/^极限/.test(level)) return 'difficulty-extreme';
+    if (/^死亡/.test(level)) return 'difficulty-death';
+    return 'difficulty-junior';
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     if (window.profileStats) {
         if (typeof window.profileStats.score !== 'undefined') {
@@ -323,7 +334,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (typeof window.profileStats.highest_level === 'undefined' || window.profileStats.highest_level === null || window.profileStats.highest_level === '') {
             document.getElementById('profile-highest-level').textContent = '最高通关难度：' + '-';
         } else {
-            document.getElementById('profile-highest-level').textContent = '最高通关难度：' + window.profileStats.highest_level;
+            var level = window.profileStats.highest_level;
+            var diffClass = getDifficultyClass(level);
+            document.getElementById('profile-highest-level').innerHTML = '最高通关难度：<span class="' + diffClass + '">' + level + '</span>';
         }
     }
 }); 

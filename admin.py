@@ -1,9 +1,10 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from models import SessionLocal, User, MapList, MapApply, MapHistory, Advice, UploadApply, MapUpload
-from auth import admin_required
+from auth import admin_required, roles_required
 from storage import upload_image
 from sqlalchemy import or_
 from datetime import datetime
+from sqlalchemy.orm import joinedload
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -21,29 +22,35 @@ def admin_login():
         session_db = SessionLocal()
         try:
             # 只查询管理员角色的用户
-            user = session_db.query(User).filter_by(
+            user = session_db.query(User).options(joinedload(User.roles)).filter_by(
                 username=username,
-                role='admin',
                 is_active=True
             ).first()
-            
-            if user and user.check_password(password):
-                # 管理员登录成功，设置管理员专用会话
+            if user and any(role.name in ['admin', 'map_admin', 'demo_admin'] for role in user.roles):
+                # 管理员、地图管理员或记录管理员登录成功，设置管理员专用会话
                 remember_me = request.form.get('remember_me') == 'on'
                 if remember_me:
                     session.permanent = True  # 启用持久化会话
                 else:
                     session.permanent = False  # 使用临时会话（浏览器关闭后失效）
-                
                 session['admin_logged_in'] = True
                 session['admin_username'] = user.username
                 session['admin_user_id'] = user.id
-                session['admin_user_role'] = user.role
-                
+                session['admin_user_role'] = ','.join([role.name for role in user.roles])
+                _ = user.roles  # 触发加载
+                roles = [role.name for role in user.roles]
+                session['roles'] = roles
                 flash('管理员登录成功！', 'success')
-                return redirect(url_for('admin.admin_home'))
+                # 登录后根据角色跳转
+                if 'admin' in roles or 'map_admin' in roles:
+                    return redirect(url_for('admin.admin_home'))
+                elif 'demo_admin' in roles:
+                    return redirect(url_for('admin.record_review'))
+                else:
+                    flash('没有可访问的后台页面', 'error')
+                    return redirect(url_for('admin.admin_login'))
             else:
-                flash('用户名或密码错误，或该用户不是管理员', 'error')
+                flash('用户名或密码错误，或该用户没有管理权限', 'error')
         finally:
             session_db.close()
     
@@ -68,7 +75,7 @@ def admin_logout():
     return response
 
 @admin_bp.route('/')
-@admin_required
+@roles_required('map_admin')
 def admin_home():
     # 获取用户名，优先使用管理员会话中的用户名
     username = session.get('admin_username') or session.get('username', '管理员')
@@ -409,7 +416,7 @@ def check_admin_login():
         return jsonify({'admin_logged_in': False})
 
 @admin_bp.route('/record/review')
-@admin_required
+@roles_required('demo_admin')
 def record_review():
     """记录审核页面，显示upload_apply所有记录，支持状态筛选"""
     username = session.get('admin_username') or session.get('username', '管理员')

@@ -332,6 +332,24 @@ def map_detail(map_id):
                     nub_dict[key] = (r, user)
         pro_records = sorted([v for v in pro_dict.values()], key=lambda x: (x[0].finish_time, x[0].upload_time))
         nub_records = sorted([v for v in nub_dict.values()], key=lambda x: (x[0].finish_time, x[0].upload_time))
-        return render_template('map_detail.html', map=map_obj, pro_records=pro_records, nub_records=nub_records)
+        return render_template('map_detail.html', map=map_obj, pro_records=pro_records, nub_records=nub_records, difficulty_class=get_difficulty_class(map_obj.level))
     finally:
         session.close()
+
+def get_difficulty_class(level):
+    if level in ['入门', '初级']:
+        return 'difficulty-junior'
+    elif level in ['中级', '中级+']:
+        return 'difficulty-middle'
+    elif level in ['高级', '高级+']:
+        return 'difficulty-high'
+    elif level in ['骨灰', '骨灰+']:
+        return 'difficulty-legend'
+    elif level in ['火星', '火星+']:
+        return 'difficulty-mars'
+    elif level and level.startswith('极限'):
+        return 'difficulty-extreme'
+    elif level and level.startswith('死亡'):
+        return 'difficulty-death'
+    else:
+        return 'difficulty-junior'

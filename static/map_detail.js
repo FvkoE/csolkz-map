@@ -60,4 +60,52 @@ document.addEventListener('DOMContentLoaded', function() {
             proTable.style.display = 'none';
         });
     }
-}); 
+});
+
+// 地图详情页右侧浮窗，仅用于记录悬停
+(function(){
+    if (window._recordPopupFloatInit) return;
+    window._recordPopupFloatInit = true;
+    document.addEventListener('DOMContentLoaded', function() {
+        let popup = document.createElement('div');
+        popup.className = 'record-popup-float';
+        popup.innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#333;">自定义内容</div>';
+        document.body.appendChild(popup);
+        function getDifficultyClass(level) {
+            if (!level) return 'difficulty-junior';
+            if (['入门', '初级'].includes(level)) return 'difficulty-junior';
+            if (['中级', '中级+'].includes(level)) return 'difficulty-middle';
+            if (['高级', '高级+'].includes(level)) return 'difficulty-high';
+            if (['骨灰', '骨灰+'].includes(level)) return 'difficulty-legend';
+            if (['火星', '火星+'].includes(level)) return 'difficulty-mars';
+            if (/^极限/.test(level)) return 'difficulty-extreme';
+            if (/^死亡/.test(level)) return 'difficulty-death';
+            return 'difficulty-junior';
+        }
+        document.querySelectorAll('.map-detail-records-table tbody tr.record-row').forEach(function(row) {
+            row.addEventListener('mouseenter', function(e) {
+                let resonable = row.getAttribute('data-resonable');
+                let userSuggest = row.getAttribute('data-suggest-level');
+                let mapLevel = row.getAttribute('data-map-level');
+                let showLevel = '';
+                if (resonable === 'Y') {
+                    showLevel = mapLevel || '未知';
+                } else {
+                    showLevel = userSuggest || '未知';
+                }
+                let levelText = showLevel.replace(/^体感:/, '');
+                let diffClass = getDifficultyClass(levelText);
+                popup.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                    <span class="popup-diff-label">体感:</span>
+                    <span class="difficulty-tag ${diffClass} popup-diff-value">${levelText}</span>
+                </div>`;
+                let rect = row.getBoundingClientRect();
+                popup.style.top = (rect.top + rect.height/2 - popup.offsetHeight/2) + 'px';
+                popup.classList.add('active');
+            });
+            row.addEventListener('mouseleave', function(e) {
+                popup.classList.remove('active');
+            });
+        });
+    });
+})(); 

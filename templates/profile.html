@@ -5,6 +5,7 @@
     <title>个人信息 - csolkz</title>
     <link rel="stylesheet" href="{{ static_url(filename='profile.css') }}">
     <link rel="stylesheet" href="{{ static_url(filename='style.css') }}">
+    <link rel="stylesheet" href="{{ static_url(filename='color.css') }}">
     <!-- 确保前端JS能读取后端传递的profileStats -->
     <script>
     window.profileStats = {{ profileStats | tojson | safe }};

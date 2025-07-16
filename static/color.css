@@ -1,0 +1,16 @@
+/* 难度标签通用样式 */
+.difficulty-tag { font-weight: bold; padding: 2px 8px; border-radius: 8px; display: inline-block; background: none; }
+.difficulty-junior { color: #888; }      /* 入门、初级 */
+.difficulty-middle { color: #1a7f1a; }   /* 中级、中级+ */
+.difficulty-high { color: #1976d2; }     /* 高级、高级+ */
+.difficulty-legend { color: #8e24aa; }   /* 骨灰、骨灰+ */
+.difficulty-mars { color: #d32f2f; }     /* 火星、火星+ */
+.difficulty-extreme { color: #d81b60; }  /* 极限(1-4) */
+.difficulty-death { 
+    color: #ffd700;    /* 死亡(1-4) */
+    text-shadow:
+        -1px -1px 0 #000,
+         1px -1px 0 #000,
+        -1px  1px 0 #000,
+         1px  1px 0 #000;
+} 

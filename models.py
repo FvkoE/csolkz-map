@@ -141,3 +141,17 @@ class UploadApply(Base):
     reviewer_id = Column(Integer, ForeignKey('users.id'), nullable=True)
     review_time = Column(DateTime, nullable=True)
     reject_reason = Column(String(255), nullable=True)
+
+class Role(Base):
+    __tablename__ = 'role'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(50), unique=True, nullable=False)
+    description = Column(String(100))
+
+class UserRole(Base):
+    __tablename__ = 'user_role'
+    user_id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+    role_id = Column(Integer, ForeignKey('role.id'), primary_key=True)
+
+# 在User类中增加roles多对多关系
+User.roles = relationship('Role', secondary='user_role', backref='users')

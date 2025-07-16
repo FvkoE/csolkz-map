@@ -7,6 +7,7 @@ import os
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from email_utils import email_verification
+from sqlalchemy.orm import joinedload
 
 # 创建认证蓝图
 auth_bp = Blueprint('auth', __name__)
@@ -81,6 +82,32 @@ def admin_required(f):
         flash('请先登录管理员账户', 'error')
         return redirect(url_for('admin.admin_login'))
     return decorated_function
+
+def roles_required(*role_names):
+    """多角色权限控制装饰器，admin自动拥有所有权限，实时查数据库"""
+    from functools import wraps
+    from flask import session, abort
+    from models import SessionLocal, User
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            user_id = session.get('user_id')
+            if not user_id:
+                abort(403)
+            db = SessionLocal()
+            user = db.query(User).get(user_id)
+            if not user:
+                db.close()
+                abort(403)
+            roles = [role.name for role in user.roles]
+            db.close()
+            if 'admin' in roles:
+                return f(*args, **kwargs)
+            if not any(r in roles for r in role_names):
+                abort(403)
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
@@ -185,13 +212,13 @@ def login():
             
             if is_email:
                 # 使用邮箱登录
-                user = session_db.query(User).filter_by(
+                user = session_db.query(User).options(joinedload(User.roles)).filter_by(
                     email=login_input,
                     is_active=True
                 ).first()
             else:
                 # 使用用户名登录
-                user = session_db.query(User).filter_by(
+                user = session_db.query(User).options(joinedload(User.roles)).filter_by(
                     username=login_input,
                     is_active=True
                 ).first()
@@ -203,24 +230,21 @@ def login():
                     session.permanent = True  # 启用持久化会话
                 else:
                     session.permanent = False  # 使用临时会话（浏览器关闭后失效）
-                
                 session['user_logged_in'] = True
                 session['username'] = user.username
                 session['user_id'] = user.id
                 session['user_role'] = user.role
-                
+                # 新增：存储所有角色名
+                _ = user.roles  # 触发加载
+                session['roles'] = [role.name for role in user.roles]
                 # 存储用户头像和昵称信息
                 if user.avatar is not None and user.avatar.strip():
-                    # user.avatar已经包含了avatars/路径，直接使用
                     session['avatar_url'] = url_for('static', filename=user.avatar)
                 else:
                     session['avatar_url'] = url_for('static', filename='default_avatar.svg')
-                
                 session['nickname'] = user.nickname if user.nickname is not None and user.nickname.strip() else user.username
-                
                 # 登录成功，显示成功消息
                 flash('登录成功！', 'success')
-                
                 # 所有用户都重定向到主页面，管理员可以选择访问管理后台
                 return redirect(url_for('maplist.mainpage'))
             else:

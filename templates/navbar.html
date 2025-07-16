@@ -18,8 +18,11 @@
                 <span class="username">{{ session.nickname or session.username }}</span>
             </div>
             <div class="dropdown-menu" id="userDropdownMenu">
-                {% if session.user_role == 'admin' %}
+                {% set roles = session.get('roles', []) %}
+                {% if 'admin' in roles or 'map_admin' in roles %}
                 <a href="{{ url_for('admin.admin_home') }}" class="dropdown-item" target="_blank">管理后台</a>
+                {% endif %}
+                {% if 'admin' in roles or 'demo_admin' in roles %}
                 <a href="{{ url_for('admin.record_review') }}" class="dropdown-item" target="_blank">记录审核</a>
                 {% endif %}
                 <a href="{{ url_for('auth.logout') }}" class="dropdown-item">退出</a>
