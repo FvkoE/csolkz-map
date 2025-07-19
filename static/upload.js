@@ -262,8 +262,8 @@ document.addEventListener('DOMContentLoaded', function() {
             savepointExtraInputs.style.display = '';
             savepointExtraInputs.innerHTML =
                 '<div class="savepoint-extra-group">' +
-                '<label>存点 <input type="number" min="0" class="upload-demo-input" name="savepoint-count"></label>' +
-                '<label>读点 <input type="number" min="0" class="upload-demo-input" name="loadpoint-count"></label>' +
+                '<label>存点 <input type="number" min="0" class="upload-demo-input" name="savepoint-count" placeholder="选填"></label>' +
+                '<label>读点 <input type="number" min="0" class="upload-demo-input" name="loadpoint-count" placeholder="选填"></label>' +
                 '</div>';
         } else {
             savepointExtraInputs.style.display = 'none';
@@ -336,11 +336,20 @@ document.addEventListener('DOMContentLoaded', function() {
             if (mode === 'nub') { // 存点
                 const cpInput = document.querySelector('input[name="savepoint-count"]');
                 const tpInput = document.querySelector('input[name="loadpoint-count"]');
-                cp = cpInput ? parseInt(cpInput.value) : null;
-                tp = tpInput ? parseInt(tpInput.value) : null;
-                if (cpInput == null || tpInput == null || isNaN(cp) || isNaN(tp) || cp < 0 || tp < 0) {
-                    alert('存点模式下，存点和读点数量必须填写且为非负整数！');
-                    return;
+                // 允许为空，如果填写了则验证为非负整数
+                if (cpInput && cpInput.value.trim() !== '') {
+                    cp = parseInt(cpInput.value);
+                    if (isNaN(cp) || cp < 0) {
+                        alert('存点数量必须为非负整数！');
+                        return;
+                    }
+                }
+                if (tpInput && tpInput.value.trim() !== '') {
+                    tp = parseInt(tpInput.value);
+                    if (isNaN(tp) || tp < 0) {
+                        alert('读点数量必须为非负整数！');
+                        return;
+                    }
                 }
             }
             // 5. 难度

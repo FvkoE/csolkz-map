@@ -125,8 +125,8 @@
                             </a>
                         </td>
                         <td>{% set s = rec.finish_time|float(0) %}{% set m = (s // 60)|int %}{% set sec = s - m*60 %}{{ '%02d' % m }}:{{ '%05.2f' % sec }}</td>
-                        <td>{{ rec.cp or 0 }}</td>
-                        <td>{{ rec.tp or 0 }}</td>
+                        <td>{{ rec.cp if rec.cp is not none else '-' }}</td>
+                        <td>{{ rec.tp if rec.tp is not none else '-' }}</td>
                         <td>
                             {% if rec.score == 1000 %}
                                 <span class="gold-score">{{ rec.score }}</span>

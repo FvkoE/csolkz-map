@@ -161,7 +161,11 @@ def create_app(config_name='default'):
         nickname = str(nickname_raw) if nickname_raw else ''
         username = str(username_raw) if username_raw else ''
         is_self = (session.get('user_id') == user_id)
-        db.close()
+        try:
+            db.close()
+        except Exception as e:
+            print(e)
+            pass
         return render_template('profile.html',
             avatar_url=avatar_url,
             profile=None,
@@ -240,13 +244,30 @@ def create_app(config_name='default'):
             if best and data['finish_time'] >= best.finish_time:
                 db.close()
                 return jsonify({'success': False, 'msg': '你已上传过该模式下更快的成绩，无需重复提交！'})
-            # 后端校验：存点模式下cp和tp必填且为非负整数
+            # 后端校验：存点模式下cp和tp可以为空，如果填写了则验证为非负整数
             if data['mode'] == 'nub':
                 cp = data.get('cp')
                 tp = data.get('tp')
-                if cp is None or tp is None or str(cp).strip() == '' or str(tp).strip() == '' or int(cp) < 0 or int(tp) < 0:
-                    db.close()
-                    return jsonify({'success': False, 'msg': '存点模式下，存点和读点数量必须填写且为非负整数！'})
+                # 如果cp不为空，验证为非负整数
+                if cp is not None and str(cp).strip() != '':
+                    try:
+                        cp_int = int(cp)
+                        if cp_int < 0:
+                            db.close()
+                            return jsonify({'success': False, 'msg': '存点数量必须为非负整数！'})
+                    except ValueError:
+                        db.close()
+                        return jsonify({'success': False, 'msg': '存点数量必须为整数！'})
+                # 如果tp不为空，验证为非负整数
+                if tp is not None and str(tp).strip() != '':
+                    try:
+                        tp_int = int(tp)
+                        if tp_int < 0:
+                            db.close()
+                            return jsonify({'success': False, 'msg': '读点数量必须为非负整数！'})
+                    except ValueError:
+                        pass
+                        return jsonify({'success': False, 'msg': '读点数量必须为整数！'})
             upload = UploadApply(
                 maplist_id = data['maplist_id'],
                 user_id = user_id,

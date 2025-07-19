@@ -336,6 +336,52 @@ def map_detail(map_id):
     finally:
         session.close()
 
+@maplist_bp.route('/api/map_record_brief')
+def api_map_record_brief():
+    """返回指定地图的裸跳/存点模式第一名记录，供主页面悬浮窗使用"""
+    from models import SessionLocal, MapUpload, User
+    map_id = request.args.get('map_id', type=int)
+    if not map_id:
+        return jsonify({'pro': None, 'nub': None})
+    session = SessionLocal()
+    try:
+        # 查询所有通过的记录
+        all_records = session.query(MapUpload, User).join(User, MapUpload.user_id == User.id).filter(
+            MapUpload.maplist_id == map_id,
+            MapUpload.status == 'approve'
+        ).all()
+        # 分mode分组，筛选最快一条
+        pro_best = None
+        nub_best = None
+        for r, user in all_records:
+            if r.mode == 'pro':
+                if (pro_best is None) or (r.finish_time < pro_best[0].finish_time) or (r.finish_time == pro_best[0].finish_time and r.upload_time < pro_best[0].upload_time):
+                    pro_best = (r, user)
+            elif r.mode == 'nub':
+                if (nub_best is None) or (r.finish_time < nub_best[0].finish_time) or (r.finish_time == nub_best[0].finish_time and r.upload_time < nub_best[0].upload_time):
+                    nub_best = (r, user)
+        def fmt_time(t):
+            if t is None:
+                return '-'
+            m = int(t // 60)
+            s = t % 60
+            return f"{m:02d}:{s:05.2f}" if m > 0 else f"{s:05.2f}"
+        def rec_to_dict(tup):
+            if not tup:
+                return None
+            r, user = tup
+            return {
+                'time': fmt_time(r.finish_time),
+                'nickname': user.nickname or user.username or '-',
+                'is_wr': (getattr(r, 'is_wr', 'N') == 'Y')
+            }
+        return jsonify({
+            'pro': rec_to_dict(pro_best),
+            'nub': rec_to_dict(nub_best)
+        })
+    finally:
+        session.close()
+
 def get_difficulty_class(level):
     if level in ['入门', '初级']:
         return 'difficulty-junior'

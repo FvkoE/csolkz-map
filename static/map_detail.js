@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
             proTable.style.display = 'none';
         });
     }
-});
+}); 
 
 // 地图详情页右侧浮窗，仅用于记录悬停
 (function(){

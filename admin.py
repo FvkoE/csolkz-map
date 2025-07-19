@@ -466,7 +466,7 @@ def record_review():
     return render_template('record_review.html', username=username, records=record_list, all_statuses=['pending','approve','refuse'], current_status=status)
 
 @admin_bp.route('/upload_apply/review/<int:apply_id>', methods=['POST'])
-@admin_required
+@roles_required('admin', 'demo_admin')
 def review_upload_apply(apply_id):
     data = request.get_json()
     action = data.get('action')
