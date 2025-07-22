@@ -1080,7 +1080,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 modal.style.top = '0';
                 modal.style.width = '100vw';
                 modal.style.height = '100vh';
-                modal.style.background = 'transparent'; // 去除黑色遮罩
+                modal.style.background = 'rgba(0,0,0,0.7)';
                 modal.style.display = 'flex';
                 modal.style.alignItems = 'center';
                 modal.style.justifyContent = 'center';
@@ -1201,52 +1201,6 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
         setupNightModeToggle();
     }
-
-    // ... existing code ...
-    document.addEventListener('DOMContentLoaded', function() {
-        popup = document.createElement('div');
-        popup.className = 'map-card-popup-float';
-        popup.innerHTML = '';
-        document.body.appendChild(popup);
-        document.querySelectorAll('.map-card').forEach(function(card) {
-            card.addEventListener('mouseenter', async function(e) {
-                currentCard = card;
-                popup.innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#888;font-size:15px;">加载中...</div>';
-                popup.classList.add('active');
-                updatePopupPosition();
-                followLoop();
-                // 获取地图ID
-                let mapId = card.getAttribute('data-map-id');
-                if (!mapId) return;
-                try {
-                    // 异步请求后端API，获取该地图的记录
-                    let resp = await fetch(`/api/map_record_brief?map_id=${mapId}`);
-                    let data = await resp.json();
-                    let pro = data.pro;
-                    let nub = data.nub;
-                    let proText = '-';
-                    let nubText = '-';
-                    if (pro) {
-                        proText = `${pro.time} ${pro.nickname}${pro.is_wr ? ' <span style=\'color:#FFD700;font-weight:bold\'>WR</span>' : ''}`;
-                    }
-                    if (nub) {
-                        nubText = `${nub.time} ${nub.nickname}${nub.is_wr ? ' <span style=\'color:#FFD700;font-weight:bold\'>WR</span>' : ''}`;
-                    }
-                    popup.innerHTML = `<div style='width:100%;padding:0 12px;'>
-                        <div style='font-size:15px;margin-bottom:4px;'><b>裸跳：</b>${proText}</div>
-                        <div style='font-size:15px;'><b>存点：</b>${nubText}</div>
-                    </div>`;
-                } catch (err) {
-                    popup.innerHTML = '<div style="color:#e53935;font-size:15px;">加载失败</div>';
-                }
-            });
-            card.addEventListener('mouseleave', function(e) {
-                currentCard = null;
-                popup.classList.remove('active');
-            });
-        });
-    });
-    // ... existing code ...
 });
 
 // 检查登录状态的函数
@@ -2414,3 +2368,4 @@ function showProfileErrorAuto(message) {
         }, 2000);
     }
 }
+

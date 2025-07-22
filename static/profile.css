@@ -461,3 +461,93 @@
     margin-left: -20px;
     margin-right: -0px;
 }   
+.profile-record-model{
+    display: flex;
+    height: 20px;
+}
+.profile-record-model {
+  display: flex;
+  background: #eaf1fb;
+  border-radius: 24px;
+  padding: 4px;
+  gap: 0;
+  width: fit-content;
+  margin-bottom: 18px;
+  box-shadow: 0 2px 8px #e3e3e3;
+}
+
+/* Tab栏样式 */
+.profile-record-tabs {
+  display: flex;
+  border-bottom: 2px solid #f0f0f0;
+  background: transparent;
+  width: fit-content;
+  margin-bottom: 0;
+  margin-top: -25px;
+  margin-left: -35px;
+}
+
+.tab-item {
+  padding: 0 32px;
+  height: 44px;
+  line-height: 44px;
+  font-size: 18px;
+  color: #222;
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s;
+  font-weight: bold;
+}
+
+.tab-item.selected {
+  color: #1976d2;
+}
+
+.tab-item.selected::after {
+  content: "";
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 0;
+  height: 3px;
+  background: #1976d2;
+  border-radius: 2px;
+  transition: all 0.2s;
+}
+
+.tab-item:not(.selected):hover {
+  color: #1976d2;
+}
+
+.wr-toggle-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 5px;
+  border: none;
+  background: #85858500;
+  color: #000000;
+  font-size: 20px;
+  font-weight: bold;    
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  margin-right: 8px;
+  margin-left: -10px;
+  margin-top: 15px;
+  outline: none;
+  box-shadow: 0 1px 3px #eee;
+}
+.wr-toggle-btn.selected {
+  background: #ffff00;
+  color: #000000;
+}
+.wr-toggle-btn:hover {
+    background: #d1d1d1ae;
+    color: #000000;
+  }
+  .wr-toggle-btn.selected:hover {
+    background: #ffff00;
+    color: #000000;
+  }

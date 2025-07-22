@@ -340,3 +340,19 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 }); 
+
+// Tab栏切换效果
+const tabItems = document.querySelectorAll('.tab-item');
+tabItems.forEach(tab => {
+  tab.addEventListener('click', function() {
+    tabItems.forEach(t => t.classList.remove('selected'));
+    this.classList.add('selected');
+  });
+}); 
+
+const wrBtn = document.getElementById('wr-toggle-btn');
+if (wrBtn) {
+  wrBtn.addEventListener('click', function() {
+    wrBtn.classList.toggle('selected');
+  });
+} 
