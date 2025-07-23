@@ -46,21 +46,100 @@ document.addEventListener('DOMContentLoaded', function() {
     const nubBtn = document.getElementById('nubViewBtn');
     const proTable = document.getElementById('pro-records-table');
     const nubTable = document.getElementById('nub-records-table');
+    const wrBtn = document.getElementById('wr-toggle-btn');
+    const PAGE_SIZE = 10;
+    let proRows = Array.from(proTable ? proTable.querySelectorAll('tbody tr.record-row') : []);
+    let nubRows = Array.from(nubTable ? nubTable.querySelectorAll('tbody tr.record-row') : []);
+    let proPage = 1, nubPage = 1;
+    let proWrMode = false, nubWrMode = false;
+
+    function renderPage(table, rows, page) {
+        rows.forEach((row, idx) => {
+            if (idx >= (page-1)*PAGE_SIZE && idx < page*PAGE_SIZE) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        // 更新分页控件
+        let total = rows.length;
+        let pageCount = Math.ceil(total / PAGE_SIZE);
+        let pager = table.querySelector('.record-pager');
+        if (!pager) {
+            pager = document.createElement('div');
+            pager.className = 'record-pager';
+            table.appendChild(pager);
+        }
+        pager.innerHTML = '';
+        if (pageCount > 1) {
+            for (let i = 1; i <= pageCount; i++) {
+                let btn = document.createElement('button');
+                btn.textContent = i;
+                btn.className = 'pager-btn' + (i === page ? ' active' : '');
+                btn.onclick = function() {
+                    if (table === proTable) {
+                        proPage = i;
+                        renderPage(proTable, getCurrentRows('pro'), proPage);
+                    } else {
+                        nubPage = i;
+                        renderPage(nubTable, getCurrentRows('nub'), nubPage);
+                    }
+                };
+                pager.appendChild(btn);
+            }
+        }
+    }
+    function getCurrentRows(mode) {
+        let rows = mode === 'pro' ? proRows : nubRows;
+        let wrMode = mode === 'pro' ? proWrMode : nubWrMode;
+        if (wrMode) {
+            return rows.filter(row => {
+                let rankCell = row.querySelector('td');
+                return rankCell && rankCell.textContent.trim() === '1';
+            });
+        }
+        return rows;
+    }
+    function rerenderAll() {
+        renderPage(proTable, getCurrentRows('pro'), proPage);
+        renderPage(nubTable, getCurrentRows('nub'), nubPage);
+    }
     if (proBtn && nubBtn && proTable && nubTable) {
         proBtn.addEventListener('click', function() {
             proBtn.classList.add('active');
             nubBtn.classList.remove('active');
             proTable.style.display = '';
             nubTable.style.display = 'none';
+            proPage = 1;
+            rerenderAll();
         });
         nubBtn.addEventListener('click', function() {
             nubBtn.classList.add('active');
             proBtn.classList.remove('active');
             nubTable.style.display = '';
             proTable.style.display = 'none';
+            nubPage = 1;
+            rerenderAll();
         });
     }
-}); 
+    // W按钮筛选功能
+    if (wrBtn) {
+        wrBtn.addEventListener('click', function() {
+            let isPro = proTable && proTable.style.display !== 'none';
+            if (isPro) {
+                proWrMode = !proWrMode;
+                proPage = 1;
+            } else {
+                nubWrMode = !nubWrMode;
+                nubPage = 1;
+            }
+            wrBtn.classList.toggle('selected');
+            rerenderAll();
+        });
+    }
+    // 初始化
+    rerenderAll();
+});
 
 // 地图详情页右侧浮窗，仅用于记录悬停
 (function(){

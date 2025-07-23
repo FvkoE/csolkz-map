@@ -321,6 +321,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('请填写视频链接');
                 return;
             }
+            // 只允许bilibili和抖音
+            if (!/^(https?:\/\/)?(www\.)?(bilibili\.com|b23\.tv|douyin\.com)\//.test(videoUrl)) {
+                alert('只允许提交bilibili和抖音的视频链接！');
+                return;
+            }
             // 3. 类型
             const typeRadio = document.querySelector('input[name="demo-type"]:checked');
             let mode = typeRadio ? typeRadio.value : '';
@@ -336,7 +341,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (mode === 'nub') { // 存点
                 const cpInput = document.querySelector('input[name="savepoint-count"]');
                 const tpInput = document.querySelector('input[name="loadpoint-count"]');
-                // 允许为空，如果填写了则验证为非负整数
                 if (cpInput && cpInput.value.trim() !== '') {
                     cp = parseInt(cpInput.value);
                     if (isNaN(cp) || cp < 0) {
@@ -355,7 +359,6 @@ document.addEventListener('DOMContentLoaded', function() {
             // 5. 难度
             const diffRadio = document.querySelector('input[name="demo-difficulty"]:checked');
             const difficulty = diffRadio ? diffRadio.value : '';
-            // resonable字段
             let resonable = '';
             if (difficulty === '是') resonable = 'Y';
             else if (difficulty === '否') resonable = 'N';
@@ -383,13 +386,9 @@ document.addEventListener('DOMContentLoaded', function() {
             if (sec) finishTime += parseInt(sec);
             if (hs) finishTime += parseInt(hs) / 100;
             // 8. 其他必填项（user_rank, score, first_clear_score, is_first_clear）
-            // 这里假设页面有相关输入框，若无可设为0或false
             let userRank = 0, score = 0, firstClearScore = 0, isFirstClear = false;
-            // 可根据实际表单补充
-            // 获取当前用户id（假设后端已注入window.user_id）
             let userId = window.user_id || null;
             if (!userId) {
-                // 可选：尝试从页面隐藏域等获取
                 const userIdInput = document.getElementById('current-user-id');
                 if (userIdInput) userId = userIdInput.value;
             }

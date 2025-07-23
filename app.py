@@ -166,13 +166,26 @@ def create_app(config_name='default'):
         except Exception as e:
             print(e)
             pass
+        # 构造前端需要的best_records数据
+        best_records_for_frontend = []
+        for r in best_records:
+            m = maplist_dict.get(r.maplist_id)
+            best_records_for_frontend.append({
+                'map_id': m.id if m else '',
+                'map_name': m.name if m else '-',
+                'finish_time': r.finish_time,
+                'user_rank': r.user_rank,
+                'video_url': r.video_url,
+                'mode': r.mode
+            })
         return render_template('profile.html',
             avatar_url=avatar_url,
             profile=None,
             profileStats=profile_stats,
             nickname=nickname,
             username=username,
-            is_self=is_self
+            is_self=is_self,
+            best_records=best_records_for_frontend
         )
     
     @app.route('/profile/update_nickname', methods=['POST'])

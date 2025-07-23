@@ -528,6 +528,7 @@
   border-radius: 5px;
   border: none;
   background: #85858500;
+
   color: #000000;
   font-size: 20px;
   font-weight: bold;    
@@ -537,17 +538,102 @@
   margin-left: -10px;
   margin-top: 15px;
   outline: none;
-  box-shadow: 0 1px 3px #eee;
+  box-shadow: 0 2px 8px #e3e3e3;
 }
 .wr-toggle-btn.selected {
-  background: #ffff00;
-  color: #000000;
+  background: linear-gradient(135deg, #fff700 60%, #ffe066 100%);
+  color: #222;
+  box-shadow: 0 4px 16px 0 rgba(255, 255, 0, 0.25), 0 1.5px 8px 0 rgba(255, 255, 0, 0.18);
+  outline: none;
+  filter: drop-shadow(0 2px 8px #fffbe0);
+  transition: background 0.2s, box-shadow 0.2s, border 0.2s, filter 0.2s;
 }
 .wr-toggle-btn:hover {
     background: #d1d1d1ae;
     color: #000000;
   }
   .wr-toggle-btn.selected:hover {
-    background: #ffff00;
-    color: #000000;
+    background: linear-gradient(135deg, #fffb00 60%, #ffe066 100%);
+    color: #222;
+    box-shadow: 0 4px 16px 0 rgba(255, 255, 0, 0.25), 0 1.5px 8px 0 rgba(255, 255, 0, 0.18);
+    outline: none;
+    filter: drop-shadow(0 2px 8px #fffbe0);
+    transition: background 0.2s, box-shadow 0.2s, border 0.2s, filter 0.2s;
+
   }
+
+.profile-records-list {
+  width: 100%;
+  margin-top: 0px;
+  background: #ffffff00;
+  border-radius: 10px;
+  overflow-x: auto;
+  padding: 0;
+}
+.profile-record-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: transparent;
+}
+.profile-records-list:hover {
+    box-shadow: 0 2px 8px #e3e3e3;
+  }
+.profile-record-table tr {
+  border-bottom: 1px solid #f0f0f0;
+}
+.profile-record-table td {
+  padding: 10px 8px;
+  font-size: 15px;
+  color: #222;
+  text-align: left;
+  vertical-align: middle;
+}
+.profile-record-table .profile-record-video-btn {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 auto;
+}
+.profile-record-table .profile-record-index {
+  color: #888;
+  width: 48px;
+}
+.profile-record-table .profile-record-mapname {
+  font-weight: bold;
+  color: #1976d2;
+  max-width: 180px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.profile-record-table .profile-record-finishtime {
+  font-family: monospace;
+  color: #333;
+}
+.profile-record-table .profile-record-rank {
+  color: #ff9800;
+  font-weight: bold;
+}
+.profile-record-wr {
+  color: #FFD700;
+  font-weight: bold;
+  font-size: 1.08em;
+  text-shadow: 0 0 6px #fffbe0, 0 0 12px #ffd700, 1px 1px 0 #222, -1px -1px 0 #222;
+  padding: 2px 10px;
+  border-radius: 8px;
+  border: 0.5px solid #e6c200;
+  background: linear-gradient(90deg, #fffbe0 60%, #ffe066 100%);
+  box-shadow: 0 0 8px #ffe066, 0 0 2px #222;
+  letter-spacing: 1px;
+  display: inline-block;
+}
+
+.profile-record-maplink {
+  color: #1976d2;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.18s, text-decoration 0.18s;
+}
+.profile-record-maplink:hover {
+  color: #007ffe;
+  text-decoration: underline;
+}

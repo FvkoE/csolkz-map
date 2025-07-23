@@ -109,7 +109,8 @@
             <div class="profile-wr-sort">
                 <button class="wr-toggle-btn" id="wr-toggle-btn"><b>W</b></button>
             </div>
-            <div class="profile-records">
+            <hr class="profile-stats-divider">
+            <div class="profile-records-list">
 
             </div>
         </div>
@@ -186,4 +187,6 @@
             avatarModal.style.display = 'none';
         });
     }
+    // 注入地图成绩数据
+    window.bestRecords = {{ best_records | tojson | safe }};
     </script>

@@ -1,4 +1,3 @@
-// Profile页面独立弹窗函数
 function showProfileModal(message, type = 'error') {
     const modal = document.getElementById('profileModal');
     const messageEl = document.getElementById('profileModalMessage');
@@ -300,6 +299,78 @@ function getDifficultyClass(level) {
     return 'difficulty-junior';
 }
 
+// ========== 个人地图记录渲染 ========== //
+function formatTimeMMSS(time) {
+    if (typeof time !== 'number' && typeof time !== 'string') return '-';
+    let s = parseFloat(time);
+    if (isNaN(s)) return '-';
+    let m = Math.floor(s / 60);
+    let sec = s - m * 60;
+    return `${m.toString().padStart(2, '0')}:${sec.toFixed(2).padStart(5, '0')}`;
+}
+function renderProfileRecords(records) {
+    const listBox = document.querySelector('.profile-records-list');
+    if (!listBox) return;
+    listBox.innerHTML = '';
+    if (!records || records.length === 0) {
+        listBox.innerHTML = '<div style="color:#888;padding:32px 0;text-align:center;">暂无记录</div>';
+        return;
+    }
+    // 构建表格
+    const table = document.createElement('table');
+    table.className = 'profile-record-table';
+    // 不显示表头
+    records.forEach((rec, idx) => {
+        const videoBtn = rec.video_url ? `<a href="${rec.video_url}" target="_blank" class="profile-record-video-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#1976d2"/><polygon points="10,8 16,12 10,16" fill="#fff"/></svg></a>` : '';
+        const tr = document.createElement('tr');
+        let rankHtml;
+        if (rec.user_rank == 1 || rec.user_rank === '1') {
+            rankHtml = '<span class="profile-record-wr">WR!</span>';
+        } else {
+            rankHtml = `#${rec.user_rank||'-'}`;
+        }
+        // 地图名可点击，跳转到/map/{map_id}
+        let mapLink = `<a href="/map/${rec.map_id}" class="profile-record-maplink" target="_blank">${rec.map_name||'-'}</a>`;
+        tr.innerHTML = `
+            <td class="profile-record-index">${idx+1}</td>
+            <td class="profile-record-mapname">${mapLink}</td>
+            <td class="profile-record-finishtime">${formatTimeMMSS(rec.finish_time)}</td>
+            <td class="profile-record-rank">${rankHtml}</td>
+            <td class="profile-record-video">${videoBtn}</td>
+        `;
+        table.appendChild(tr);
+    });
+    listBox.appendChild(table);
+}
+// ========== Tab切换与模式过滤 ========== //
+function filterRecordsByMode(mode) {
+    if (!window.bestRecords) return [];
+    return window.bestRecords.filter(r => r.mode === mode);
+}
+
+function updateRecordsByTab(tab) {
+    let mode = 'pro';
+    if(tab && tab.id === 'tab-savepoint') mode = 'nub';
+    const filtered = filterRecordsByMode(mode);
+    renderProfileRecords(filtered);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // 默认显示裸跳
+    if(window.bestRecords){
+        renderProfileRecords(filterRecordsByMode('pro'));
+    }
+    // Tab栏切换效果与数据切换
+    const tabItems = document.querySelectorAll('.tab-item');
+    tabItems.forEach(tab => {
+      tab.addEventListener('click', function() {
+        tabItems.forEach(t => t.classList.remove('selected'));
+        this.classList.add('selected');
+        updateRecordsByTab(this);
+      });
+    });
+});
+
 document.addEventListener('DOMContentLoaded', function() {
     if (window.profileStats) {
         if (typeof window.profileStats.score !== 'undefined') {
@@ -356,3 +427,4 @@ if (wrBtn) {
     wrBtn.classList.toggle('selected');
   });
 } 
+
