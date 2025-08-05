@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API测试</title>
+</head>
+<body>
+    <h1>API测试页面</h1>
+    <button onclick="testAPI()">测试WR排名API</button>
+    <div id="result"></div>
+
+    <script>
+        function testAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '正在测试API...';
+            
+            fetch('/api/rank/wr?t=' + Date.now())
+                .then(response => {
+                    console.log('响应状态:', response.status);
+                    console.log('响应头:', response.headers);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('API数据:', data);
+                    resultDiv.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                })
+                .catch(error => {
+                    console.error('错误:', error);
+                    resultDiv.innerHTML = '错误: ' + error.message;
+                });
+        }
+    </script>
+</body>
+</html> 

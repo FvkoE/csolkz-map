@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
-from models import SessionLocal, User, MapList, MapApply, MapHistory, Advice, UploadApply, MapUpload
+from models import SessionLocal, User, MapList, MapApply, MapHistory, Advice, UploadApply, MapUpload, Message
 from auth import admin_required, roles_required
 from storage import upload_image
 from sqlalchemy import or_
@@ -204,6 +204,7 @@ def admin_map_edit(map_id):
 def admin_apply_review(apply_id):
     data = request.get_json()
     action = data.get('action')
+    reject_reason = data.get('reject_reason', '')
     session_db = SessionLocal()
     try:
         apply = session_db.query(MapApply).filter(MapApply.id == apply_id).first()
@@ -213,6 +214,7 @@ def admin_apply_review(apply_id):
         apply_map_id = getattr(apply, 'map_id', None)
         apply_status = getattr(apply, 'status', None)
         apply_image = getattr(apply, 'image', None)
+        user_id = getattr(apply, 'user_id', None) if hasattr(apply, 'user_id') else None
         if action == '通过':
             # 添加申请：插入新地图
             if apply_type == 'add':
@@ -268,8 +270,31 @@ def admin_apply_review(apply_id):
                     )
                     session_db.add(history)
             setattr(apply, 'status', '通过')
+            # 新增：发送系统通知
+            if user_id:
+                msg = Message(
+                    user_id=user_id,
+                    type='map_apply',
+                    content=f'您的地图申请"{apply.name}"已通过审核。',
+                    related_id=apply.id
+                )
+                session_db.add(msg)
         elif action == '拒绝':
             setattr(apply, 'status', '拒绝')
+            # 新增：发送系统通知
+            if user_id:
+                # 构建消息内容，包含拒绝理由
+                content = f'您的地图申请"{apply.name}"被拒绝。'
+                if reject_reason and reject_reason.strip():
+                    content += f' 理由为：{reject_reason}'
+                
+                msg = Message(
+                    user_id=user_id,
+                    type='map_apply',
+                    content=content,
+                    related_id=apply.id
+                )
+                session_db.add(msg)
         else:
             return jsonify({'success': False, 'msg': '无效操作'})
         
@@ -344,6 +369,7 @@ def admin_map_add():
         
         # 2. 在map_apply表中创建一条已处理的记录用于历史追踪
         admin_apply = MapApply(
+            user_id=session.get('admin_user_id') or session.get('user_id'),
             type='add',
             map_id=new_map.id,
             name=name,
@@ -476,6 +502,7 @@ def review_upload_apply(apply_id):
         apply = session_db.query(UploadApply).filter(UploadApply.id == apply_id).first()
         if not apply:
             return jsonify({'success': False, 'msg': '记录不存在'})
+        user_id = apply.user_id
         if action == 'approve':
             # 1. 查询该地图所有已通过记录
             approved_records = session_db.query(MapUpload).filter(
@@ -535,6 +562,19 @@ def review_upload_apply(apply_id):
             apply.status = 'approve'
             apply.review_time = datetime.now()
             apply.reviewer_id = session.get('admin_user_id')
+            # 新增：发送系统通知
+            if user_id:
+                # 查询地图名称
+                map_obj = session_db.query(MapList).filter(MapList.id == apply.maplist_id).first()
+                map_name = map_obj.name if map_obj else f"地图{apply.maplist_id}"
+                
+                msg = Message(
+                    user_id=user_id,
+                    type='upload_apply',
+                    content=f'您的记录"{map_name}"已通过审核。',
+                    related_id=apply.id
+                )
+                session_db.add(msg)
             session_db.commit()
 
             # 新增：批量更新该地图该模式所有已通过记录的排名和积分（每用户只保留最快且最早上传的记录）
@@ -591,6 +631,24 @@ def review_upload_apply(apply_id):
             apply.reject_reason = reject_reason
             apply.review_time = datetime.now()
             apply.reviewer_id = session.get('admin_user_id')
+            # 新增：发送系统通知
+            if user_id:
+                # 查询地图名称
+                map_obj = session_db.query(MapList).filter(MapList.id == apply.maplist_id).first()
+                map_name = map_obj.name if map_obj else f"地图{apply.maplist_id}"
+                
+                # 构建消息内容，包含拒绝理由
+                content = f'您的记录"{map_name}"被拒绝。'
+                if reject_reason and reject_reason.strip():
+                    content += f' 理由为：{reject_reason}'
+                
+                msg = Message(
+                    user_id=user_id,
+                    type='upload_apply',
+                    content=content,
+                    related_id=apply.id
+                )
+                session_db.add(msg)
             session_db.commit()
             return jsonify({'success': True})
         else:

@@ -3,7 +3,7 @@
     display: flex;
     flex-direction: row;
     gap: 32px;
-    margin: -10px auto 0 auto;
+    margin: -25em auto 0 auto !important;
     max-width: 1100px;
     align-items: flex-start;
     justify-content: center;

@@ -49,6 +49,7 @@ class User(Base):
 class MapApply(Base):
     __tablename__ = 'map_apply'
     id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False, comment='申请人用户ID')
     type = Column(String(10))  # add 或 edit
     map_id = Column(Integer, ForeignKey('maplist.id'))   # 申请修改时关联原地图id
     name = Column(String(50))
@@ -155,3 +156,15 @@ class UserRole(Base):
 
 # 在User类中增加roles多对多关系
 User.roles = relationship('Role', secondary='user_role', backref='users')
+
+class Message(Base):
+    __tablename__ = 'message'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False, index=True, comment='接收者用户ID')
+    type = Column(String(32), nullable=False, comment='消息类型，如map_apply, upload_apply')
+    content = Column(String(512), nullable=False, comment='消息内容')
+    related_id = Column(Integer, nullable=True, comment='关联的申请/记录ID')
+    is_read = Column(Boolean, default=False, nullable=False, comment='是否已读')
+    create_time = Column(DateTime, default=datetime.now, nullable=False, comment='创建时间')
+
+    user = relationship('User', backref='messages')

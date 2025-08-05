@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, jsonify, session as flask_session
 from models import SessionLocal, MapList, MapApply
 from config import config
 from auth import login_required
@@ -201,6 +201,7 @@ def map_add():
                 # 图片上传异常，但不阻止申请提交
         
         new_apply = MapApply(
+            user_id=flask_session.get('user_id'),
             type='add',
             map_id=None,
             name=name,

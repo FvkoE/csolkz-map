@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     // 初始化
     rerenderAll();
-});
+}); 
 
 // 地图详情页右侧浮窗，仅用于记录悬停
 (function(){

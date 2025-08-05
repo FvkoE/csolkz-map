@@ -28,6 +28,11 @@ function showProfileModal(message, type = 'error') {
     }
 }
 
+// 成功消息显示函数
+function showSuccessModal(message) {
+    showProfileModal(message, 'success');
+}
+
 // Profile页面确认弹窗函数
 function showConfirmModal(message, onConfirm) {
     const modal = document.getElementById('profileModal');
@@ -273,10 +278,23 @@ function updateNicknameToServer(newNickname) {
     .then(data => {
         console.log('接口返回', data);
         if (data.success) {
-            // 延时刷新页面，确保所有昵称显示同步
+            // 显示成功消息
+            showProfileModal('昵称更新成功！', 'success');
+            
+            // 立即更新页面上的昵称显示
+            const nicknameText = document.getElementById('nicknameText');
+            if (nicknameText) {
+                nicknameText.textContent = newNickname;
+            }
+            
+            // 更新window.currentNickname
+            window.currentNickname = newNickname;
+            
+            // 延时刷新页面，确保导航栏也同步更新
             setTimeout(() => {
                 window.location.reload();
             }, 1500);
+            
             exitEditMode();
         } else {
             showProfileModal('更新失败：' + (data.message || '未知错误'), 'error');
@@ -376,7 +394,25 @@ document.addEventListener('DOMContentLoaded', function() {
         if (typeof window.profileStats.score !== 'undefined') {
             document.getElementById('profile-score').textContent = window.profileStats.score;
         }
-        document.getElementById('profile-rank').textContent = (window.profileStats.rank === undefined || window.profileStats.rank === null || window.profileStats.rank === '') ? '-' : window.profileStats.rank;
+        const rankElement = document.getElementById('profile-rank');
+        const rank = window.profileStats.rank;
+        
+        if (rank === undefined || rank === null || rank === '') {
+            rankElement.textContent = '-';
+            rankElement.className = 'profile-rank rank-other';
+        } else {
+            rankElement.textContent = rank;
+            // 根据排名设置不同的CSS类
+            if (rank === 1) {
+                rankElement.className = 'profile-rank rank-1';
+            } else if (rank === 2) {
+                rankElement.className = 'profile-rank rank-2';
+            } else if (rank === 3) {
+                rankElement.className = 'profile-rank rank-3';
+            } else {
+                rankElement.className = 'profile-rank rank-other';
+            }
+        }
         if (typeof window.profileStats.first_clear_score !== 'undefined') {
             document.getElementById('profile-first-clear-score').textContent =window.profileStats.first_clear_score;
         }

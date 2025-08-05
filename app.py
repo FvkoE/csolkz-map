@@ -7,7 +7,7 @@ from flask import render_template
 load_dotenv()
 
 from config import config
-from models import SessionLocal, Advice, DetailProfile, User, MapList, MapUpload, UploadApply
+from models import SessionLocal, Advice, DetailProfile, User, MapList, MapUpload, UploadApply, Message
 from auth import login_required
 
 def create_app(config_name='default'):
@@ -141,6 +141,36 @@ def create_app(config_name='default'):
                     highest_level_idx = idx
                     highest_level = m.level
         total_count = len(best_records)
+        
+        # 计算WR排名（与排行榜API保持一致）
+        from sqlalchemy import func
+        
+        # 统计所有用户的WR数量
+        wr_counts = db.query(
+            MapUpload.user_id,
+            func.count(MapUpload.id).label('wr_count')
+        ).filter(
+            MapUpload.is_wr == 'Y',
+            MapUpload.status == 'approve'
+        ).group_by(
+            MapUpload.user_id
+        ).subquery()
+        
+        # 获取所有用户的WR数量，按WR数量降序排列
+        all_wr_ranks = db.query(
+            wr_counts.c.user_id,
+            wr_counts.c.wr_count
+        ).order_by(
+            wr_counts.c.wr_count.desc()
+        ).all()
+        
+        # 计算当前用户的WR排名
+        wr_rank = '-'
+        for i, (uid, count) in enumerate(all_wr_ranks):
+            if uid == user_id:
+                wr_rank = i + 1
+                break
+        
         profile_stats = {
             'score': total_score,
             'score_float': total_rank_score,
@@ -152,7 +182,8 @@ def create_app(config_name='default'):
             'highest_level': highest_level,
             'pro': pro_count,
             'nub': nub_count,
-            'total_count': total_count
+            'total_count': total_count,
+            'rank': wr_rank  # 添加WR排名
         }
         avatar_value = getattr(user, 'avatar', None)
         avatar_url = url_for('static', filename=avatar_value) if avatar_value else url_for('static', filename='default_avatar.svg')
@@ -197,6 +228,7 @@ def create_app(config_name='default'):
         try:
             data = request.get_json()
             new_nickname = data.get('nickname', '').strip()
+            user_id = session.get('user_id')
             
             if not new_nickname:
                 return jsonify({'success': False, 'message': '昵称不能为空'})
@@ -204,13 +236,32 @@ def create_app(config_name='default'):
             if len(new_nickname) > 20:
                 return jsonify({'success': False, 'message': '昵称长度不能超过20个字符'})
             
-            # 更新session中的昵称
-            session['nickname'] = new_nickname
-            
-            # 这里可以添加数据库更新逻辑，如果需要的话
-            # 例如：更新用户表中的nickname字段
-            
-            return jsonify({'success': True, 'message': '昵称更新成功'})
+            # 检查重名（排除当前用户）
+            db = SessionLocal()
+            try:
+                existing_user = db.query(User).filter(
+                    User.nickname == new_nickname,
+                    User.id != user_id
+                ).first()
+                
+                if existing_user:
+                    return jsonify({'success': False, 'message': '该昵称已被其他用户使用'})
+                
+                # 更新数据库中的昵称
+                user = db.query(User).filter(User.id == user_id).first()
+                if user:
+                    user.nickname = new_nickname
+                    db.commit()
+                    
+                    # 更新session中的昵称
+                    session['nickname'] = new_nickname
+                    
+                    return jsonify({'success': True, 'message': '昵称更新成功'})
+                else:
+                    return jsonify({'success': False, 'message': '用户不存在'})
+                    
+            finally:
+                db.close()
             
         except Exception as e:
             return jsonify({'success': False, 'message': f'更新失败：{str(e)}'})
@@ -340,6 +391,220 @@ def create_app(config_name='default'):
         }
         session.close()
         return jsonify(success=True, data=data)
+    
+    @app.route('/api/unread_message_count')
+    def unread_message_count():
+        from flask import session as flask_session
+        user_id = flask_session.get('user_id')
+        if not user_id:
+            return {'count': 0}
+        db = SessionLocal()
+        try:
+            count = db.query(Message).filter_by(user_id=user_id, is_read=False).count()
+            return {'count': count}
+        finally:
+            db.close()
+    
+    @app.route('/api/messages')
+    def api_messages():
+        from flask import session as flask_session, request
+        from datetime import datetime
+        user_id = flask_session.get('user_id')
+        if not user_id:
+            return {'success': False, 'messages': []}
+        db = SessionLocal()
+        try:
+            all_mode = request.args.get('all') == '1'
+            q = db.query(Message).filter_by(user_id=user_id)
+            if not all_mode:
+                q = q.filter_by(is_read=False)
+            messages = q.order_by(Message.create_time.desc()).limit(50).all()
+            def fmt_time(dt):
+                now = datetime.now()
+                diff = now - dt
+                seconds = diff.total_seconds()
+                if seconds < 60:
+                    return f"{int(seconds)}秒前"
+                elif seconds < 3600:
+                    return f"{int(seconds//60)}分钟前"
+                elif seconds < 86400:
+                    return f"{int(seconds//3600)}小时前"
+                elif seconds < 2592000:
+                    return f"{int(seconds//86400)}天前"
+                elif dt.year == now.year:
+                    return dt.strftime('%m-%d')
+                else:
+                    return dt.strftime('%Y-%m-%d')
+            return {'success': True, 'messages': [
+                {
+                    'id': m.id,
+                    'content': m.content,
+                    'is_read': m.is_read,
+                    'create_time': fmt_time(m.create_time)
+                } for m in messages
+            ]}
+        finally:
+            db.close()
+    
+    @app.route('/api/messages/mark_all_read', methods=['POST'])
+    def api_mark_all_messages_read():
+        from flask import session as flask_session
+        user_id = flask_session.get('user_id')
+        if not user_id:
+            return {'success': False}
+        db = SessionLocal()
+        try:
+            db.query(Message).filter_by(user_id=user_id, is_read=False).update({'is_read': True})
+            db.commit()
+            return {'success': True}
+        finally:
+            db.close()
+    
+    @app.route('/message')
+    @login_required
+    def message_page():
+        return render_template('message.html')
+    
+    @app.route('/rank')
+    def rank_page():
+        return render_template('rank.html')
+    
+    @app.route('/api/rank_data')
+    def api_rank_data():
+        """获取排行榜数据"""
+        rank_type = request.args.get('type', 'wr')  # 默认WR排名
+        
+        print(f"API请求: rank_type={rank_type}")
+        
+        db = SessionLocal()
+        try:
+            if rank_type == 'wr':
+                # WR数量排名：从map_upload表统计每个用户的WR数量和积分
+                from sqlalchemy import func
+                
+                # 首先统计每个用户的WR数量
+                wr_counts = db.query(
+                    MapUpload.user_id,
+                    func.count(MapUpload.id).label('wr_count')
+                ).filter(
+                    MapUpload.is_wr == 'Y',
+                    MapUpload.status == 'approve'
+                ).group_by(
+                    MapUpload.user_id
+                ).subquery()
+                
+                # 统计每个用户的总积分（从map_upload表）
+                score_sums = db.query(
+                    MapUpload.user_id,
+                    func.sum(MapUpload.score).label('total_score')
+                ).filter(
+                    MapUpload.status == 'approve'
+                ).group_by(
+                    MapUpload.user_id
+                ).subquery()
+                
+                # 然后与用户表关联
+                rank_data = db.query(
+                    User.id.label('user_id'),
+                    User.username,
+                    User.nickname,
+                    User.avatar,
+                    func.coalesce(wr_counts.c.wr_count, 0).label('wr_count'),
+                    func.coalesce(score_sums.c.total_score, 0).label('total_score')
+                ).outerjoin(
+                    wr_counts, User.id == wr_counts.c.user_id
+                ).outerjoin(
+                    score_sums, User.id == score_sums.c.user_id
+                ).filter(
+                    func.coalesce(wr_counts.c.wr_count, 0) > 0
+                ).order_by(
+                    func.coalesce(wr_counts.c.wr_count, 0).desc()
+                ).limit(20).all()
+                
+                print(f"WR排名查询结果: {len(rank_data)} 条记录")
+                for i, item in enumerate(rank_data[:3]):
+                    display_name = item.nickname if item.nickname else item.username
+                    print(f"第{i+1}名: user_id={item.user_id}, display_name={display_name}, wr_count={item.wr_count}, total_score={item.total_score}, avatar={item.avatar}")
+                
+                return jsonify({
+                    'success': True,
+                    'type': 'wr',
+                    'data': [
+                        {
+                            'user_id': item.user_id,
+                            'username': item.nickname if item.nickname else item.username,
+                            'avatar': item.avatar,
+                            'wr_count': item.wr_count,
+                            'total_score': item.total_score
+                        } for item in rank_data
+                    ]
+                })
+            else:
+                # 积分排名：从map_upload表统计每个用户的积分和WR数量
+                from sqlalchemy import func
+                
+                # 统计每个用户的总积分
+                score_sums = db.query(
+                    MapUpload.user_id,
+                    func.sum(MapUpload.score).label('total_score')
+                ).filter(
+                    MapUpload.status == 'approve'
+                ).group_by(
+                    MapUpload.user_id
+                ).subquery()
+                
+                # 统计每个用户的WR数量
+                wr_counts = db.query(
+                    MapUpload.user_id,
+                    func.count(MapUpload.id).label('wr_count')
+                ).filter(
+                    MapUpload.is_wr == 'Y',
+                    MapUpload.status == 'approve'
+                ).group_by(
+                    MapUpload.user_id
+                ).subquery()
+                
+                # 然后与用户表关联
+                rank_data = db.query(
+                    User.id.label('user_id'),
+                    User.username,
+                    User.nickname,
+                    User.avatar,
+                    func.coalesce(wr_counts.c.wr_count, 0).label('wr_count'),
+                    func.coalesce(score_sums.c.total_score, 0).label('total_score')
+                ).outerjoin(
+                    score_sums, User.id == score_sums.c.user_id
+                ).outerjoin(
+                    wr_counts, User.id == wr_counts.c.user_id
+                ).filter(
+                    func.coalesce(score_sums.c.total_score, 0) > 0
+                ).order_by(
+                    func.coalesce(score_sums.c.total_score, 0).desc()
+                ).limit(20).all()
+                
+                print(f"积分排名查询结果: {len(rank_data)} 条记录")
+                for i, item in enumerate(rank_data[:3]):
+                    display_name = item.nickname if item.nickname else item.username
+                    print(f"第{i+1}名: user_id={item.user_id}, display_name={display_name}, wr_count={item.wr_count}, total_score={item.total_score}, avatar={item.avatar}")
+                
+                return jsonify({
+                    'success': True,
+                    'type': 'score',
+                    'data': [
+                        {
+                            'user_id': item.user_id,
+                            'username': item.nickname if item.nickname else item.username,
+                            'avatar': item.avatar,
+                            'wr_count': item.wr_count,
+                            'total_score': item.total_score
+                        } for item in rank_data
+                    ]
+                })
+        except Exception as e:
+            print(f"API错误: {e}")
+            return jsonify({'success': False, 'error': str(e)})
+        finally:
+            db.close()
     
     # 全局中间件：会话验证
     @app.before_request

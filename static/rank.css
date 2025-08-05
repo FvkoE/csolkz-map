@@ -1,0 +1,648 @@
+/* 排行页面容器 */
+.rank-page-container {
+    max-width: 1200px;
+    margin: 5.5em auto 0 auto;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.82);
+    border-radius: 12px;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
+    min-height: calc(100vh - 120px);
+    backdrop-filter: blur(8px);
+}
+
+/* 排行页面标题区域 */
+.rank-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.rank-title {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #333;
+    margin: 0 0 0.5rem 0;
+    letter-spacing: 1px;
+}
+
+.rank-subtitle {
+    font-size: 1.2em;
+    color: #666;
+    margin: 0 0 1.5rem 0;
+    font-weight: 300;
+}
+
+/* 排名切换按钮样式 */
+.rank-toggle-container {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.rank-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.8rem 1.5rem;
+    background: rgba(255, 255, 255, 0.7);
+    border: 2px solid transparent;
+    border-radius: 25px;
+    color: #666;
+    font-size: 0.95em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(8px);
+}
+
+.rank-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.rank-toggle-btn.active {
+    background: linear-gradient(135deg, #1976d2, #42a5f5);
+    color: white;
+    border-color: #1976d2;
+    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+}
+
+.rank-toggle-btn.active:hover {
+    background: linear-gradient(135deg, #1565c0, #1976d2);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(25, 118, 210, 0.4);
+}
+
+.toggle-text {
+    font-weight: 500;
+}
+
+/* 加载和错误状态样式 */
+.loading-message, .error-message, .no-data-message {
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.1em;
+    color: #666;
+}
+
+.loading-message {
+    color: #1976d2;
+}
+
+.error-message {
+    color: #e74c3c;
+}
+
+.no-data-message {
+    color: #666;
+    font-style: italic;
+}
+
+/* 排行内容区域 */
+.rank-content {
+    display: flex;
+    flex-direction: column;
+    min-height: 400px;
+}
+
+/* 排行榜整体容器 */
+.rank-main-container {
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 16px;
+    padding: 2rem;
+    backdrop-filter: blur(8px);
+}
+
+/* 领奖台样式 */
+.podium-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 2rem;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.podium-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    transition: transform 0.3s ease;
+}
+
+.podium-item:hover {
+    transform: translateY(-5px);
+}
+
+.podium-rank {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2em;
+    color: white;
+    z-index: 2;
+}
+
+.podium-first {
+    order: 2;
+}
+
+.podium-first .podium-rank {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+}
+
+.podium-first .podium-avatar {
+    width: 120px;
+    height: 120px;
+    border: 4px solid #FFD700;
+    box-shadow: 0 8px 24px rgba(255, 215, 0, 0.3);
+}
+
+.podium-second {
+    order: 1;
+}
+
+.podium-second .podium-rank {
+    background: linear-gradient(135deg, #C0C0C0, #A0A0A0);
+    box-shadow: 0 4px 12px rgba(192, 192, 192, 0.4);
+}
+
+.podium-second .podium-avatar {
+    width: 100px;
+    height: 100px;
+    border: 4px solid #C0C0C0;
+    box-shadow: 0 6px 18px rgba(192, 192, 192, 0.3);
+}
+
+.podium-third {
+    order: 3;
+}
+
+.podium-third .podium-rank {
+    background: linear-gradient(135deg, #CD7F32, #B8860B);
+    box-shadow: 0 4px 12px rgba(205, 127, 50, 0.4);
+}
+
+.podium-third .podium-avatar {
+    width: 100px;
+    height: 100px;
+    border: 4px solid #CD7F32;
+    box-shadow: 0 6px 18px rgba(205, 127, 50, 0.3);
+}
+
+.podium-avatar {
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    background: white;
+}
+
+.podium-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.podium-name {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 0.5rem;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: color 0.2s ease;
+}
+
+.podium-name:hover {
+    color: #1976d2;
+}
+
+.podium-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    font-size: 0.9em;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.2rem 0;
+    min-width: 100px;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 0.8em;
+}
+
+.stat-value {
+    color: #333;
+    font-weight: bold;
+}
+
+/* 其他排名列表样式 */
+.rank-list-section {
+    padding-top: 1rem;
+}
+
+.rank-list-title {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #333;
+    margin: 0 0 1.5rem 0;
+    text-align: center;
+}
+
+.rank-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.rank-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border-left: 4px solid #ddd;
+}
+
+.rank-item:hover {
+    background: rgba(255, 255, 255, 0.9);
+    transform: translateX(5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.rank-number {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #666;
+    margin-right: 1rem;
+    flex-shrink: 0;
+}
+
+.rank-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-right: 1rem;
+    border: 2px solid #ddd;
+    flex-shrink: 0;
+}
+
+.rank-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.rank-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.rank-name {
+    font-weight: bold;
+    color: #333;
+    font-size: 1.1em;
+    transition: color 0.2s ease;
+}
+
+.rank-name:hover {
+    color: #1976d2;
+}
+
+.rank-stats {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.9em;
+}
+
+.rank-wr {
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+.rank-score {
+    color: #27ae60;
+    font-weight: bold;
+}
+
+/* 加载更多指示器样式 */
+.load-more-indicator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    margin-top: 1rem;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 8px;
+    border: 1px dashed #ddd;
+}
+
+.load-more-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.load-more-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 夜间模式下的加载更多指示器 */
+body.night-mode .load-more-indicator {
+    background: rgba(44, 44, 44, 0.5);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+body.night-mode .load-more-content {
+    color: #b0b0b0;
+}
+
+body.night-mode .load-more-spinner {
+    border-color: #444;
+    border-top-color: #90caf9;
+}
+
+
+
+/* 夜间模式适配 */
+body.night-mode .rank-page-container {
+    background: rgba(30, 30, 30, 0.82);
+    color: #e0e0e0;
+}
+
+body.night-mode .rank-title {
+    color: #e0e0e0;
+}
+
+body.night-mode .rank-subtitle {
+    color: #b0b0b0;
+}
+
+body.night-mode .rank-header {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+body.night-mode .rank-toggle-btn {
+    background: rgba(60, 60, 60, 0.7);
+    color: #b0b0b0;
+}
+
+body.night-mode .rank-toggle-btn:hover {
+    background: rgba(70, 70, 70, 0.9);
+}
+
+body.night-mode .rank-toggle-btn.active {
+    background: linear-gradient(135deg, #90caf9, #42a5f5);
+    color: #1a1a1a;
+    border-color: #90caf9;
+    box-shadow: 0 4px 12px rgba(144, 202, 249, 0.3);
+}
+
+body.night-mode .rank-toggle-btn.active:hover {
+    background: linear-gradient(135deg, #42a5f5, #1976d2);
+    box-shadow: 0 6px 16px rgba(144, 202, 249, 0.4);
+}
+
+/* 夜间模式适配 */
+body.night-mode .loading-message {
+    color: #90caf9;
+}
+
+body.night-mode .error-message {
+    color: #ff6b6b;
+}
+
+body.night-mode .no-data-message {
+    color: #b0b0b0;
+}
+
+/* 夜间模式适配 */
+body.night-mode .rank-main-container {
+    background: rgba(44, 44, 44, 0.5);
+}
+
+body.night-mode .podium-container {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+body.night-mode .podium-name {
+    color: #e0e0e0;
+}
+
+body.night-mode .podium-name:hover {
+    color: #90caf9;
+}
+
+body.night-mode .stat-label {
+    color: #b0b0b0;
+}
+
+body.night-mode .stat-value {
+    color: #e0e0e0;
+}
+
+body.night-mode .rank-number {
+    color: #b0b0b0;
+}
+
+body.night-mode .rank-item {
+    background: rgba(60, 60, 60, 0.7);
+    border-left-color: #555;
+}
+
+body.night-mode .rank-item:hover {
+    background: rgba(70, 70, 70, 0.9);
+}
+
+body.night-mode .rank-name {
+    color: #e0e0e0;
+}
+
+body.night-mode .rank-name:hover {
+    color: #90caf9;
+}
+
+body.night-mode .rank-wr {
+    color: #ff6b6b;
+}
+
+body.night-mode .rank-score {
+    color: #51cf66;
+}
+
+/* 夜间模式切换按钮适配 */
+body.night-mode #nightModeToggle {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .rank-page-container {
+        margin: 4.5em 1rem 0 1rem;
+        padding: 1.5rem;
+    }
+    
+    .rank-title {
+        font-size: 2em;
+    }
+    
+    .rank-subtitle {
+        font-size: 1.1em;
+    }
+    
+    .rank-toggle-container {
+        gap: 0.8rem;
+    }
+    
+    .rank-toggle-btn {
+        padding: 0.7rem 1.2rem;
+        font-size: 0.9em;
+    }
+    
+    .rank-main-container {
+        padding: 1.5rem;
+    }
+    
+    .podium-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .podium-item {
+        order: unset !important;
+    }
+    
+    .podium-first .podium-avatar {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .podium-stats {
+        flex-direction: row;
+        gap: 1rem;
+    }
+    
+    .stat-item {
+        min-width: 80px;
+    }
+}
+
+@media (max-width: 480px) {
+    .rank-page-container {
+        margin: 4.5em 0.5rem 0 0.5rem;
+        padding: 1rem;
+    }
+    
+    .rank-title {
+        font-size: 1.8em;
+    }
+    
+    .rank-subtitle {
+        font-size: 1em;
+    }
+    
+    .rank-toggle-container {
+        gap: 0.6rem;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .rank-toggle-btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.85em;
+        width: 100%;
+        max-width: 200px;
+        justify-content: center;
+    }
+    
+    .rank-main-container {
+        padding: 1rem;
+    }
+    
+    .podium-container {
+        margin-bottom: 1.5rem;
+    }
+    
+    .podium-avatar {
+        width: 80px !important;
+        height: 80px !important;
+    }
+    
+    .podium-name {
+        font-size: 1em;
+        max-width: 100px;
+    }
+    
+    .podium-stats {
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+    
+    .stat-item {
+        min-width: 70px;
+        font-size: 0.8em;
+    }
+    
+    .rank-item {
+        padding: 0.8rem;
+    }
+    
+    .rank-avatar {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .rank-name {
+        font-size: 1em;
+    }
+    
+    .rank-stats {
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+} 

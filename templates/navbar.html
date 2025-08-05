@@ -1,16 +1,22 @@
 <nav class="nav-bar">
-    <div class="nav-logo" style="cursor:pointer;" onclick="window.location.href='{{ url_for('maplist.mainpage') }}'">
-        <img src="{{ url_for('static', filename='logo.png') }}" alt="" class="logo-img">
+    <a class="nav-logo" href="{{ url_for('maplist.mainpage') }}" style="cursor:pointer;">
         <span class="logo-text">csolkz地图</span>
-    </div>
+    </a>
     <div class="nav-links">
         <a href="/upload" class="nav-link" target="_blank">上传</a>
+        <a href="/rank" class="nav-link" target="_blank">排行</a>
         <a href="#" class="nav-link">暂定</a>
         <a href="#" class="nav-link">暂定</a>
-        <a href="#" class="nav-link">暂定</a>
+    </div>
+    <div>
+
     </div>
     <div class="nav-actions">
         {% if session.user_logged_in %}
+        <!-- 私信logo -->
+        <a href="/message" class="nav-link" id="nav-message-link" title="私信" style="display:inline-flex;align-items:center;margin-right:8px;" target="_blank">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;"><rect width="24" height="24" fill="none"/><path d="M4 4h16v14H5.17L4 19.17V4zm2 2v9.17L6.83 16H20V6H6zm2 2h8v2H8V8zm0 4h5v2H8v-2z" fill="#1976d2"/></svg>
+        </a>
         <!-- 已登录用户显示用户信息 -->
         <div class="user-dropdown">
             <div class="user-info" id="userDropdownToggle" style="cursor: pointer">
@@ -36,4 +42,6 @@
         </div>
         {% endif %}
     </div>
-</nav> 
+</nav>
+<script src="{{ static_url(filename='navbar.js') }}"></script>
+<link rel="stylesheet" href="{{ static_url(filename='navbar.css') }}"> 

@@ -14,3 +14,20 @@
         -1px  1px 0 #000,
          1px  1px 0 #000;
 } 
+
+/* 个人信息页面排名颜色样式 */
+.profile-rank.rank-1 {
+    color: #FFD700 !important; /* 第一名：金色 */
+}
+
+.profile-rank.rank-2 {
+    color: #FF0000 !important; /* 第二名：红色 */
+}
+
+.profile-rank.rank-3 {
+    color: #0000FF !important; /* 第三名：蓝色 */
+}
+
+.profile-rank.rank-other {
+    color: #CCCCCC !important; /* 其余：淡灰色 */
+}
